@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ComuniCAP Admin">
+<title>ComuniCAP — Panel Administración</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   © 2025 ADRIANA SOBA — COMUNICAP
+   Todos los derechos reservados.
+   Uso exclusivo del titular. Prohibida la
+   reproducción, copia o distribución sin
+   autorización expresa por escrito.
+   Uruguay · Ley 9.739 · Convenio de Berna
+═══════════════════════════════════════════ */
+:root {
+  --bg:#0a0f1e; --surface:#111827; --surface2:#1a2235; --surface3:#222d42;
+  --accent:#3a86ff; --accent2:#06d6a0; --accent3:#a78bfa;
+  --green:#10b981; --red:#ef4444; --orange:#f59e0b; --purple:#a78bfa;
+  --text:#f1f5f9; --text2:#94a3b8; --border:rgba(255,255,255,0.08);
+  --sidebar-w:260px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{font-size:16px;}
+body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ═══════════ SPLASH / LOGIN ═══════════ */
+#splash{
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at 30% 40%,rgba(58,134,255,.2) 0%,transparent 60%),
+             radial-gradient(ellipse at 70% 70%,rgba(6,214,160,.14) 0%,transparent 60%),
+             var(--bg);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  transition:opacity .5s;
+}
+#splash.hide{opacity:0;pointer-events:none;}
+.login-wrap{width:100%;max-width:420px;}
+
+/* COPYRIGHT BANNER */
+.copyright-banner{
+  background:linear-gradient(135deg,rgba(58,134,255,.12),rgba(6,214,160,.08));
+  border:1px solid rgba(58,134,255,.25);border-radius:14px;
+  padding:12px 16px;margin-bottom:18px;text-align:center;
+}
+.copyright-banner .cp-logo{font-size:1.8rem;display:block;margin-bottom:6px;}
+.copyright-banner .cp-title{font-size:0.85rem;font-weight:900;letter-spacing:2px;color:var(--accent2);margin-bottom:3px;}
+.copyright-banner .cp-text{font-size:0.65rem;color:var(--text2);letter-spacing:.5px;line-height:1.6;}
+.copyright-banner .cp-badge{
+  display:inline-block;margin-top:8px;
+  background:linear-gradient(135deg,#3a86ff,#06d6a0);
+  color:white;font-size:0.6rem;font-weight:900;letter-spacing:2px;
+  padding:3px 12px;border-radius:50px;
+}
+
+.login-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:24px;padding:36px 28px;text-align:center;
+  box-shadow:0 24px 80px rgba(0,0,0,.5);
+}
+.login-logo{font-size:3.2rem;margin-bottom:12px;display:block;}
+.login-title{font-size:1.35rem;font-weight:900;letter-spacing:3px;margin-bottom:3px;}
+.login-sub{font-size:0.68rem;color:var(--text2);letter-spacing:2px;margin-bottom:8px;}
+.login-owner{
+  display:inline-block;background:linear-gradient(135deg,#3a86ff,#06d6a0);
+  color:white;font-size:0.6rem;font-weight:900;letter-spacing:2px;
+  padding:4px 14px;border-radius:50px;margin-bottom:24px;
+}
+.admin-input{
+  width:100%;padding:14px 18px;background:var(--surface2);
+  border:2px solid var(--border);border-radius:12px;color:var(--text);
+  font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;
+  outline:none;margin-bottom:12px;text-align:center;letter-spacing:4px;
+  transition:border-color .2s;
+}
+.admin-input:focus{border-color:var(--accent);}
+.admin-btn{
+  width:100%;padding:14px;background:linear-gradient(135deg,#3a86ff,#06d6a0);
+  color:white;border:none;border-radius:12px;font-family:'Nunito',sans-serif;
+  font-size:0.9rem;font-weight:900;letter-spacing:2px;cursor:pointer;
+  transition:opacity .2s,transform .15s;
+}
+.admin-btn:hover{opacity:.9;transform:translateY(-1px);}
+.admin-btn:active{transform:translateY(0);}
+.error-msg{color:var(--red);font-size:0.75rem;font-weight:800;margin-top:10px;min-height:18px;}
+.login-footer{margin-top:20px;font-size:0.6rem;color:var(--text2);letter-spacing:.5px;line-height:1.8;opacity:.7;}
+
+/* ═══════════ LAYOUT PRINCIPAL ═══════════ */
+#app{display:none;min-height:100vh;}
+
+/* TOPBAR */
+.topbar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:14px 20px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:80;
+  gap:10px;flex-wrap:wrap;
+}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.hamburger{
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 10px;cursor:pointer;color:var(--text2);font-size:1.1rem;
+  display:none;transition:all .2s;
+}
+.hamburger:hover{color:var(--accent);}
+.topbar-title{font-size:1.1rem;font-weight:900;letter-spacing:2px;}
+.topbar-title span{color:var(--accent2);}
+.topbar-sub{font-size:0.62rem;color:var(--text2);letter-spacing:2px;margin-top:2px;}
+.topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.tb-btn{
+  background:transparent;border:1.5px solid var(--border);color:var(--text2);
+  padding:7px 14px;border-radius:8px;font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:0.72rem;cursor:pointer;letter-spacing:1px;
+  white-space:nowrap;transition:all .2s;
+}
+.tb-btn:hover{border-color:var(--accent);color:var(--accent);}
+.tb-btn.danger:hover{border-color:var(--red);color:var(--red);}
+
+/* LAYOUT CON SIDEBAR */
+.layout{display:flex;min-height:calc(100vh - 61px);}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);
+  padding:20px 12px;flex-shrink:0;position:sticky;top:61px;
+  height:calc(100vh - 61px);overflow-y:auto;display:flex;flex-direction:column;gap:4px;
+  transition:transform .3s;
+}
+.sidebar-section{
+  font-size:0.6rem;font-weight:900;letter-spacing:2px;color:var(--text2);
+  text-transform:uppercase;padding:10px 10px 6px;margin-top:8px;
+}
+.sid-btn{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  border:none;background:transparent;color:var(--text2);cursor:pointer;
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;
+  letter-spacing:.5px;transition:all .2s;text-align:left;width:100%;
+}
+.sid-btn:hover{background:var(--surface2);color:var(--text);}
+.sid-btn.active{background:rgba(58,134,255,.15);color:var(--accent);}
+.sid-btn .si{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0;}
+.sid-btn .badge{
+  margin-left:auto;background:var(--accent);color:white;
+  font-size:0.6rem;padding:2px 7px;border-radius:50px;font-weight:900;
+}
+
+/* MAIN CONTENT */
+.main-content{flex:1;padding:24px;max-width:960px;overflow-x:hidden;}
+
+/* ═══════════ TABS / SECCIONES ═══════════ */
+.section{display:none;}
+.section.active{display:block;}
+
+/* ═══════════ STATS ═══════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:16px 12px;text-align:center;
+}
+.stat-num{font-family:'Space Mono',monospace;font-size:1.8rem;font-weight:700;line-height:1;margin-bottom:5px;}
+.stat-label{font-size:0.6rem;color:var(--text2);letter-spacing:1.5px;font-weight:900;text-transform:uppercase;}
+.sn-blue{color:#60a5fa;} .sn-green{color:#34d399;} .sn-red{color:#f87171;}
+.sn-purple{color:var(--purple);} .sn-orange{color:#fbbf24;}
+
+/* ═══════════ CARDS GENERALES ═══════════ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;}
+.card-title{font-size:0.75rem;font-weight:900;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.card-title span{color:var(--accent2);}
+
+/* ═══════════ FORM ═══════════ */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-label{font-size:0.65rem;font-weight:900;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;}
+.form-input{
+  background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;
+  padding:11px 13px;color:var(--text);font-family:'Nunito',sans-serif;
+  font-size:0.88rem;font-weight:700;outline:none;width:100%;transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--accent);}
+.form-input option{background:var(--surface);}
+.full-width{grid-column:1/-1;}
+.btn-primary{
+  width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white;border:none;border-radius:11px;font-family:'Nunito',sans-serif;
+  font-weight:900;font-size:0.85rem;letter-spacing:1px;cursor:pointer;
+  margin-top:8px;transition:opacity .2s,transform .15s;
+}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-secondary{
+  padding:10px 18px;background:var(--surface2);border:1.5px solid var(--border);
+  color:var(--text2);border-radius:10px;font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:0.78rem;cursor:pointer;transition:all .15s;
+}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{
+  padding:10px 18px;background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.2);
+  color:#f87171;border-radius:10px;font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:0.78rem;cursor:pointer;transition:all .15s;
+}
+.btn-danger:hover{background:rgba(239,68,68,.25);}
+
+/* ═══════════ SEARCH ═══════════ */
+.search-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.search-input{
+  flex:1;min-width:200px;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:10px;padding:11px 16px;color:var(--text);font-family:'Nunito',sans-serif;
+  font-size:0.88rem;font-weight:700;outline:none;transition:border-color .2s;
+}
+.search-input:focus{border-color:var(--accent);}
+.filter-select{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:10px;
+  padding:11px 13px;color:var(--text);font-family:'Nunito',sans-serif;
+  font-size:0.82rem;font-weight:700;outline:none;cursor:pointer;
+}
+
+/* ═══════════ LICENCIAS LIST ═══════════ */
+#licList{display:flex;flex-direction:column;gap:9px;padding-bottom:40px;}
+.loading{text-align:center;color:var(--text2);padding:40px;font-weight:800;letter-spacing:2px;}
+.lic-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:14px 16px;display:grid;
+  grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+  transition:border-color .2s;
+}
+.lic-card:hover{border-color:rgba(58,134,255,.3);}
+.lic-card.inactiva{opacity:.55;}
+.lic-card.vencida{border-color:rgba(239,68,68,.25);}
+.lic-icon{font-size:1.7rem;width:40px;text-align:center;}
+.lic-clave{font-family:'Space Mono',monospace;font-size:0.88rem;font-weight:700;color:var(--accent);letter-spacing:1px;margin-bottom:3px;}
+.lic-name{font-size:0.82rem;font-weight:900;color:var(--text);margin-bottom:2px;}
+.lic-email{font-size:0.72rem;color:var(--text2);font-weight:700;margin-bottom:4px;}
+.lic-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.lic-tag{font-size:0.6rem;font-weight:900;letter-spacing:1px;padding:2px 8px;border-radius:50px;text-transform:uppercase;}
+.tag-activa  {background:rgba(16,185,129,.15);color:#34d399;}
+.tag-inactiva{background:rgba(239,68,68,.15);color:#f87171;}
+.tag-vencida {background:rgba(245,158,11,.15);color:#fbbf24;}
+.tag-individual{background:rgba(58,134,255,.15);color:#60a5fa;}
+.tag-clinica {background:rgba(167,139,250,.15);color:var(--purple);}
+.tag-venc    {background:rgba(148,163,184,.1);color:var(--text2);}
+.tag-edit-on {background:rgba(6,214,160,.15);color:#06d6a0;}
+.tag-edit-off{background:rgba(148,163,184,.1);color:var(--text2);}
+.lic-actions{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px;align-items:center;}
+.lic-btn{
+  padding:6px 11px;border-radius:7px;border:none;font-family:'Nunito',sans-serif;
+  font-size:0.65rem;font-weight:900;letter-spacing:.5px;cursor:pointer;transition:all .15s;
+  white-space:nowrap;
+}
+.lic-btn:hover{transform:scale(1.05);}
+.btn-copy  {background:rgba(58,134,255,.15);color:#60a5fa;}
+.btn-wa    {background:rgba(37,211,102,.15);color:#4ade80;}
+.btn-fecha {background:rgba(245,158,11,.15);color:#fbbf24;}
+.btn-toggle{background:rgba(148,163,184,.1);color:var(--text2);}
+.btn-del   {background:rgba(239,68,68,.12);color:#f87171;}
+.btn-edit  {background:rgba(167,139,250,.15);color:#c4b5fd;}
+.btn-edit-enable{background:rgba(6,214,160,.15);color:#06d6a0;}
+
+/* ═══════════ ACTIVIDAD / LOG ═══════════ */
+.log-list{display:flex;flex-direction:column;gap:7px;max-height:400px;overflow-y:auto;}
+.log-item{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  background:var(--surface2);border-radius:10px;font-size:0.75rem;
+}
+.log-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.log-msg{color:var(--text);font-weight:700;flex:1;}
+.log-time{color:var(--text2);font-size:0.62rem;font-weight:700;white-space:nowrap;margin-top:2px;}
+
+/* ═══════════ PROPIEDAD INTELECTUAL ═══════════ */
+.ip-section{display:flex;flex-direction:column;gap:16px;}
+.ip-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;
+}
+.ip-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.ip-icon{font-size:2rem;}
+.ip-title{font-size:1rem;font-weight:900;letter-spacing:1px;}
+.ip-sub{font-size:0.7rem;color:var(--text2);margin-top:2px;}
+.ip-body{font-size:0.78rem;color:var(--text2);line-height:1.8;}
+.ip-body strong{color:var(--text);}
+.ip-highlight{
+  background:linear-gradient(135deg,rgba(58,134,255,.08),rgba(6,214,160,.06));
+  border:1px solid rgba(58,134,255,.2);border-radius:12px;
+  padding:14px 16px;margin:12px 0;
+}
+.ip-highlight p{font-size:0.78rem;color:var(--text);font-weight:700;line-height:1.7;}
+.ip-seal{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(135deg,rgba(58,134,255,.1),rgba(167,139,250,.08));
+  border:1.5px solid rgba(58,134,255,.25);border-radius:12px;padding:16px;
+  text-align:center;flex-wrap:wrap;
+}
+.ip-seal .seal-icon{font-size:2.5rem;}
+.ip-seal .seal-text{display:flex;flex-direction:column;gap:3px;}
+.ip-seal .seal-title{font-size:0.85rem;font-weight:900;letter-spacing:2px;color:var(--accent2);}
+.ip-seal .seal-sub{font-size:0.65rem;color:var(--text2);letter-spacing:1px;}
+.ip-table{width:100%;border-collapse:collapse;margin-top:10px;}
+.ip-table th{text-align:left;font-size:0.65rem;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--border);}
+.ip-table td{font-size:0.78rem;padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.04);font-weight:700;color:var(--text);}
+.ip-table tr:last-child td{border-bottom:none;}
+.ip-table .val{color:var(--accent2);}
+
+/* ═══════════ PRECIOS ═══════════ */
+.precio-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 12px;
+  border-radius:50px;font-size:0.7rem;font-weight:900;letter-spacing:1px;margin-bottom:8px;
+}
+.pb-cap  {background:rgba(58,134,255,.15);color:#60a5fa;}
+.pb-pro  {background:rgba(167,139,250,.15);color:var(--purple);}
+/* BUG FIX: .pb-picto faltaba en el CSS */
+.pb-picto{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25);}
+
+/* ═══════════ MODALS ═══════════ */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+  z-index:200;align-items:center;justify-content:center;padding:16px;
+}
+.modal-overlay.open{display:flex;}
+.modal-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:26px;width:100%;max-width:420px;
+  box-shadow:0 24px 80px rgba(0,0,0,.6);
+  animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);
+  position:relative;max-height:90vh;overflow-y:auto;
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.modal-close{
+  position:absolute;top:14px;right:14px;background:rgba(239,68,68,.15);color:#f87171;
+  border:none;border-radius:8px;width:30px;height:30px;font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-weight:900;
+}
+.modal-title{font-size:1rem;font-weight:900;margin-bottom:14px;padding-right:30px;}
+.modal-text{font-size:0.82rem;color:var(--text2);font-weight:700;line-height:1.65;margin-bottom:14px;}
+.modal-btns{display:flex;gap:10px;margin-top:18px;}
+.modal-btn{flex:1;padding:12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:900;font-size:0.82rem;cursor:pointer;transition:all .15s;}
+.modal-btn:hover{transform:scale(1.03);}
+.btn-cancel {background:var(--surface2);color:var(--text2);}
+.btn-confirm{background:linear-gradient(135deg,var(--red),#c81e1e);color:white;}
+.btn-save   {background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;}
+
+/* ═══════════ TOAST ═══════════ */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);padding:11px 22px;border-radius:50px;
+  font-size:0.82rem;font-weight:800;z-index:999;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  animation:toastIn .3s ease;
+  max-width:90vw;text-align:center;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+  transition:opacity .3s;
+}
+/* BUG FIX: .hidden faltaba → el toast nunca desaparecía */
+#toast.hidden{display:none;}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:720px){
+  .hamburger{display:flex;}
+  .sidebar{
+    position:fixed;top:0;left:0;height:100vh;z-index:90;
+    transform:translateX(-100%);padding-top:70px;
+    box-shadow:4px 0 20px rgba(0,0,0,.4);
+  }
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+    z-index:89;backdrop-filter:blur(3px);
+  }
+  .sidebar-overlay.show{display:block;}
+  .main-content{padding:14px;}
+  .stats-grid{grid-template-columns:repeat(3,1fr);gap:8px;}
+  .stat-num{font-size:1.4rem;}
+  .lic-card{grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:9px;}
+  .lic-actions{grid-column:1/-1;flex-wrap:wrap;}
+  .lic-btn{flex:1;min-width:60px;text-align:center;}
+  .form-grid{grid-template-columns:1fr;}
+  .topbar-right .tb-btn:not(.always){display:none;}
+}
+@media(max-width:480px){
+  .topbar{padding:10px 14px;}
+  .topbar-title{font-size:0.9rem;letter-spacing:1px;}
+  .stats-grid{grid-template-columns:repeat(3,1fr);gap:6px;}
+  .stat-card{padding:12px 8px;}
+  .stat-num{font-size:1.3rem;}
+  .stat-label{font-size:0.55rem;}
+  .modal-card{padding:20px 16px;border-radius:16px;}
+  .modal-btns{flex-direction:column;}
+}
+
+/* ═══════════ ORGANIZACIONES ═══════════ */
+.org-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:16px;margin-bottom:10px;transition:border-color .2s;
+}
+.org-card:hover{border-color:rgba(58,134,255,.3);}
+.org-card.suspendida{opacity:.55;border-color:rgba(239,68,68,.2);}
+.org-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.org-icon{font-size:2rem;flex-shrink:0;}
+.org-nombre{font-size:0.95rem;font-weight:900;color:var(--text);}
+.org-sub{font-size:0.72rem;color:var(--text2);margin-top:2px;}
+.org-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.org-tag{font-size:0.6rem;font-weight:900;letter-spacing:1px;padding:3px 9px;border-radius:50px;text-transform:uppercase;}
+.org-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.org-btn{
+  padding:7px 12px;border-radius:8px;border:none;font-family:'Nunito',sans-serif;
+  font-size:0.68rem;font-weight:900;cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.org-btn:hover{transform:scale(1.05);}
+.org-progress{margin:8px 0;}
+.org-progress-bar{height:6px;background:var(--surface3);border-radius:50px;overflow:hidden;margin-top:4px;}
+.org-progress-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s;}
+.org-progress-fill.warn{background:linear-gradient(90deg,#f59e0b,#ef4444);}
+
+/* Modal org usuarios */
+.ou-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;background:var(--surface2);border-radius:10px;
+  margin-bottom:7px;gap:10px;flex-wrap:wrap;
+}
+.ou-name{font-size:0.82rem;font-weight:900;}
+.ou-clave{font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--accent);letter-spacing:1px;}
+.ou-actions{display:flex;gap:5px;}
+
+/* Panel Admin Org (login separado) */
+#orgAdminPanel{display:none;position:fixed;inset:0;z-index:500;
+  background:var(--bg);overflow-y:auto;}
+.oa-topbar{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+.oa-title{font-size:1rem;font-weight:900;letter-spacing:2px;}
+.oa-org{font-size:0.7rem;color:var(--accent2);letter-spacing:1px;margin-top:2px;}
+.oa-content{padding:20px;max-width:800px;margin:0 auto;}
+.oa-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+
+/* TABLET (iPad) */
+@media(min-width:768px) and (max-width:1024px){
+  :root{--sidebar-w:220px;}
+  .main-content{padding:18px;}
+  .stats-grid{grid-template-columns:repeat(5,1fr);}
+}
+
+/* DESKTOP grande */
+@media(min-width:1200px){
+  .main-content{padding:32px;max-width:1100px;}
+  .stats-grid{grid-template-columns:repeat(5,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     SPLASH / LOGIN
+═══════════════════════════════════════ -->
+<div id="splash">
+  <div class="login-wrap">
+
+    <!-- COPYRIGHT BANNER -->
+    <div class="copyright-banner">
+      <span class="cp-logo">©</span>
+      <div class="cp-title">PROPIEDAD INTELECTUAL REGISTRADA</div>
+      <div class="cp-text">
+        ComuniCAP® es una creación original de <strong style="color:var(--accent2);">Adriana Soba</strong>.<br>
+        Todos los derechos reservados. Prohibida la reproducción, copia,<br>
+        distribución o uso no autorizado bajo pena de ley.
+      </div>
+      <div class="cp-badge">© ADRIANA SOBA · COMUNICAP® · TODOS LOS DERECHOS RESERVADOS</div>
+    </div>
+
+    <div class="login-card">
+      <span class="login-logo">🧩</span>
+      <div class="login-title">COMUNI<span style="color:var(--accent2)">CAP</span></div>
+      <div class="login-sub">PANEL DE ADMINISTRACIÓN</div>
+      <div class="login-owner">👩‍💼 ADRIANA SOBA — CREADORA Y TITULAR</div>
+
+      <input class="admin-input" id="loginPass" type="password" placeholder="••••••••"
+             maxlength="40" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="admin-btn" onclick="doLogin()">🔐 INGRESAR AL PANEL</button>
+      <div class="error-msg" id="loginErr"></div>
+
+      <div class="login-footer">
+        🛡️ Acceso restringido · Solo personal autorizado<br>
+        ComuniCAP® — Herramienta de comunicación aumentativa<br>
+        Creada por Adriana Soba · Fonoaudióloga · Uruguay
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SIDEBAR OVERLAY (mobile)
+═══════════════════════════════════════ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ═══════════════════════════════════════
+     APP PRINCIPAL
+═══════════════════════════════════════ -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div>
+        <div class="topbar-title">🧩 COMUNI<span>CAP</span> ADMIN</div>
+        <div class="topbar-sub">GESTIÓN · COMUNICAP · COMUNIPRO · PICTOCRISIS</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="tb-btn always" onclick="showSection('dashboard')" style="border-color:rgba(58,134,255,.3);color:#60a5fa;">📊 Dashboard</button>
+      <button class="tb-btn always" onclick="logout()">🔒 SALIR</button>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- SIDEBAR NAV -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-section">GESTIÓN</div>
+      <button class="sid-btn active" onclick="showSection('dashboard',this)">
+        <span class="si">📊</span> Dashboard
+      </button>
+      <button class="sid-btn" onclick="showSection('licencias',this)">
+        <span class="si">🔑</span> Licencias
+        <span class="badge" id="sidBadgeTotal">0</span>
+      </button>
+      <button class="sid-btn" onclick="showSection('nuevaLicencia',this)">
+        <span class="si">➕</span> Nueva Licencia
+      </button>
+      <button class="sid-btn" onclick="showSection('precios',this)">
+        <span class="si">💰</span> Precios
+      </button>
+
+      <button class="sid-btn" onclick="showSection('organizaciones',this)">
+        <span class="si">🏢</span> Organizaciones
+        <span class="badge" id="sidBadgeOrgs" style="background:var(--accent2);">0</span>
+      </button>
+      <button class="sid-btn" onclick="showSection('nuevaOrg',this)">
+        <span class="si">🏗️</span> Nueva Org.
+      </button>
+      <button class="sid-btn" onclick="showSection('usuariosPC',this)">
+        <span class="si">👮</span> Usuarios PC
+      </button>
+
+      <div class="sidebar-section">APLICACIONES</div>
+      <button class="sid-btn" onclick="simularApp('cap')">
+        <span class="si">🧩</span> Ver ComuniCAP
+      </button>
+      <button class="sid-btn" onclick="simularApp('pro')">
+        <span class="si">🔮</span> Ver ComuniPro
+      </button>
+      <button class="sid-btn" onclick="simularApp('picto')">
+        <span class="si">🚨</span> Ver PictoCrisis
+      </button>
+
+      <div class="sidebar-section">SISTEMA</div>
+      <button class="sid-btn" onclick="showSection('actividad',this)">
+        <span class="si">📋</span> Actividad
+      </button>
+      <button class="sid-btn" onclick="showSection('propiedadIntelectual',this)">
+        <span class="si">©</span> Propiedad Int.
+      </button>
+
+      <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border);margin-top:16px;">
+        <div style="font-size:0.6rem;color:var(--text2);letter-spacing:.5px;text-align:center;line-height:1.7;">
+          © ComuniCAP®<br>Adriana Soba · Todos los derechos reservados
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <!-- ─── DASHBOARD ─── -->
+      <div class="section active" id="sec-dashboard">
+        <div class="card-title">📊 DASHBOARD <span>— RESUMEN GENERAL</span></div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num sn-blue" id="statTotal">—</div>
+            <div class="stat-label">TOTAL</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num sn-green" id="statActivas">—</div>
+            <div class="stat-label">ACTIVAS</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num sn-red" id="statInactivas">—</div>
+            <div class="stat-label">INACT/VENC</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num sn-purple" id="statIndividual">—</div>
+            <div class="stat-label">INDIVIDUAL</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num sn-orange" id="statClinica">—</div>
+            <div class="stat-label">CLÍNICA</div>
+          </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="card">
+          <div class="card-title">⚡ ACCIONES RÁPIDAS</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+          <!-- BUG FIX: índices corregidos (eran 1,0,2 → debían ser 2,1,3) -->
+            <button class="btn-secondary" onclick="showSection('nuevaOrg');"> 🏗️ Nueva Organización</button>
+            <button class="btn-secondary" onclick="showSection('organizaciones');">🏢 Ver Orgs</button>
+            <button class="btn-secondary" onclick="showSection('nuevaLicencia');activateSideBtn(2)">➕ Nueva licencia</button>
+            <button class="btn-secondary" onclick="showSection('licencias');activateSideBtn(1)">🔑 Ver todas</button>
+            <button class="btn-secondary" onclick="showSection('precios');activateSideBtn(3)">💰 Editar precios</button>
+            <button class="btn-secondary" onclick="simularApp('cap')">🧩 Probar ComuniCAP</button>
+            <button class="btn-secondary" onclick="simularApp('pro')">🔮 Probar ComuniPro</button>
+            <button class="btn-secondary" onclick="simularApp('picto')">🚨 Probar PictoCrisis</button>
+            <button class="btn-secondary" onclick="showSection('propiedadIntelectual')">© Ver registro</button>
+          </div>
+        </div>
+
+        <!-- Próximas a vencer -->
+        <div class="card">
+          <div class="card-title">⚠️ PRÓXIMAS A VENCER <span>— 30 días</span></div>
+          <div id="proximasVencer"><div class="loading">⏳ Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- ─── LICENCIAS ─── -->
+      <div class="section" id="sec-licencias">
+        <div class="card-title">🔑 LICENCIAS <span>— GESTIÓN COMPLETA</span></div>
+        <div class="search-row">
+          <input class="search-input" id="searchInput" placeholder="🔍 Buscar por nombre, email, clave..." oninput="filtrarLicencias()">
+          <select class="filter-select" id="filterEstado" onchange="filtrarLicencias()">
+            <option value="todas">Todas</option>
+            <option value="activa">Activas</option>
+            <option value="inactiva">Inactivas</option>
+            <option value="vencida">Vencidas</option>
+            <option value="individual">Individual</option>
+            <option value="clinica">Clínica</option>
+            <option value="cap">ComuniCAP</option>
+            <option value="pro">ComuniPro</option>
+            <option value="picto">PictoCrisis</option>
+          </select>
+          <button class="btn-secondary" onclick="cargarLicencias()" title="Actualizar">🔄</button>
+        </div>
+        <div id="licList"><div class="loading">⏳ CARGANDO...</div></div>
+      </div>
+
+      <!-- ─── NUEVA LICENCIA ─── -->
+      <div class="section" id="sec-nuevaLicencia">
+        <div class="card-title">➕ NUEVA LICENCIA <span>— CREAR USUARIO</span></div>
+        <div class="card">
+          <div class="form-grid">
+            <div class="form-group">
+              <div class="form-label">NOMBRE</div>
+              <input class="form-input" id="newNombre" type="text" placeholder="Ej: María">
+            </div>
+            <div class="form-group">
+              <div class="form-label">APELLIDO</div>
+              <input class="form-input" id="newApellido" type="text" placeholder="Ej: García">
+            </div>
+            <div class="form-group">
+              <div class="form-label">EMAIL</div>
+              <input class="form-input" id="newEmail" type="email" placeholder="cliente@email.com">
+            </div>
+            <div class="form-group">
+              <div class="form-label">TELÉFONO</div>
+              <input class="form-input" id="newTelefono" type="tel" placeholder="Ej: 59899123456">
+            </div>
+            <div class="form-group">
+              <div class="form-label">APLICACIÓN</div>
+              <select class="form-input" id="newApp" onchange="actualizarTipos();actualizarPlaceholderClave();actualizarDropdownPrecios()">
+                <option value="cap">🧩 ComuniCAP</option>
+                <option value="pro">🔮 ComuniPro</option>
+                <option value="picto">🚨 PictoCrisis</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div class="form-label">TIPO DE PLAN</div>
+              <select class="form-input" id="newTipo" onchange="toggleLimite();actualizarPlaceholderClave()">
+                <option value="individual">👤 INDIVIDUAL</option>
+                <option value="clinica">🏥 CLÍNICA</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div class="form-label">FECHA VENCIMIENTO</div>
+              <input class="form-input" id="newVenc" type="date">
+            </div>
+            <div class="form-group" id="limiteGroup" style="display:none;">
+              <div class="form-label">LÍMITE PACIENTES</div>
+              <input class="form-input" id="newLimite" type="number" value="15" min="2" max="100">
+            </div>
+            <div class="form-group full-width">
+              <div class="form-label">CLAVE (se genera automático si está vacía)</div>
+              <input class="form-input" id="newClave" placeholder="Ej: CAP-ABC123 · CP-XYZ789" style="text-transform:uppercase;letter-spacing:2px;">
+            </div>
+            <div class="form-group full-width" id="appBadgeWrap">
+              <div id="appBadge" style="background:rgba(58,134,255,.12);color:#60a5fa;padding:10px 14px;border-radius:10px;font-size:0.75rem;font-weight:900;letter-spacing:1px;text-align:center;">
+                🧩 ComuniCAP · Clave: CAP-XXXXXX
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" id="createBtn" onclick="crearLicencia()">✨ CREAR LICENCIA Y USUARIO</button>
+        </div>
+      </div>
+
+      <!-- ─── PRECIOS ─── -->
+      <div class="section" id="sec-precios">
+        <div class="card-title">💰 PRECIOS <span>— CONFIGURACIÓN</span></div>
+        <div class="card">
+          <div class="precio-badge pb-cap">🧩 COMUNICAP</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <div class="form-label">👤 INDIVIDUAL ($/mes)</div>
+              <input class="form-input" id="precioIndividual" type="number" min="1" placeholder="490">
+            </div>
+            <div class="form-group">
+              <div class="form-label">🏥 CLÍNICA ($/mes)</div>
+              <input class="form-input" id="precioClinica" type="number" min="1" placeholder="10000">
+            </div>
+          </div>
+          <div class="precio-badge pb-pro" style="margin-top:8px;">🔮 COMUNIPRO</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <div class="form-label">👤 INDIVIDUAL ($/mes)</div>
+              <input class="form-input" id="precioProIndividual" type="number" min="1" placeholder="490">
+            </div>
+            <div class="form-group">
+              <div class="form-label">🏥 CLÍNICA ($/mes)</div>
+              <input class="form-input" id="precioProClinica" type="number" min="1" placeholder="10000">
+            </div>
+          </div>
+          <!-- BUG FIX: antes usaba inline style duplicado + clase inexistente -->
+          <div class="precio-badge pb-picto" style="margin-top:8px;">🚨 PICTOCRISIS</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <div class="form-label">👮 AGENTE ($/mes)</div>
+              <input class="form-input" id="precioPictoAgente" type="number" min="1" placeholder="490">
+            </div>
+            <div class="form-group">
+              <div class="form-label">🏛️ COMISARÍA ($/mes)</div>
+              <input class="form-input" id="precioPictoComisaria" type="number" min="1" placeholder="10000">
+            </div>
+            <div class="form-group">
+              <div class="form-label">🚔 UNIDAD ($/mes)</div>
+              <input class="form-input" id="precioPictoUnidad" type="number" min="1" placeholder="5000">
+            </div>
+          </div>
+          <div id="precios-status" style="font-size:0.75rem;font-weight:800;color:var(--text2);margin-bottom:8px;min-height:18px;"></div>
+          <button class="btn-primary" onclick="guardarConfig()" style="background:linear-gradient(135deg,#10b981,#059669)">
+            💾 GUARDAR Y SINCRONIZAR PRECIOS
+          </button>
+        </div>
+      </div>
+
+      <!-- ─── ORGANIZACIONES ─── -->
+      <div class="section" id="sec-organizaciones">
+        <div class="card-title">🏢 ORGANIZACIONES <span>— GESTIÓN COLECTIVA</span></div>
+        <div class="search-row">
+          <input class="search-input" id="orgSearchInput" placeholder="🔍 Buscar organización..." oninput="filtrarOrgs()">
+          <select class="filter-select" id="orgFilterEstado" onchange="filtrarOrgs()">
+            <option value="todas">Todas</option>
+            <option value="activa">Activas</option>
+            <option value="suspendida">Suspendidas</option>
+            <option value="cap">ComuniCAP</option>
+            <option value="picto">PictoCrisis</option>
+          </select>
+          <button class="btn-secondary" onclick="cargarOrganizaciones()" title="Actualizar">🔄</button>
+        </div>
+        <div id="orgList"><div class="loading">⏳ CARGANDO...</div></div>
+      </div>
+
+      <!-- ─── USUARIOS PICTOCRISIS ─── -->
+      <div class="section" id="sec-usuariosPC">
+        <div class="card-title">👮 USUARIOS PICTOCRISIS <span>— POR ORGANIZACIÓN</span></div>
+        <div class="card">
+          <button class="btn-primary" onclick="cargarUsuariosPC()" style="margin-bottom:16px;">🔄 ACTUALIZAR</button>
+          <div id="pcUsersContainer" style="color:#f0f0f5;"><div class="loading">Tocá Actualizar para cargar...</div></div>
+        </div>
+      </div>
+
+      <!-- ─── NUEVA ORGANIZACIÓN ─── -->
+      <div class="section" id="sec-nuevaOrg">
+        <div class="card-title">🏗️ NUEVA ORGANIZACIÓN <span>— CREAR ACCESO COLECTIVO</span></div>
+        <div class="card">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <div class="form-label">NOMBRE DE LA ORGANIZACIÓN</div>
+              <input class="form-input" id="orgNombre" type="text" placeholder="Ej: Colegio San Martín / Comisaría 3ª">
+            </div>
+            <div class="form-group">
+              <div class="form-label">TIPO</div>
+              <select class="form-input" id="orgTipo">
+                <option value="educativo">🏫 Educativo (Colegio/Escuela)</option>
+                <option value="policial">🚔 Policial (Comisaría/Unidad)</option>
+                <option value="salud">🏥 Salud (Hospital/Clínica)</option>
+                <option value="gobierno">🏛️ Gobierno / Ministerio</option>
+                <option value="otro">📋 Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div class="form-label">APLICACIÓN</div>
+              <select class="form-input" id="orgApp">
+                <option value="cap">🧩 ComuniCAP</option>
+                <option value="picto">🚨 PictoCrisis</option>
+                <option value="pro">🔮 ComuniPro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div class="form-label">LÍMITE DE USUARIOS</div>
+              <input class="form-input" id="orgLimite" type="number" value="15" min="1" max="500" placeholder="15">
+            </div>
+            <div class="form-group">
+              <div class="form-label">FECHA VENCIMIENTO</div>
+              <input class="form-input" id="orgVenc" type="date">
+            </div>
+            <div class="form-group">
+              <div class="form-label">EMAIL DEL ADMIN (director/comisario)</div>
+              <input class="form-input" id="orgAdminEmail" type="email" placeholder="director@colegio.com">
+            </div>
+            <div class="form-group">
+              <div class="form-label">CONTRASEÑA DEL ADMIN</div>
+              <input class="form-input" id="orgAdminPass" type="text" placeholder="Ej: Colegio2025!" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <div class="form-label">TELÉFONO DEL ADMIN (WhatsApp)</div>
+              <input class="form-input" id="orgAdminTel" type="tel" placeholder="Ej: 59899123456">
+            </div>
+            <div class="form-group full-width">
+              <div class="form-label">NOTAS INTERNAS</div>
+              <input class="form-input" id="orgNotas" type="text" placeholder="Ej: Contacto: Prof. Ramírez · Tel: 099...">
+            </div>
+          </div>
+          <button class="btn-primary" id="createOrgBtn" onclick="crearOrganizacion()">🏗️ CREAR ORGANIZACIÓN</button>
+        </div>
+      </div>
+
+      <!-- ─── ACTIVIDAD ─── -->
+      <div class="section" id="sec-actividad">
+        <div class="card-title">📋 REGISTRO DE ACTIVIDAD <span>— ÚLTIMAS ACCIONES</span></div>
+        <div class="card">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+            <button class="btn-danger" onclick="if(confirm('¿Limpiar el registro?')){activityLog=[];renderLog();}" style="font-size:0.72rem;padding:7px 14px;">
+              🗑️ Limpiar registro
+            </button>
+          </div>
+          <div class="log-list" id="logList">
+            <div class="loading">Sin actividad registrada aún.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── PROPIEDAD INTELECTUAL ─── -->
+      <div class="section" id="sec-propiedadIntelectual">
+        <div class="card-title">© PROPIEDAD INTELECTUAL <span>— REGISTRO Y PROTECCIÓN</span></div>
+        <div class="ip-section">
+
+          <div class="ip-card">
+            <div class="ip-header">
+              <span class="ip-icon">🏆</span>
+              <div>
+                <div class="ip-title">ComuniCAP® — Obra Original</div>
+                <div class="ip-sub">Herramienta de Comunicación Aumentativa y Alternativa</div>
+              </div>
+            </div>
+            <div class="ip-seal">
+              <span class="seal-icon">©</span>
+              <div class="seal-text">
+                <div class="seal-title">OBRA PROTEGIDA POR DERECHOS DE AUTOR</div>
+                <div class="seal-sub">Ley 9.739 de Propiedad Intelectual (Uruguay)</div>
+                <div class="seal-sub">Convenio de Berna · OMPI · Tratados Internacionales</div>
+              </div>
+            </div>
+            <div class="ip-highlight" style="margin-top:14px;">
+              <p>
+                <strong>ComuniCAP®</strong> es una creación original e intelectual de <strong>Adriana Soba</strong>,
+                fonoaudióloga. Esta aplicación, incluyendo su diseño, código, pictogramas, estructura,
+                lógica de funcionamiento, sistema de licencias y contenido, están protegidos por las
+                leyes de propiedad intelectual vigentes en Uruguay y tratados internacionales.
+              </p>
+            </div>
+          </div>
+
+          <div class="ip-card">
+            <div class="card-title">📄 DATOS DE REGISTRO</div>
+            <table class="ip-table">
+              <tr><th>Campo</th><th>Dato</th></tr>
+              <tr><td>Titular / Creadora</td><td class="val">Adriana Soba</td></tr>
+              <tr><td>Profesión</td><td class="val">Fonoaudióloga</td></tr>
+              <tr><td>Obra</td><td class="val">ComuniCAP® — Aplicación de CAA</td></tr>
+              <tr><td>Versión actual</td><td class="val">v11.0</td></tr>
+              <tr><td>Año de creación</td><td class="val">2025</td></tr>
+              <tr><td>País de origen</td><td class="val">Uruguay</td></tr>
+              <tr><td>Tipo de obra</td><td class="val">Software / Aplicación web educativa y de salud</td></tr>
+              <tr><td>Ley aplicable</td><td class="val">Ley 9.739 (Uruguay) · Convenio de Berna</td></tr>
+              <tr><td>Marco internacional</td><td class="val">OMPI / WIPO · Tratado de Budapest</td></tr>
+            </table>
+          </div>
+
+          <div class="ip-card">
+            <div class="card-title">🚫 USOS PROHIBIDOS</div>
+            <div class="ip-body">
+              Queda expresamente prohibido, sin autorización escrita de la titular:
+              <ul style="margin-top:10px;padding-left:18px;display:flex;flex-direction:column;gap:8px;">
+                <li><strong>Copiar o reproducir</strong> total o parcialmente la aplicación o su código.</li>
+                <li><strong>Distribuir o compartir</strong> la aplicación, archivos o accesos sin licencia válida.</li>
+                <li><strong>Modificar o crear obras derivadas</strong> sin autorización expresa.</li>
+                <li><strong>Vender, sublicenciar o comercializar</strong> la aplicación o cualquiera de sus partes.</li>
+                <li><strong>Eliminar avisos de copyright</strong> o atribuirla a otra persona u organización.</li>
+                <li><strong>Usar la marca ComuniCAP®</strong> sin autorización expresa de la titular.</li>
+                <li><strong>Acceder al panel administrativo</strong> sin ser el titular o personal autorizado.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="ip-card">
+            <div class="card-title">⚖️ CONSECUENCIAS LEGALES</div>
+            <div class="ip-body">
+              El incumplimiento de los derechos de propiedad intelectual puede dar lugar a:
+              <div class="ip-highlight">
+                <p>
+                  ▸ <strong>Acciones civiles</strong> por daños y perjuicios (Ley 9.739, Art. 44-46)<br>
+                  ▸ <strong>Acciones penales</strong>: multa y/o prisión según art. 46 Ley 9.739<br>
+                  ▸ <strong>Medidas cautelares</strong> inmediatas: cese y secuestro<br>
+                  ▸ <strong>Reclamo internacional</strong> vía OMPI / WIPO<br>
+                  ▸ <strong>Publicación de infracción</strong> en medios pertinentes
+                </p>
+              </div>
+              Para solicitar licencias comerciales, colaboraciones o denunciar infracciones,
+              contactar directamente a <strong>Adriana Soba</strong>.
+            </div>
+          </div>
+
+          <div class="ip-card" style="background:linear-gradient(135deg,rgba(58,134,255,.06),rgba(6,214,160,.04));border-color:rgba(58,134,255,.2);">
+            <div style="text-align:center;padding:10px 0;">
+              <div style="font-size:2.5rem;margin-bottom:10px;">🧩</div>
+              <div style="font-size:1.2rem;font-weight:900;letter-spacing:3px;color:var(--accent2);margin-bottom:6px;">COMUNICAP®</div>
+              <div style="font-size:0.72rem;color:var(--text2);line-height:1.9;">
+                Herramienta de Comunicación Aumentativa y Alternativa<br>
+                <strong style="color:var(--text);">© 2025 Adriana Soba · Todos los derechos reservados</strong><br>
+                La reproducción no autorizada es una violación de los derechos de autor<br>
+                y está penada por la ley uruguaya e internacional.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════ MODAL CONFIRMAR ELIMINAR ═══════ -->
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal-card">
+    <button class="modal-close" onclick="cerrarModalConfirm()">✕</button>
+    <div class="modal-title">⚠️ Confirmar eliminación</div>
+    <div class="modal-text" id="modalConfirmText"></div>
+    <div class="modal-btns">
+      <button class="modal-btn btn-cancel" onclick="cerrarModalConfirm()">CANCELAR</button>
+      <button class="modal-btn btn-confirm" onclick="confirmarEliminar()">🗑️ ELIMINAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL FECHA ═══════ -->
+<div class="modal-overlay" id="modalFecha">
+  <div class="modal-card">
+    <button class="modal-close" onclick="cerrarModalFecha()">✕</button>
+    <div class="modal-title">📅 Editar fecha de vencimiento</div>
+    <div class="form-group">
+      <div class="form-label">NUEVA FECHA</div>
+      <input class="form-input" id="modalFechaInput" type="date">
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn btn-cancel" onclick="cerrarModalFecha()">CANCELAR</button>
+      <button class="modal-btn btn-save" onclick="guardarFecha()">💾 GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL EDITAR USUARIO ═══════ -->
+<div class="modal-overlay" id="modalEditar">
+  <div class="modal-card">
+    <button class="modal-close" onclick="cerrarModalEditar()">✕</button>
+    <div class="modal-title">✏️ Editar datos de usuario</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <div class="form-label">NOMBRE</div>
+        <input class="form-input" id="editNombre" type="text" placeholder="Nombre">
+      </div>
+      <div class="form-group">
+        <div class="form-label">APELLIDO</div>
+        <input class="form-input" id="editApellido" type="text" placeholder="Apellido">
+      </div>
+      <div class="form-group full-width">
+        <div class="form-label">TELÉFONO</div>
+        <input class="form-input" id="editTelefono" type="tel" placeholder="Ej: 59899123456">
+      </div>
+      <div class="form-group full-width">
+        <div class="form-label">EMAIL</div>
+        <input class="form-input" id="editEmail" type="email" placeholder="email@cliente.com">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn btn-cancel" onclick="cerrarModalEditar()">CANCELAR</button>
+      <button class="modal-btn btn-save" id="editarConfirmBtn" onclick="guardarEdicion()">💾 GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL WHATSAPP ═══════ -->
+<div class="modal-overlay" id="modalWA">
+  <div class="modal-card">
+    <button class="modal-close" onclick="cerrarModalWA()">✕</button>
+    <div class="modal-title">📱 Enviar por WhatsApp</div>
+    <div class="modal-text" id="modalWAInfo"></div>
+    <div class="form-group" id="modalWAInputGroup">
+      <div class="form-label">NÚMERO WA DEL CLIENTE</div>
+      <input class="form-input" id="modalWAInput" type="tel" placeholder="Ej: 59899123456">
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn btn-cancel" onclick="cerrarModalWA()">CANCELAR</button>
+      <button class="modal-btn btn-save" style="background:linear-gradient(135deg,#25D366,#128C7E);" onclick="enviarWA()">
+        💬 ENVIAR WA
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL SIMULAR APP ═══════ -->
+<div class="modal-overlay" id="modalSim">
+  <div class="modal-card" style="text-align:center;">
+    <button class="modal-close" onclick="cerrarModalSim()">✕</button>
+    <span id="simLogo" style="font-size:3rem;display:block;margin-bottom:12px;"></span>
+    <div class="modal-title" id="simTitle"></div>
+    <div style="font-size:0.7rem;color:var(--text2);margin-bottom:16px;" id="simSub"></div>
+    <input class="form-input" id="simInput" type="text" placeholder="Ej: CAP-ABC123"
+           style="text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:8px;"
+           onkeydown="if(event.key==='Enter')doSimLogin()">
+    <div class="error-msg" id="simError" style="margin-bottom:8px;"></div>
+    <button class="btn-primary" id="simBtn" onclick="doSimLogin()">🔓 VERIFICAR ACCESO</button>
+  </div>
+</div>
+
+<!-- ═══════ PANEL ADMIN ORGANIZACIÓN ═══════ -->
+<div id="orgAdminPanel">
+  <div class="oa-topbar">
+    <div>
+      <div class="oa-title" id="oaTitle">🏢 PANEL ORGANIZACIÓN</div>
+      <div class="oa-org" id="oaOrgName">—</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="tb-btn always" style="border-color:rgba(37,211,102,.3);color:#4ade80;"
+        onclick="enviarWAAdmin(_currentOrgId)">📱 WA Admin</button>
+      <button class="tb-btn always" onclick="cerrarOrgAdmin()" style="border-color:rgba(239,68,68,.3);color:#f87171;">✕ Cerrar</button>
+    </div>
+  </div>
+  <div class="oa-content">
+    <div class="oa-stats">
+      <div class="stat-card">
+        <div class="stat-num sn-blue" id="oaStatTotal">0</div>
+        <div class="stat-label">USUARIOS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num sn-green" id="oaStatActivos">0</div>
+        <div class="stat-label">ACTIVOS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num sn-purple" id="oaStatLimite">—</div>
+        <div class="stat-label">LÍMITE</div>
+      </div>
+    </div>
+
+    <!-- Crear usuario dentro de org -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">➕ AGREGAR USUARIO <span id="oaAppLabel"></span></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="form-label">NOMBRE</div>
+          <input class="form-input" id="ouNombre" type="text" placeholder="Nombre">
+        </div>
+        <div class="form-group">
+          <div class="form-label">APELLIDO</div>
+          <input class="form-input" id="ouApellido" type="text" placeholder="Apellido">
+        </div>
+        <div class="form-group full-width">
+          <div class="form-label">CLAVE (se genera si está vacía)</div>
+          <input class="form-input" id="ouClave" type="text" placeholder="Ej: CAP-XYZ123" style="text-transform:uppercase;letter-spacing:2px;">
+        </div>
+        <div class="form-group full-width">
+          <div class="form-label">TELÉFONO (WhatsApp)</div>
+          <input class="form-input" id="ouTelefono" type="tel" placeholder="Ej: 59899123456">
+        </div>
+      </div>
+      <button class="btn-primary" id="ouCreateBtn" onclick="crearOrgUsuario()">✨ AGREGAR USUARIO</button>
+    </div>
+
+    <!-- Lista de usuarios -->
+    <div class="card">
+      <div class="card-title">👥 USUARIOS DE LA ORGANIZACIÓN</div>
+      <div id="ouList"><div class="loading">⏳ Cargando...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL EDITAR ORGANIZACIÓN ═══════ -->
+<div class="modal-overlay" id="modalEditOrg">
+  <div class="modal-card">
+    <button class="modal-close" onclick="cerrarModalEditOrg()">✕</button>
+    <div class="modal-title">✏️ Editar Organización</div>
+    <div class="form-grid">
+      <div class="form-group full-width">
+        <div class="form-label">NOMBRE</div>
+        <input class="form-input" id="eoNombre" type="text">
+      </div>
+      <div class="form-group">
+        <div class="form-label">LÍMITE USUARIOS</div>
+        <input class="form-input" id="eoLimite" type="number" min="1" max="500">
+      </div>
+      <div class="form-group">
+        <div class="form-label">VENCIMIENTO</div>
+        <input class="form-input" id="eoVenc" type="date">
+      </div>
+      <div class="form-group">
+        <div class="form-label">EMAIL ADMIN</div>
+        <input class="form-input" id="eoEmail" type="email">
+      </div>
+      <div class="form-group">
+        <div class="form-label">CONTRASEÑA ADMIN</div>
+        <input class="form-input" id="eoPass" type="text">
+      </div>
+      <div class="form-group">
+        <div class="form-label">TELÉFONO ADMIN (WhatsApp)</div>
+        <input class="form-input" id="eoTel" type="tel" placeholder="Ej: 59899123456">
+      </div>
+      <div class="form-group full-width">
+        <div class="form-label">NOTAS</div>
+        <input class="form-input" id="eoNotas" type="text">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn btn-cancel" onclick="cerrarModalEditOrg()">CANCELAR</button>
+      <button class="modal-btn btn-save" onclick="guardarEditOrg()">💾 GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL LOGIN ADMIN ORG ═══════ -->
+<div class="modal-overlay" id="modalOrgLogin">
+  <div class="modal-card" style="text-align:center;">
+    <button class="modal-close" onclick="document.getElementById('modalOrgLogin').classList.remove('open')">✕</button>
+    <span style="font-size:2.5rem;display:block;margin-bottom:8px;" id="orgLoginIcon">🏢</span>
+    <div class="modal-title" id="orgLoginTitle">Panel de Organización</div>
+    <div style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;" id="orgLoginSub">Ingresá la contraseña del admin</div>
+    <input class="form-input" id="orgLoginPass" type="password" placeholder="Contraseña del admin"
+           style="text-align:center;letter-spacing:2px;margin-bottom:8px;"
+           onkeydown="if(event.key==='Enter')verificarOrgLogin()">
+    <div class="error-msg" id="orgLoginErr" style="margin-bottom:8px;"></div>
+    <button class="btn-primary" onclick="verificarOrgLogin()">🔓 INGRESAR</button>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   © COMUNICAP — ADRIANA SOBA — TODOS LOS DERECHOS
+   RESERVADOS. CÓDIGO PROPIETARIO Y CONFIDENCIAL.
+   Prohibida su reproducción sin autorización.
+   Uruguay · Ley 9.739 · Convenio de Berna
+═══════════════════════════════════════════════════ */
+
+// ── SUPABASE CONFIG ──────────────────────────────
+const SUPABASE_URL = "https://lgpqyjevdwstbnerawmp.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxncHF5amV2ZHdzdGJuZXJhd21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzM1OTgsImV4cCI6MjA5MjgwOTU5OH0.GMPbwHdxj_aRLaJgDHCkDA5L1KHAwLJLkO9LYOpI8pA";
+const TABLE = "licencias2";
+
+// ── CONTRASEÑA ADMIN (hash en producción) ────────
+const ADMIN_PASS = "ComuniCAP2024Adriana!";
+
+// ── INTENTOS DE LOGIN ────────────────────────────
+let loginAttempts = 0;
+let loginBlocked = false;
+
+function doLogin() {
+  if(loginBlocked){ showLoginErr("⛔ Demasiados intentos. Esperá 5 minutos."); return; }
+  const pass = document.getElementById('loginPass').value;
+  if(pass === ADMIN_PASS) {
+    loginAttempts = 0;
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(()=>{ document.getElementById('splash').style.display='none'; }, 500);
+    document.getElementById('app').style.display = 'block';
+    logActivity('🔐','Ingreso al panel de administración');
+    cargarLicencias();
+    cargarPrecios();
+  } else {
+    loginAttempts++;
+    if(loginAttempts >= 5){
+      loginBlocked = true;
+      showLoginErr("⛔ Cuenta bloqueada por 5 min.");
+      setTimeout(()=>{ loginBlocked=false; loginAttempts=0; showLoginErr(''); }, 300000);
+    } else {
+      showLoginErr(`❌ Contraseña incorrecta (intento ${loginAttempts}/5)`);
+      document.getElementById('loginPass').value='';
+      document.getElementById('loginPass').focus();
+    }
+  }
+}
+function showLoginErr(msg){ document.getElementById('loginErr').textContent=msg; }
+
+function logout() {
+  if(!confirm('¿Cerrar sesión del panel?')) return;
+  logActivity('🚪','Cierre de sesión');
+  document.getElementById('app').style.display='none';
+  document.getElementById('splash').style.display='flex';
+  document.getElementById('splash').classList.remove('hide');
+  document.getElementById('loginPass').value='';
+}
+
+// ── LOGIN con Enter ──────────────────────────────
+document.addEventListener('keydown', e => {
+  if(e.key==='Enter' && document.getElementById('splash').style.display!=='none' &&
+     !document.getElementById('splash').classList.contains('hide'))
+    doLogin();
+});
+
+// ── SIDEBAR ─────────────────────────────────────
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+// ── SECTIONS ────────────────────────────────────
+function showSection(name, btnEl) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  document.querySelectorAll('.sid-btn').forEach(b=>b.classList.remove('active'));
+  if(btnEl) btnEl.classList.add('active');
+  closeSidebar();
+  if(name==='licencias') cargarLicencias();
+  if(name==='dashboard') { cargarLicencias(); cargarProximasVencer(); }
+  if(name==='actividad') renderLog();
+  if(name==='organizaciones') cargarOrganizaciones();
+  if(name==='usuariosPC') cargarUsuariosPC();
+}
+function activateSideBtn(idx){
+  const btns=document.querySelectorAll('.sid-btn');
+  btns.forEach(b=>b.classList.remove('active'));
+  if(btns[idx]) btns[idx].classList.add('active');
+}
+
+// ── ACTIVITY LOG ────────────────────────────────
+let activityLog = [];
+function logActivity(icon, msg) {
+  activityLog.unshift({ icon, msg, time: new Date().toLocaleString('es-UY') });
+  if(activityLog.length > 100) activityLog.pop();
+  renderLog();
+}
+// BUG FIX: escapar HTML para evitar XSS con nombres/emails maliciosos
+function escHtml(str){ const d=document.createElement('div'); d.textContent=str||''; return d.innerHTML; }
+
+function renderLog() {
+  const el = document.getElementById('logList');
+  if(!activityLog.length){ el.innerHTML='<div class="loading">Sin actividad registrada.</div>'; return; }
+  el.innerHTML = activityLog.map(l=>`
+    <div class="log-item">
+      <span class="log-icon">${escHtml(l.icon)}</span>
+      <span class="log-msg">${escHtml(l.msg)}</span>
+      <span class="log-time">${escHtml(l.time)}</span>
+    </div>`).join('');
+}
+
+// ── SUPABASE FETCH ───────────────────────────────
+async function sbFetch(path, opts={}) {
+  const url = SUPABASE_URL + '/rest/v1/' + path;
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': opts.prefer
+      ? opts.prefer
+      : (opts.method === 'GET' || !opts.method)
+        ? 'return=representation'
+        : 'return=minimal',
+  };
+  if(opts.headers) Object.assign(headers, opts.headers);
+  const res = await fetch(url, { method: opts.method||'GET', headers, body: opts.body });
+  if(!res.ok) {
+    let msg = 'Error '+res.status;
+    try{ const j=await res.json(); msg=j.message||j.hint||j.error||msg; }catch(_){}
+    throw new Error(msg);
+  }
+  // BUG FIX: paréntesis explícitos para precedencia clara, y cubrir 204 en cualquier método
+  if(res.status === 204 || (res.status === 200 && opts.method === 'DELETE')) return null;
+  const text = await res.text();
+  if(!text) return null;
+  try { return JSON.parse(text); } catch(_) { return null; }
+}
+
+// ── ESTADO DE LICENCIAS ──────────────────────────
+let allLicencias = [];
+let _eliminarData = {};
+let _editandoId = null;
+let _fechaEditId = null;
+let _waData = {};
+let _simMode = null;
+let preciosConfig = {};
+
+// ── CARGAR LICENCIAS ─────────────────────────────
+async function cargarLicencias() {
+  document.getElementById('licList').innerHTML='<div class="loading">⏳ CARGANDO...</div>';
+  try {
+    const data = await sbFetch(`${TABLE}?select=*&order=created_at.desc`);
+    allLicencias = data || [];
+    actualizarStats(allLicencias);
+    renderLicencias(allLicencias);
+    document.getElementById('sidBadgeTotal').textContent = allLicencias.length;
+    // Refrescar próximas a vencer si el widget existe
+    if(document.getElementById('proximasVencer')) cargarProximasVencer();
+  } catch(e){
+    document.getElementById('licList').innerHTML=`<div class="loading">❌ Error: ${e.message}</div>`;
+    showToast('❌ '+e.message,'#ef4444');
+  }
+}
+
+function actualizarStats(lics) {
+  const ahora = new Date();
+  const activas  = lics.filter(l=>l.activa && !(l.fecha_vencimiento && new Date(l.fecha_vencimiento+'T23:59:59')<ahora));
+  const inact    = lics.filter(l=>!l.activa || (l.fecha_vencimiento && new Date(l.fecha_vencimiento+'T23:59:59')<ahora));
+  const individ  = lics.filter(l=>l.tipo==='individual');
+  const clinica  = lics.filter(l=>l.tipo==='clinica');
+  document.getElementById('statTotal').textContent     = lics.length;
+  document.getElementById('statActivas').textContent   = activas.length;
+  document.getElementById('statInactivas').textContent = inact.length;
+  document.getElementById('statIndividual').textContent= individ.length;
+  document.getElementById('statClinica').textContent   = clinica.length;
+  document.getElementById('sidBadgeTotal').textContent = lics.length;
+}
+
+function renderLicencias(lics) {
+  const el = document.getElementById('licList');
+  if(!lics.length){ el.innerHTML='<div class="loading">No se encontraron licencias.</div>'; return; }
+  const ahora = new Date();
+  el.innerHTML = lics.map(l=>{
+    const vencida = l.fecha_vencimiento && new Date(l.fecha_vencimiento+'T23:59:59') < ahora;
+    const estado  = !l.activa ? 'inactiva' : vencida ? 'vencida' : 'activa';
+    const tagEst  = estado==='activa' ? '<span class="lic-tag tag-activa">Activa</span>'
+                  : estado==='inactiva' ? '<span class="lic-tag tag-inactiva">Inactiva</span>'
+                  : '<span class="lic-tag tag-vencida">Vencida</span>';
+    const tagTipo = l.tipo==='clinica'
+      ? '<span class="lic-tag tag-clinica">🏥 Clínica</span>'
+      : l.tipo==='comisaria'
+      ? '<span class="lic-tag tag-clinica">🏛️ Comisaría</span>'
+      : l.tipo==='unidad'
+      ? '<span class="lic-tag tag-clinica">🚔 Unidad</span>'
+      : l.tipo==='agente'
+      ? '<span class="lic-tag tag-individual">👮 Agente</span>'
+      : '<span class="lic-tag tag-individual">👤 Individual</span>';
+    const tagApp  = (l.clave||'').startsWith('CP-')
+      ? '<span class="lic-tag" style="background:rgba(167,139,250,.15);color:#c4b5fd;">🔮 ComuniPro</span>'
+      : (l.clave||'').startsWith('PC-')
+      ? '<span class="lic-tag" style="background:rgba(239,68,68,.15);color:#f87171;">🚨 PictoCrisis</span>'
+      : '<span class="lic-tag" style="background:rgba(58,134,255,.15);color:#60a5fa;">🧩 ComuniCAP</span>';
+    const tagVenc = l.fecha_vencimiento
+      ? `<span class="lic-tag tag-venc">📅 ${l.fecha_vencimiento}</span>`:'';
+
+    const ico = l.tipo==='clinica' ? '🏥' : '👤';
+    const nombre = [l.nombre,l.apellido].filter(Boolean).join(' ') || '—';
+    return `
+      <div class="lic-card ${estado}">
+        <div class="lic-icon">${ico}</div>
+        <div>
+          <div class="lic-clave">${l.clave||'—'}</div>
+          <div class="lic-name">${nombre}</div>
+          <div class="lic-email">${l.email||'—'} ${l.telefono?'· '+l.telefono:''}</div>
+          <div class="lic-tags">${tagEst}${tagTipo}${tagApp}${tagVenc}</div>
+        </div>
+        <div class="lic-actions"
+          data-id="${l.id}"
+          data-clave="${(l.clave||'').replace(/"/g,'&quot;')}"
+          data-nombre="${(l.nombre||'').replace(/"/g,'&quot;')}"
+          data-apellido="${(l.apellido||'').replace(/"/g,'&quot;')}"
+          data-email="${(l.email||'').replace(/"/g,'&quot;')}"
+          data-telefono="${(l.telefono||'').replace(/"/g,'&quot;')}"
+          data-venc="${l.fecha_vencimiento||''}"
+          data-activa="${l.activa?'1':'0'}">
+          <button class="lic-btn btn-copy"  data-action="copy">📋 Copiar</button>
+          <button class="lic-btn btn-wa"    data-action="wa">📱 WA</button>
+          <button class="lic-btn btn-fecha" data-action="fecha">📅 Fecha</button>
+          <button class="lic-btn btn-edit"  data-action="edit">✏️ Editar</button>
+          <button class="lic-btn btn-toggle" data-action="toggle">${l.activa?'🚫 Dar de baja':'✅ Reactivar'}</button>
+          <button class="lic-btn btn-del"   data-action="del">🗑️ Eliminar</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── FILTRAR LICENCIAS ────────────────────────────
+// Delegación de eventos para botones de licencias
+document.getElementById('licList').addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-action]');
+  if(!btn) return;
+  const wrap = btn.closest('[data-id]');
+  if(!wrap) return;
+  const id       = wrap.dataset.id;
+  const clave    = wrap.dataset.clave;
+  const nombre   = wrap.dataset.nombre;
+  const apellido = wrap.dataset.apellido;
+  const email    = wrap.dataset.email;
+  const telefono = wrap.dataset.telefono;
+  const venc     = wrap.dataset.venc;
+  const activa   = wrap.dataset.activa === '1';
+  const action   = btn.dataset.action;
+  switch(action) {
+    case 'copy':   copiarClave(clave); break;
+    case 'wa':     abrirModalWA(clave, (nombre+' '+apellido).trim(), email, telefono); break;
+    case 'fecha':  abrirModalFecha(id, venc); break;
+    case 'edit':   abrirModalEditar(id, nombre, apellido, telefono, email); break;
+    case 'toggle': toggleActiva(id, clave, activa); break;
+    case 'del':    eliminarLicencia(id, clave); break;
+  }
+});
+function filtrarLicencias() {
+  const q     = document.getElementById('searchInput').value.toLowerCase().trim();
+  const filtro= document.getElementById('filterEstado').value;
+  const ahora = new Date();
+  let res = allLicencias.filter(l=>{
+    const txt = [(l.clave||''),(l.nombre||''),(l.apellido||''),(l.email||''),(l.telefono||'')].join(' ').toLowerCase();
+    if(q && !txt.includes(q)) return false;
+    const vencida = l.fecha_vencimiento && new Date(l.fecha_vencimiento+'T23:59:59') < ahora;
+    if(filtro==='activa'    && (!l.activa||vencida)) return false;
+    if(filtro==='inactiva'  && l.activa) return false;
+    if(filtro==='vencida'   && !vencida) return false;
+    if(filtro==='individual'&& l.tipo!=='individual') return false;
+    if(filtro==='clinica'   && l.tipo!=='clinica') return false;
+    if(filtro==='cap'       && !(l.clave||'').startsWith('CAP-')) return false;
+    if(filtro==='pro'       && !(l.clave||'').startsWith('CP-')) return false;
+    if(filtro==='picto'     && !(l.clave||'').startsWith('PC-')) return false;
+    return true;
+  });
+  renderLicencias(res);
+}
+
+// ── PRÓXIMAS A VENCER ────────────────────────────
+function cargarProximasVencer() {
+  const el = document.getElementById('proximasVencer');
+  if(!allLicencias.length){ el.innerHTML='<div class="loading">Sin datos aún.</div>'; return; }
+  const ahora = new Date();
+  const en30  = new Date(); en30.setDate(en30.getDate()+30);
+  const prox  = allLicencias.filter(l=>{
+    if(!l.fecha_vencimiento||!l.activa) return false;
+    const venc = new Date(l.fecha_vencimiento+'T23:59:59');
+    return venc >= ahora && venc <= en30;
+  }).sort((a,b)=>new Date(a.fecha_vencimiento)-new Date(b.fecha_vencimiento));
+  if(!prox.length){ el.innerHTML='<div class="loading" style="padding:14px;">✅ Sin vencimientos próximos.</div>'; return; }
+  el.innerHTML = prox.map(l=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(245,158,11,.07);border-radius:10px;margin-bottom:7px;gap:10px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:0.82rem;font-weight:900;">${l.nombre||''} ${l.apellido||''} <span style="font-family:'Space Mono',monospace;font-size:0.75rem;color:#60a5fa;">${l.clave}</span></div>
+        <div style="font-size:0.7rem;color:var(--text2);">${l.email||''}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:0.75rem;font-weight:900;color:#fbbf24;">📅 ${l.fecha_vencimiento}</div>
+        <button class="lic-btn btn-wa prox-wa-btn" style="margin-top:4px;"
+          data-clave="${(l.clave||'').replace(/"/g,'&quot;')}"
+          data-nombre="${((l.nombre||'')+' '+(l.apellido||'')).trim().replace(/"/g,'&quot;')}"
+          data-email="${(l.email||'').replace(/"/g,'&quot;')}"
+          data-telefono="${(l.telefono||'').replace(/"/g,'&quot;')}">📱 Avisarle</button>
+      </div>
+    </div>`).join('');
+}
+
+// Delegación para botones WA en "próximas a vencer"
+document.getElementById('proximasVencer').addEventListener('click', function(e){
+  const btn = e.target.closest('.prox-wa-btn');
+  if(!btn) return;
+  abrirModalWA(btn.dataset.clave, btn.dataset.nombre, btn.dataset.email, btn.dataset.telefono);
+});
+
+// ── CREAR LICENCIA ───────────────────────────────
+function genClave(app, tipo) {
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c=''; for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  const prefix = app==='pro' ? 'CP-' : app==='picto' ? 'PC-' : 'CAP-';
+  return prefix + (tipo==='clinica'?'CL-':'') + c;
+}
+// ── TIPOS DINÁMICOS SEGÚN APP ─────────────────────
+// Para ComuniCAP / ComuniPro: Individual / Clínica
+// Para PictoCrisis: Agente / Comisaría / Unidad
+const TIPOS_CAP = [
+  { value:'individual', label:'👤 INDIVIDUAL' },
+  { value:'clinica',    label:'🏥 CLÍNICA' }
+];
+const TIPOS_PICTO = [
+  { value:'agente',    label:'👮 AGENTE' },
+  { value:'comisaria', label:'🏛️ COMISARÍA' },
+  { value:'unidad',    label:'🚔 UNIDAD' }
+];
+function actualizarTipos() {
+  const app  = document.getElementById('newApp').value;
+  const sel  = document.getElementById('newTipo');
+  const opts = app==='picto' ? TIPOS_PICTO : TIPOS_CAP;
+  sel.innerHTML = opts.map(o=>`<option value="${o.value}">${o.label}</option>`).join('');
+  toggleLimite();
+  actualizarPlaceholderClave();
+}
+
+function actualizarPlaceholderClave() {
+  const app  = document.getElementById('newApp').value;
+  const tipo = document.getElementById('newTipo').value;
+  const ex   = genClave(app,tipo);
+  const label = app==='pro' ? '🔮 ComuniPro' : app==='picto' ? '🚨 PictoCrisis' : '🧩 ComuniCAP';
+  document.getElementById('appBadge').textContent = label + ' · Ej: '+ex;
+  document.getElementById('appBadge').style.color = app==='pro'?'#c4b5fd': app==='picto'?'#f87171':'#60a5fa';
+}
+function toggleLimite() {
+  const tipo = document.getElementById('newTipo').value;
+  const mostrar = tipo==='clinica' || tipo==='comisaria' || tipo==='unidad';
+  document.getElementById('limiteGroup').style.display = mostrar?'block':'none';
+}
+function actualizarDropdownPrecios() {
+  const app  = document.getElementById('newApp').value;
+  const tipo = document.getElementById('newTipo').value;
+  let key;
+  if(app==='picto') {
+    key = tipo==='comisaria' ? 'precioPictoComisaria' : tipo==='unidad' ? 'precioPictoUnidad' : 'precioPictoAgente';
+  } else if(app==='pro') {
+    key = tipo==='clinica' ? 'precioProClinica' : 'precioProIndividual';
+  } else {
+    key = tipo==='clinica' ? 'precioClinica' : 'precioIndividual';
+  }
+  const precio = document.getElementById(key)?.value || '—';
+  const label = app==='pro' ? '🔮 ComuniPro' : app==='picto' ? '🚨 PictoCrisis' : '🧩 ComuniCAP';
+  const ex = genClave(app, tipo);
+  document.getElementById('appBadge').textContent = label + ' · Ej: ' + ex + ' · $' + precio + '/mes';
+  document.getElementById('appBadge').style.color = app==='pro'?'#c4b5fd': app==='picto'?'#f87171':'#60a5fa';
+}
+
+async function crearLicencia() {
+  const nombre  = document.getElementById('newNombre').value.trim();
+  const apellido= document.getElementById('newApellido').value.trim();
+  const email   = document.getElementById('newEmail').value.trim();
+  const telefono= document.getElementById('newTelefono').value.trim();
+  const app     = document.getElementById('newApp').value;
+  const tipo    = document.getElementById('newTipo').value;
+  const venc    = document.getElementById('newVenc').value;
+  const limite  = parseInt(document.getElementById('newLimite').value)||15;
+  let   clave   = document.getElementById('newClave').value.trim().toUpperCase();
+  if(!clave) clave = genClave(app, tipo);
+  if(!email){ showToast('❌ El email es obligatorio','#ef4444'); return; }
+
+  const btn = document.getElementById('createBtn');
+  btn.disabled=true; btn.textContent='⏳ CREANDO...';
+
+  try {
+    const payload = {
+      clave, email, nombre:nombre||null, apellido:apellido||null,
+      telefono:telefono||null, tipo, activa:true,
+      fecha_vencimiento: venc||null,
+      // BUG FIX: 'unidad' también debe guardar limite_pacientes (antes solo clinica y comisaria)
+      limite_pacientes: (tipo==='clinica'||tipo==='comisaria'||tipo==='unidad')?limite:null
+      // 'app' y 'edicion_habilitada' eliminados: no existen en licencias2
+    };
+    await sbFetch(TABLE, { method:'POST', body:JSON.stringify(payload) });
+    showToast(`✅ Licencia creada: ${clave}`, '#06d6a0');
+    logActivity('➕', `Licencia creada: ${clave} para ${nombre} ${apellido} (${email})`);
+    // Limpiar form
+    ['newNombre','newApellido','newEmail','newTelefono','newClave','newVenc'].forEach(id=>{
+      document.getElementById(id).value='';
+    });
+    cargarLicencias();
+  } catch(e){
+    showToast('❌ '+e.message,'#ef4444');
+  } finally {
+    btn.disabled=false; btn.textContent='✨ CREAR LICENCIA Y USUARIO';
+  }
+}
+
+// ── TOGGLE ACTIVA / BAJA ─────────────────────────
+async function toggleActiva(id, clave, activa) {
+  const estadoActual = activa === true || activa === 'true' || activa === 1;
+  const nuevoEstado = !estadoActual;
+  const accion = nuevoEstado ? 'reactivar' : 'dar de BAJA';
+  if(!confirm(`¿Deseas ${accion} la licencia "${clave}"?`)) return;
+  try {
+    await sbFetch(`${TABLE}?id=eq.${id}`, {
+      method:'PATCH', body:JSON.stringify({activa:nuevoEstado}), prefer:'return=minimal'
+    });
+    const msg = nuevoEstado ? `✅ Licencia reactivada: ${clave}` : `🚫 Baja dada: ${clave}`;
+    showToast(msg, nuevoEstado?'#06d6a0':'#ef4444');
+    logActivity(nuevoEstado?'✅':'🚫', (nuevoEstado?'Licencia reactivada: ':'Baja dada: ')+clave);
+    cargarLicencias();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+}
+
+// ── ELIMINAR LICENCIA ────────────────────────────
+function eliminarLicencia(id, clave) {
+  _eliminarData = {id, clave};
+  document.getElementById('modalConfirmText').textContent =
+    `¿Eliminás permanentemente la licencia "${clave}"? Esta acción NO se puede deshacer.`;
+  document.getElementById('modalConfirm').classList.add('open');
+}
+function cerrarModalConfirm(){ document.getElementById('modalConfirm').classList.remove('open'); }
+async function confirmarEliminar() {
+  const {id,clave} = _eliminarData;
+  cerrarModalConfirm();
+  try {
+    await sbFetch(`${TABLE}?id=eq.${id}`, { method:'DELETE', prefer:'return=minimal' });
+    showToast('🗑️ Licencia eliminada: '+clave,'#ef4444');
+    logActivity('🗑️','Licencia eliminada: '+clave);
+    cargarLicencias();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+}
+
+// ── EDITAR FECHA ─────────────────────────────────
+function abrirModalFecha(id, fecha) {
+  _fechaEditId = id;
+  document.getElementById('modalFechaInput').value = fecha||'';
+  document.getElementById('modalFecha').classList.add('open');
+}
+function cerrarModalFecha(){ document.getElementById('modalFecha').classList.remove('open'); }
+async function guardarFecha() {
+  const fecha = document.getElementById('modalFechaInput').value;
+  cerrarModalFecha();
+  try {
+    await sbFetch(`${TABLE}?id=eq.${_fechaEditId}`, {
+      method:'PATCH', body:JSON.stringify({fecha_vencimiento:fecha||null}), prefer:'return=minimal'
+    });
+    showToast('📅 Fecha actualizada','#06d6a0');
+    logActivity('📅','Fecha de vencimiento actualizada — ID '+_fechaEditId);
+    cargarLicencias();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+}
+
+// ── EDITAR USUARIO ───────────────────────────────
+function abrirModalEditar(id, nombre, apellido, telefono, email) {
+  _editandoId = id;
+  document.getElementById('editNombre').value   = nombre;
+  document.getElementById('editApellido').value = apellido;
+  document.getElementById('editTelefono').value = telefono;
+  document.getElementById('editEmail').value    = email;
+  document.getElementById('modalEditar').classList.add('open');
+}
+function cerrarModalEditar(){ document.getElementById('modalEditar').classList.remove('open'); _editandoId=null; }
+async function guardarEdicion() {
+  const nombre   = document.getElementById('editNombre').value.trim();
+  const apellido = document.getElementById('editApellido').value.trim();
+  const telefono = document.getElementById('editTelefono').value.trim();
+  const email    = document.getElementById('editEmail').value.trim();
+  const btn = document.getElementById('editarConfirmBtn');
+  btn.disabled=true; btn.textContent='⏳ GUARDANDO...';
+  try {
+    await sbFetch(`${TABLE}?id=eq.${_editandoId}`, {
+      method:'PATCH',
+      body:JSON.stringify({ nombre:nombre||null, apellido:apellido||null, telefono:telefono||null, email:email||null }),
+      prefer:'return=minimal'
+    });
+    cerrarModalEditar();
+    showToast('✅ Datos actualizados','#10b981');
+    logActivity('✏️','Datos editados — ID '+_editandoId);
+    cargarLicencias();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+  finally { btn.disabled=false; btn.textContent='💾 GUARDAR'; }
+}
+
+// ── COPIAR CLAVE ─────────────────────────────────
+function copiarClave(clave) {
+  navigator.clipboard.writeText(clave).then(()=>{
+    showToast('📋 Clave copiada: '+clave,'#60a5fa');
+    logActivity('📋','Clave copiada: '+clave);
+  }).catch(()=>{
+    // Fallback para iOS Safari
+    const ta=document.createElement('textarea');
+    ta.value=clave; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('📋 Clave copiada: '+clave,'#60a5fa');
+  });
+}
+
+// ── WHATSAPP ─────────────────────────────────────
+function abrirModalWA(clave, nombre, email, telefono) {
+  _waData = {clave, nombre, email, telefono};
+  document.getElementById('modalWAInfo').innerHTML =
+    `<strong>${nombre}</strong> · ${clave}<br>Email: ${email||'—'}`;
+  document.getElementById('modalWAInput').value = telefono||'';
+  document.getElementById('modalWA').classList.add('open');
+}
+function cerrarModalWA(){ document.getElementById('modalWA').classList.remove('open'); }
+function enviarWA() {
+  const num = document.getElementById('modalWAInput').value.trim().replace(/\D/g,'');
+  if(!num){ showToast('❌ Ingresá el número','#ef4444'); return; }
+  const {clave, nombre} = _waData;
+  const appNombre = (clave||'').startsWith('PC-') ? 'PictoCrisis®' : (clave||'').startsWith('CP-') ? 'ComuniPro®' : 'ComuniCAP®';
+  const appEmoji  = (clave||'').startsWith('PC-') ? '🚨' : (clave||'').startsWith('CP-') ? '🔮' : '🧩';
+  const APP_LINKS = {
+    'PC-':  'https://comunipro2026-oss.github.io/pictoccrisis-policia',
+    'CP-':  'https://comunipro2026-oss.github.io/comunicador-aac',
+    'CAP-': 'https://comunipro2026-oss.github.io/comunica-aac',
+  };
+  const prefix    = (clave||'').startsWith('PC-') ? 'PC-' : (clave||'').startsWith('CP-') ? 'CP-' : 'CAP-';
+  const appLink   = APP_LINKS[prefix];
+  const msg = `${appEmoji} *${appNombre}*\n\nHola ${nombre}! Tu código de acceso es:\n\n*${clave}*\n\nIngresá a la app desde acá:\n${appLink}\n\nAnte cualquier consulta, no dudes en escribirme.\n\n_© Adriana Soba — ${appNombre}_`;
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+  cerrarModalWA();
+  logActivity('📱','WA enviado a '+num+' — clave: '+clave);
+}
+
+// ── PRECIOS ──────────────────────────────────────
+async function cargarPrecios() {
+  try {
+    const data = await sbFetch('config?select=*&limit=1');
+    if(data && data.length){
+      const cfg = data[0];
+      preciosConfig = cfg;
+      document.getElementById('precioIndividual').value    = cfg.precio_individual||490;
+      document.getElementById('precioClinica').value       = cfg.precio_clinica||10000;
+      document.getElementById('precioProIndividual').value = cfg.precio_pro_individual||490;
+      document.getElementById('precioProClinica').value    = cfg.precio_pro_clinica||10000;
+      document.getElementById('precioPictoAgente').value   = cfg.precio_picto_agente||490;
+      document.getElementById('precioPictoComisaria').value= cfg.precio_picto_comisaria||10000;
+      document.getElementById('precioPictoUnidad').value   = cfg.precio_picto_unidad||5000;
+    }
+  } catch(e){ /* tabla config puede no existir */ }
+}
+async function guardarConfig() {
+  const payload = {
+    precio_individual:     parseInt(document.getElementById('precioIndividual').value)||490,
+    precio_clinica:        parseInt(document.getElementById('precioClinica').value)||10000,
+    precio_pro_individual: parseInt(document.getElementById('precioProIndividual').value)||490,
+    precio_pro_clinica:    parseInt(document.getElementById('precioProClinica').value)||10000,
+    precio_picto_agente:   parseInt(document.getElementById('precioPictoAgente').value)||490,
+    precio_picto_comisaria:parseInt(document.getElementById('precioPictoComisaria').value)||10000,
+    precio_picto_unidad:   parseInt(document.getElementById('precioPictoUnidad').value)||5000,
+  };
+  const st = document.getElementById('precios-status');
+  st.textContent='⏳ Guardando...'; st.style.color='var(--text2)';
+  try {
+    // Si ya existe un registro en config, hacemos PATCH; si no, POST sin id
+    const existing = await sbFetch('config?select=id&limit=1');
+    if(existing && existing.length) {
+      // Actualizar el registro existente por su id real
+      await sbFetch('config?id=eq.'+existing[0].id, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+        prefer: 'return=minimal'
+      });
+    } else {
+      // Insertar sin enviar id (lo genera la DB automáticamente)
+      await sbFetch('config', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        prefer: 'return=minimal'
+      });
+    }
+    st.textContent='✅ Precios guardados y sincronizados'; st.style.color='#34d399';
+    showToast('💰 Precios actualizados','#06d6a0');
+    logActivity('💰','Precios actualizados');
+  } catch(e) {
+    st.textContent='❌ Error: '+e.message; st.style.color='#f87171';
+    showToast('❌ Config: '+e.message,'#ef4444');
+  }
+  setTimeout(()=>{ st.textContent=''; }, 5000);
+}
+
+// ── SIMULAR APP ──────────────────────────────────
+function simularApp(mode) {
+  _simMode = mode;
+  const isCap   = mode==='cap';
+  const isPicto = mode==='picto';
+  document.getElementById('simLogo').textContent  = isCap?'🧩': isPicto?'🚨':'🔮';
+  document.getElementById('simTitle').textContent = isCap?'COMUNICAP': isPicto?'PICTOCRISIS':'COMUNIPRO';
+  document.getElementById('simSub').textContent   = isCap?'ComuniCAP® · Verificar acceso': isPicto?'PictoCrisis® · Verificar acceso':'ComuniPro® · Verificar acceso';
+  document.getElementById('simInput').placeholder = isCap?'CAP-XXXXXX': isPicto?'PC-XXXXXX':'CP-XXXXXX';
+  document.getElementById('simBtn').className='btn-primary';
+  document.getElementById('simBtn').style.background = isCap
+    ? 'linear-gradient(135deg,#3a86ff,#06d6a0)'
+    : isPicto
+    ? 'linear-gradient(135deg,#ef4444,#f59e0b)'
+    : 'linear-gradient(135deg,#a78bfa,#ec4899)';
+  document.getElementById('simInput').value='';
+  document.getElementById('simError').textContent='';
+  document.getElementById('modalSim').classList.add('open');
+  setTimeout(()=>document.getElementById('simInput').focus(),200);
+}
+function cerrarModalSim(){ document.getElementById('modalSim').classList.remove('open'); }
+async function doSimLogin() {
+  const clave  = document.getElementById('simInput').value.trim().toUpperCase();
+  const errEl  = document.getElementById('simError');
+  const prefix = _simMode==='pro' ? 'CP-' : _simMode==='picto' ? 'PC-' : 'CAP-';
+  if(!clave){ errEl.textContent='❌ Ingresá el código'; return; }
+  try {
+    const data = await sbFetch(`${TABLE}?clave=eq.${encodeURIComponent(clave)}&select=*`);
+    if(!data||!data.length){ errEl.textContent='❌ Código no encontrado'; return; }
+    const lic = data[0];
+    if(!lic.activa){ errEl.textContent='❌ Licencia suspendida'; return; }
+    if(lic.fecha_vencimiento && new Date(lic.fecha_vencimiento+'T23:59:59')<new Date()){
+      errEl.textContent='❌ Licencia vencida'; return;
+    }
+    const appName = _simMode==='pro'?'ComuniPro': _simMode==='picto'?'PictoCrisis':'ComuniCAP';
+    if(!clave.startsWith(prefix)){ errEl.textContent=`❌ Código inválido para ${appName}`; return; }
+    cerrarModalSim();
+    const toastColor = _simMode==='pro'?'#a78bfa': _simMode==='picto'?'#f87171':'#06d6a0';
+    showToast(`✅ Acceso correcto — ${lic.nombre||clave}`, toastColor);
+    logActivity('🔓','Simulación de acceso exitosa: '+clave);
+  } catch(e){ errEl.textContent='❌ Error: '+e.message; }
+}
+
+// ── ORGANIZACIONES ───────────────────────────
+const ORG_TABLE = 'organizaciones';
+const OU_TABLE  = 'org_usuarios';
+let allOrgs = [];
+let _currentOrgId   = null;
+let _currentOrgData = null;
+let _editOrgId      = null;
+
+function orgTipoIcon(tipo) {
+  return tipo==='educativo'?'🏫': tipo==='policial'?'🚔': tipo==='salud'?'🏥': tipo==='gobierno'?'🏛️':'📋';
+}
+function orgAppLabel(app) {
+  return app==='picto'?'🚨 PictoCrisis': app==='pro'?'🔮 ComuniPro':'🧩 ComuniCAP';
+}
+function genOrgClave(app) {
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c=''; for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  return (app==='picto'?'PC-': app==='pro'?'CP-':'CAP-') + c;
+}
+
+async function cargarOrganizaciones() {
+  document.getElementById('orgList').innerHTML='<div class="loading">⏳ CARGANDO...</div>';
+  try {
+    const data = await sbFetch(`${ORG_TABLE}?select=*&order=created_at.desc`);
+    allOrgs = data || [];
+    document.getElementById('sidBadgeOrgs').textContent = allOrgs.length;
+    renderOrgs(allOrgs);
+  } catch(e) {
+    document.getElementById('orgList').innerHTML=`<div class="loading">❌ ${e.message}</div>`;
+  }
+}
+
+function renderOrgs(orgs) {
+  const el = document.getElementById('orgList');
+  if(!orgs.length){ el.innerHTML='<div class="loading">No hay organizaciones creadas aún.</div>'; return; }
+  const ahora = new Date();
+  el.innerHTML = orgs.map(o => {
+    const vencida = o.fecha_vencimiento && new Date(o.fecha_vencimiento+'T23:59:59') < ahora;
+    const activa  = o.activa && !vencida;
+    const tagEst  = activa
+      ? '<span class="org-tag" style="background:rgba(16,185,129,.15);color:#34d399;">✅ Activa</span>'
+      : '<span class="org-tag" style="background:rgba(239,68,68,.15);color:#f87171;">🚫 Suspendida</span>';
+    const tagVenc = o.fecha_vencimiento
+      ? `<span class="org-tag" style="background:rgba(148,163,184,.1);color:var(--text2);">📅 ${o.fecha_vencimiento}</span>` : '';
+    const tagApp  = `<span class="org-tag" style="background:rgba(58,134,255,.12);color:#60a5fa;">${orgAppLabel(o.app)}</span>`;
+    return `
+      <div class="org-card ${activa?'':'suspendida'}" data-org-id="${o.id}">
+        <div class="org-header">
+          <span class="org-icon">${orgTipoIcon(o.tipo)}</span>
+          <div style="flex:1;">
+            <div class="org-nombre">${escHtml(o.nombre)}</div>
+            <div class="org-sub">${escHtml(o.admin_email)} · Límite: <strong>${o.limite_usuarios} usuarios</strong></div>
+          </div>
+        </div>
+        <div class="org-tags">${tagEst}${tagApp}${tagVenc}</div>
+        <div class="org-actions">
+          <button class="org-btn" style="background:rgba(37,211,102,.15);color:#4ade80;"
+            onclick="enviarWAAdmin('${o.id}')">📱 WA al Admin</button>
+          <button class="org-btn" style="background:rgba(58,134,255,.15);color:#60a5fa;"
+            onclick="abrirPanelOrg('${o.id}')">👥 Ver usuarios</button>
+          <button class="org-btn" style="background:rgba(167,139,250,.15);color:#c4b5fd;"
+            onclick="abrirModalEditOrg('${o.id}')">✏️ Editar</button>
+          <button class="org-btn" style="background:rgba(${activa?'239,68,68':'16,185,129'},.15);color:${activa?'#f87171':'#34d399'};"
+            onclick="toggleOrg('${o.id}','${escHtml(o.nombre)}',${activa})">${activa?'🚫 Suspender':'✅ Reactivar'}</button>
+          <button class="org-btn" style="background:rgba(6,214,160,.12);color:#06d6a0;"
+            onclick="abrirLoginOrg('${o.id}')">🔓 Simular Admin</button>
+          <button class="org-btn" style="background:rgba(239,68,68,.12);color:#f87171;"
+            onclick="eliminarOrg('${o.id}','${escHtml(o.nombre)}')">🗑️ Eliminar</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filtrarOrgs() {
+  const q = document.getElementById('orgSearchInput').value.toLowerCase().trim();
+  const f = document.getElementById('orgFilterEstado').value;
+  const ahora = new Date();
+  let res = allOrgs.filter(o => {
+    const txt = [(o.nombre||''),(o.admin_email||''),(o.notas||'')].join(' ').toLowerCase();
+    if(q && !txt.includes(q)) return false;
+    const vencida = o.fecha_vencimiento && new Date(o.fecha_vencimiento+'T23:59:59') < ahora;
+    const activa  = o.activa && !vencida;
+    if(f==='activa'    && !activa) return false;
+    if(f==='suspendida'&& activa)  return false;
+    if(f==='cap'       && o.app!=='cap')   return false;
+    if(f==='picto'     && o.app!=='picto') return false;
+    return true;
+  });
+  renderOrgs(res);
+}
+
+async function crearOrganizacion() {
+  const nombre = document.getElementById('orgNombre').value.trim();
+  const tipo   = document.getElementById('orgTipo').value;
+  const app    = document.getElementById('orgApp').value;
+  const limite = parseInt(document.getElementById('orgLimite').value)||15;
+  const venc   = document.getElementById('orgVenc').value;
+  const email  = document.getElementById('orgAdminEmail').value.trim();
+  const pass   = document.getElementById('orgAdminPass').value.trim();
+  const tel    = document.getElementById('orgAdminTel').value.trim();
+  const notas  = document.getElementById('orgNotas').value.trim();
+  if(!nombre){ showToast('❌ El nombre es obligatorio','#ef4444'); return; }
+  if(!email){  showToast('❌ El email del admin es obligatorio','#ef4444'); return; }
+  if(!pass){   showToast('❌ La contraseña del admin es obligatoria','#ef4444'); return; }
+  const btn = document.getElementById('createOrgBtn');
+  btn.disabled=true; btn.textContent='⏳ CREANDO...';
+  try {
+    // Generar código para el admin
+    const adminChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let adminCodigo = (app==='picto'?'PC-': app==='pro'?'CP-':'CAP-');
+    for(let i=0;i<6;i++) adminCodigo += adminChars[Math.floor(Math.random()*adminChars.length)];
+
+    // Crear organización en comunipro
+    const orgFetchRes = await fetch(SUPABASE_URL + '/rest/v1/' + ORG_TABLE, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({ nombre, tipo, app, admin_email:email, admin_password:pass, admin_codigo:adminCodigo, admin_telefono:tel||null, limite_usuarios:limite, fecha_vencimiento:venc||null, notas:notas||null, activa:true })
+    });
+    if(!orgFetchRes.ok) { const errText = await orgFetchRes.text(); throw new Error('Error: ' + errText); }
+    const orgData = await orgFetchRes.json();
+    const orgId = Array.isArray(orgData) ? orgData[0]?.id : orgData?.id;
+
+    // Guardar en pictoccrisis-uy
+    if(orgId) {
+      const PC_URL2 = "https://kyjdefvwlosiqsttjeea.supabase.co";
+      const PC_KEY2 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5amRlZnZ3bG9zaXFzdHRqZWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MDY5MjQsImV4cCI6MjA5NDI4MjkyNH0.nCZgtG88pzUk7V3RXaGZEwTbS9K3ZgcLgWPdNrQA1Ec";
+      const pcOrgRes = await fetch(`${PC_URL2}/rest/v1/organizaciones`, { method:'POST', headers:{'apikey':PC_KEY2,'Authorization':`Bearer ${PC_KEY2}`,'Content-Type':'application/json','Prefer':'return=representation'}, body:JSON.stringify({nombre,tipo,admin_codigo:adminCodigo,admin_password:pass,limite_usuarios:limite,fecha_vencimiento:venc||null,activa:true}) });
+      if(pcOrgRes.ok) { const pcOrgData = await pcOrgRes.json(); const pcOrgId = Array.isArray(pcOrgData)?pcOrgData[0]?.id:pcOrgData?.id; if(pcOrgId) { await fetch(`${PC_URL2}/rest/v1/org_admins`,{method:'POST',headers:{'apikey':PC_KEY2,'Authorization':`Bearer ${PC_KEY2}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({org_id:pcOrgId,codigo:adminCodigo,password:pass,nombre,activa:true})}); } }
+    }
+
+    showToast(`✅ Organización creada: ${nombre} · Admin: ${adminCodigo}`,'#06d6a0');
+    logActivity('🏗️',`Organización creada: ${nombre} (${orgAppLabel(app)}) · ${limite} usuarios · Admin: ${adminCodigo}`);
+    ['orgNombre','orgAdminEmail','orgAdminPass','orgAdminTel','orgNotas','orgVenc'].forEach(id=>{ document.getElementById(id).value=''; });
+    document.getElementById('orgLimite').value='15';
+    cargarOrganizaciones();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+  finally { btn.disabled=false; btn.textContent='🏗️ CREAR ORGANIZACIÓN'; }
+}
+
+async function toggleOrg(id, nombre, activa) {
+  const accion = activa ? 'SUSPENDER' : 'REACTIVAR';
+  if(!confirm(`¿Deseas ${accion} la organización "${nombre}"?\n${activa?'Todos sus usuarios quedarán sin acceso.':''}`)) return;
+  try {
+    // 1. Actualizar org
+    await sbFetch(`${ORG_TABLE}?id=eq.${id}`, {
+      method:'PATCH', body:JSON.stringify({activa:!activa}), prefer:'return=minimal'
+    });
+    // 2. Obtener todas las claves de usuarios de esta org y sincronizar en licencias2
+    const usuarios = await sbFetch(`${OU_TABLE}?org_id=eq.${id}&select=clave`);
+    if(usuarios && usuarios.length) {
+      for(const u of usuarios) {
+        await sbFetch(`${TABLE}?clave=eq.${encodeURIComponent(u.clave)}`, {
+          method:'PATCH', body:JSON.stringify({activa:!activa}), prefer:'return=minimal'
+        });
+      }
+    }
+    // 3. Also update pictoccrisis-uy organizaciones by name
+    try {
+      const PC_URL3 = "https://kyjdefvwlosiqsttjeea.supabase.co";
+      const PC_KEY3 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5amRlZnZ3bG9zaXFzdHRqZWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MDY5MjQsImV4cCI6MjA5NDI4MjkyNH0.nCZgtG88pzUk7V3RXaGZEwTbS9K3ZgcLgWPdNrQA1Ec";
+      await fetch(`${PC_URL3}/rest/v1/organizaciones?nombre=eq.${encodeURIComponent(nombre)}`, {
+        method: 'PATCH',
+        headers: {'apikey': PC_KEY3, 'Authorization': 'Bearer '+PC_KEY3, 'Content-Type': 'application/json', 'Prefer': 'return=minimal'},
+        body: JSON.stringify({activa: !activa})
+      });
+    } catch(e2) { console.warn('PC org sync error:', e2); }
+
+    showToast(activa?`🚫 Suspendida: ${nombre}`:`✅ Reactivada: ${nombre}`, activa?'#ef4444':'#06d6a0');
+    logActivity(activa?'🚫':'✅', `Organización ${activa?'suspendida':'reactivada'}: ${nombre} (${(usuarios||[]).length} usuarios sincronizados)`);
+    cargarOrganizaciones();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+}
+
+async function eliminarOrg(id, nombre) {
+  if(!confirm(`¿Eliminar permanentemente "${nombre}" y TODOS sus usuarios?\nEsta acción NO se puede deshacer.`)) return;
+  try {
+    await sbFetch(`${ORG_TABLE}?id=eq.${id}`, { method:'DELETE', prefer:'return=minimal' });
+    showToast('🗑️ Organización eliminada','#ef4444');
+    logActivity('🗑️','Organización eliminada: '+nombre);
+    cargarOrganizaciones();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+}
+
+// ── EDITAR ORG ───────────────────────────────
+function abrirModalEditOrg(id) {
+  const o = allOrgs.find(x=>x.id===id);
+  if(!o) return;
+  _editOrgId = id;
+  document.getElementById('eoNombre').value = o.nombre||'';
+  document.getElementById('eoLimite').value = o.limite_usuarios||15;
+  document.getElementById('eoVenc').value   = o.fecha_vencimiento||'';
+  document.getElementById('eoEmail').value  = o.admin_email||'';
+  document.getElementById('eoPass').value   = o.admin_password||'';
+  document.getElementById('eoTel').value    = o.admin_telefono||'';
+  document.getElementById('eoNotas').value  = o.notas||'';
+  document.getElementById('modalEditOrg').classList.add('open');
+}
+function cerrarModalEditOrg(){ document.getElementById('modalEditOrg').classList.remove('open'); _editOrgId=null; }
+async function guardarEditOrg() {
+  const payload = {
+    nombre:   document.getElementById('eoNombre').value.trim(),
+    limite_usuarios: parseInt(document.getElementById('eoLimite').value)||15,
+    fecha_vencimiento: document.getElementById('eoVenc').value||null,
+    admin_email:    document.getElementById('eoEmail').value.trim(),
+    admin_password: document.getElementById('eoPass').value.trim(),
+    admin_telefono: document.getElementById('eoTel').value.trim()||null,
+    notas: document.getElementById('eoNotas').value.trim()||null,
+  };
+  try {
+    await sbFetch(`${ORG_TABLE}?id=eq.${_editOrgId}`, {
+      method:'PATCH', body:JSON.stringify(payload), prefer:'return=minimal'
+    });
+    cerrarModalEditOrg();
+    showToast('✅ Organización actualizada','#06d6a0');
+    logActivity('✏️','Organización editada — ID '+_editOrgId);
+    cargarOrganizaciones();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+}
+
+// ── LOGIN SIMULADO ADMIN ORG ─────────────────
+function abrirLoginOrg(id) {
+  const o = allOrgs.find(x=>x.id===id);
+  if(!o) return;
+  _currentOrgData = o;
+  document.getElementById('orgLoginIcon').textContent  = orgTipoIcon(o.tipo);
+  document.getElementById('orgLoginTitle').textContent = o.nombre;
+  document.getElementById('orgLoginSub').textContent   = 'Admin: '+o.admin_email;
+  document.getElementById('orgLoginPass').value = '';
+  document.getElementById('orgLoginErr').textContent = '';
+  document.getElementById('modalOrgLogin').classList.add('open');
+  setTimeout(()=>document.getElementById('orgLoginPass').focus(),200);
+}
+function verificarOrgLogin() {
+  const pass = document.getElementById('orgLoginPass').value;
+  if(!_currentOrgData){ return; }
+  if(pass === _currentOrgData.admin_password) {
+    document.getElementById('modalOrgLogin').classList.remove('open');
+    abrirOrgAdmin(_currentOrgData);
+  } else {
+    document.getElementById('orgLoginErr').textContent = '❌ Contraseña incorrecta';
+  }
+}
+
+function enviarWAAdmin(id) {
+  const o = allOrgs.find(x=>x.id===id);
+  if(!o) return;
+  const appLink   = getAppLink(o.app);
+  const appNombre = o.app==='picto'?'PictoCrisis®': o.app==='pro'?'ComuniPro®':'ComuniCAP®';
+  const appEmoji  = o.app==='picto'?'🚨': o.app==='pro'?'🔮':'🧩';
+  const codigoAdmin = o.admin_codigo ? `\n🔑 *Código de acceso:* ${o.admin_codigo}` : '';
+  const msg = `${appEmoji} *${appNombre} — Acceso Administrador*\n\nHola! Te enviamos los datos de acceso para administrar *${o.nombre}*:${codigoAdmin}\n🔒 *Contraseña:* ${o.admin_password}\n👥 *Usuarios disponibles:* ${o.limite_usuarios}\n\n🔗 *Link de acceso:*\n${appLink}\n\nCon estos datos podés ingresar y crear los usuarios de tu organización.\n\n_© Adriana Soba — ${appNombre}_`;
+  let num = (o.admin_telefono||'').replace(/\D/g,'');
+  if(!num) {
+    num = prompt(`Número WhatsApp del admin de "${o.nombre}" (ej: 59899123456):`);
+    if(!num) return;
+    num = num.replace(/\D/g,'');
+  }
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+  logActivity('📱','WA enviado al admin de org: '+o.nombre);
+}
+
+// ── PANEL ADMIN ORG ──────────────────────────
+function abrirPanelOrg(id) {
+  const o = allOrgs.find(x=>x.id===id);
+  if(!o) return;
+  abrirOrgAdmin(o);
+}
+function abrirOrgAdmin(org) {
+  _currentOrgId   = org.id;
+  _currentOrgData = org;
+  document.getElementById('oaTitle').textContent   = orgTipoIcon(org.tipo)+' '+org.nombre;
+  document.getElementById('oaOrgName').textContent = orgAppLabel(org.app)+' · Límite: '+org.limite_usuarios+' usuarios';
+  document.getElementById('oaAppLabel').textContent = '— '+orgAppLabel(org.app);
+  document.getElementById('oaStatLimite').textContent = org.limite_usuarios;
+  document.getElementById('orgAdminPanel').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  cargarOrgUsuarios();
+  logActivity('🔓','Panel abierto para organización: '+org.nombre);
+}
+async function toggleLicencia(id, activa) {
+  try {
+    await sbFetch(`${TABLE}?id=eq.${id}`, {method:'PATCH', body:JSON.stringify({activa:!activa}), prefer:'return=minimal'});
+    showToast(activa?'🚫 Usuario dado de baja':'✅ Usuario reactivado', activa?'#ef4444':'#06d6a0');
+    cargarOrgUsuarios();
+  } catch(e) { showToast('❌ '+e.message,'#ef4444'); }
+}
+async function eliminarLicenciaOrg(id, clave) {
+  if(!confirm(`¿Eliminar el usuario "${clave}"?`)) return;
+  try {
+    await sbFetch(`${TABLE}?id=eq.${id}`, {method:'DELETE', prefer:'return=minimal'});
+    showToast('🗑️ Usuario eliminado','#ef4444');
+    logActivity('🗑️','Usuario org eliminado de licencias2: '+clave);
+    cargarOrgUsuarios();
+  } catch(e) { showToast('❌ '+e.message,'#ef4444'); }
+}
+function cerrarOrgAdmin() {
+  document.getElementById('orgAdminPanel').style.display = 'none';
+  document.body.style.overflow = '';
+  _currentOrgId = null; _currentOrgData = null;
+}
+
+async function cargarOrgUsuarios() {
+  document.getElementById('ouList').innerHTML='<div class="loading">⏳ Cargando...</div>';
+  try {
+    // Load from org_usuarios (ComuniCAP users)
+    const data = await sbFetch(`${OU_TABLE}?org_id=eq.${_currentOrgId}&order=created_at.asc`);
+    let usuarios = data || [];
+
+    // Also load from pictoccrisis-uy policias (PictoCrisis users created by comisario)
+    if(_currentOrgData && _currentOrgData.app === 'picto') {
+      const PC_URL2 = "https://kyjdefvwlosiqsttjeea.supabase.co";
+      const PC_KEY2 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5amRlZnZ3bG9zaXFzdHRqZWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MDY5MjQsImV4cCI6MjA5NDI4MjkyNH0.nCZgtG88pzUk7V3RXaGZEwTbS9K3ZgcLgWPdNrQA1Ec";
+      // Find org in pictoccrisis-uy by name
+      const pcOrgsRes = await fetch(`${PC_URL2}/rest/v1/organizaciones?nombre=eq.${encodeURIComponent(_currentOrgData.nombre)}&select=id`, {
+        headers: {'apikey': PC_KEY2, 'Authorization': 'Bearer ' + PC_KEY2}
+      });
+      const pcOrgs = await pcOrgsRes.json();
+      if(pcOrgs && pcOrgs.length) {
+        const pcOrgId = pcOrgs[0].id;
+        const pcUsersRes = await fetch(`${PC_URL2}/rest/v1/policias?org_id=eq.${pcOrgId}&select=id,codigo,nombre,rango`, {
+          headers: {'apikey': PC_KEY2, 'Authorization': 'Bearer ' + PC_KEY2}
+        });
+        const pcUsers = await pcUsersRes.json();
+        // Map to same format as org_usuarios
+        const mapped = (pcUsers||[]).map(u => ({
+          id: u.id, clave: u.codigo, nombre: u.nombre, apellido: '', activa: true, _fromPC: true
+        }));
+        usuarios = [...usuarios, ...mapped];
+      }
+    }
+
+    // Also load from licencias2 for ComuniCAP orgs
+    if(_currentOrgData && _currentOrgData.app !== 'picto') {
+      try {
+        const adminEmail = _currentOrgData.admin_email || ('org_' + _currentOrgData.admin_codigo + '@comunicap.uy');
+        const capUsers = await sbFetch(`${TABLE}?email=eq.${encodeURIComponent(adminEmail)}&tipo=eq.clinica&select=*`);
+        if(capUsers && capUsers.length) {
+          const mapped = capUsers.map(u => ({
+            id: u.id,
+            clave: u.clave,
+            nombre: u.nombre,
+            apellido: u.apellido || '',
+            activa: u.activa !== false,
+            telefono: u.telefono || '',
+            _fromLicencias: true
+          }));
+          usuarios = [...usuarios, ...mapped];
+        }
+      } catch(e2) { console.warn('CAP users load error:', e2); }
+    }
+
+    const activos = usuarios.filter(u=>u.activa).length;
+    document.getElementById('oaStatTotal').textContent  = usuarios.length;
+    document.getElementById('oaStatActivos').textContent= activos;
+    renderOrgUsuarios(usuarios);
+  } catch(e) {
+    document.getElementById('ouList').innerHTML=`<div class="loading">❌ ${e.message}</div>`;
+  }
+}
+
+function renderOrgUsuarios(usuarios) {
+  const el = document.getElementById('ouList');
+  if(!usuarios.length){ el.innerHTML='<div class="loading">Sin usuarios aún. Agregá el primero arriba.</div>'; return; }
+  const appLink = getAppLink(_currentOrgData ? _currentOrgData.app : 'cap');
+  el.innerHTML = usuarios.map(u=>{
+    const nombre = escHtml(((u.nombre||'')+' '+(u.apellido||'')).trim()) || 'Sin nombre';
+    const clave  = escHtml(u.clave);
+    return `
+    <div class="ou-item" style="opacity:${u.activa?1:.5}">
+      <div style="flex:1;">
+        <div class="ou-name">${nombre}</div>
+        <div class="ou-clave">${clave}</div>
+      </div>
+      <div class="ou-actions" style="flex-wrap:wrap;gap:5px;">
+        <button class="lic-btn btn-copy" title="Copiar clave" onclick="copiarClave('${u.clave}')">📋 Copiar</button>
+        <button class="lic-btn btn-wa"   title="Enviar por WhatsApp"
+          onclick="enviarWAUsuarioOrg('${u.clave}','${nombre}','${appLink}','${(u.telefono||'').replace(/'/g,'')}')">📱 WA</button>
+        <button class="lic-btn ${u.activa?'btn-toggle':'btn-edit-enable'}"
+          onclick="${u._fromPC ? `eliminarUsuarioPC('${u.id}','${nombre}')` : u._fromLicencias ? `toggleLicencia('${u.id}',${u.activa})` : `toggleOrgUsuario('${u.id}',${u.activa})`}">${u.activa?'🚫 Baja':'✅ Activar'}</button>
+        <button class="lic-btn btn-del"
+          onclick="${u._fromPC ? `eliminarUsuarioPC('${u.id}','${nombre}')` : u._fromLicencias ? `eliminarLicenciaOrg('${u.id}','${u.clave}')` : `eliminarOrgUsuario('${u.id}','${u.clave}')`}">🗑️ Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getAppLink(app) {
+  return app==='picto' ? 'https://comunipro2026-oss.github.io/pictoccrisis-policia/admin-org.html'
+       : app==='pro'   ? 'https://comunipro2026-oss.github.io/comunicador-aac/admin-org.html'
+       :                 'https://comunipro2026-oss.github.io/comunica-aac/admin-org.html';
+}
+
+function enviarWAUsuarioOrg(clave, nombre, appLink, telefono) {
+  const appNombre = _currentOrgData
+    ? ((_currentOrgData.app==='picto')?'PictoCrisis®':(_currentOrgData.app==='pro')?'ComuniPro®':'ComuniCAP®')
+    : 'ComuniCAP®';
+  const appEmoji = _currentOrgData
+    ? ((_currentOrgData.app==='picto')?'🚨':(_currentOrgData.app==='pro')?'🔮':'🧩')
+    : '🧩';
+  const orgNombre = _currentOrgData ? _currentOrgData.nombre : '';
+  const msg = `${appEmoji} *${appNombre}*\n\nHola ${nombre}! Tu código de acceso es:\n\n*${clave}*\n\nIngresá a la app desde acá:\n${appLink}\n\nOrganización: ${orgNombre}\n\nAnte cualquier consulta, consultá a tu administrador.\n\n_© Adriana Soba — ${appNombre}_`;
+  let num = (telefono||'').replace(/\D/g,'');
+  if(!num) {
+    num = prompt(`Número WhatsApp de ${nombre} (ej: 59899123456):`);
+    if(!num) return;
+    num = num.replace(/\D/g,'');
+  }
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+  logActivity('📱','WA enviado a usuario org: '+clave);
+}
+
+async function crearOrgUsuario() {
+  if(!_currentOrgId || !_currentOrgData) return;
+  const nombre   = document.getElementById('ouNombre').value.trim();
+  const apellido = document.getElementById('ouApellido').value.trim();
+  const telefono = document.getElementById('ouTelefono').value.trim();
+  let   clave    = document.getElementById('ouClave').value.trim().toUpperCase();
+  if(!clave) clave = genOrgClave(_currentOrgData.app);
+
+  // Verificar límite
+  const existing = await sbFetch(`${OU_TABLE}?org_id=eq.${_currentOrgId}&activa=eq.true&select=id`);
+  if((existing||[]).length >= _currentOrgData.limite_usuarios) {
+    showToast(`❌ Límite alcanzado: ${_currentOrgData.limite_usuarios} usuarios activos`,'#ef4444');
+    return;
+  }
+  const btn = document.getElementById('ouCreateBtn');
+  btn.disabled=true; btn.textContent='⏳ CREANDO...';
+  try {
+    // 1. Insertar en org_usuarios
+    await sbFetch(OU_TABLE, {
+      method:'POST',
+      body: JSON.stringify({ org_id:_currentOrgId, nombre:nombre||null, apellido:apellido||null, clave, telefono:telefono||null, activa:true })
+    });
+
+    // 2. Insertar también en licencias2 para que la app lo reconozca
+    const tipo = _currentOrgData.app==='picto' ? 'comisaria' : 'clinica';
+    await sbFetch(TABLE, {
+      method:'POST',
+      body: JSON.stringify({
+        clave, nombre:nombre||null, apellido:apellido||null,
+        telefono:telefono||null,
+        email: _currentOrgData.admin_email,
+        tipo, activa:true,
+        fecha_vencimiento: _currentOrgData.fecha_vencimiento||null,
+        limite_pacientes: null
+      })
+    });
+
+    showToast('✅ Usuario creado: '+clave,'#06d6a0');
+    logActivity('➕','Usuario org creado: '+clave+' ('+_currentOrgData.nombre+') → también en licencias2');
+    ['ouNombre','ouApellido','ouClave','ouTelefono'].forEach(id=>{ document.getElementById(id).value=''; });
+    cargarOrgUsuarios();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+  finally { btn.disabled=false; btn.textContent='✨ AGREGAR USUARIO'; }
+}
+
+async function toggleOrgUsuario(id, activa) {
+  try {
+    // 1. Actualizar en org_usuarios
+    await sbFetch(`${OU_TABLE}?id=eq.${id}`, {
+      method:'PATCH', body:JSON.stringify({activa:!activa}), prefer:'return=minimal'
+    });
+    // 2. Buscar la clave y sincronizar en licencias2
+    const data = await sbFetch(`${OU_TABLE}?id=eq.${id}&select=clave`);
+    if(data && data[0]) {
+      await sbFetch(`${TABLE}?clave=eq.${encodeURIComponent(data[0].clave)}`, {
+        method:'PATCH', body:JSON.stringify({activa:!activa}), prefer:'return=minimal'
+      });
+    }
+    showToast(activa?'🚫 Usuario dado de baja':'✅ Usuario reactivado', activa?'#ef4444':'#06d6a0');
+    cargarOrgUsuarios();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+}
+
+async function eliminarOrgUsuario(id, clave) {
+  if(!confirm(`¿Eliminar el usuario "${clave}"?`)) return;
+  try {
+    // 1. Eliminar de org_usuarios
+    await sbFetch(`${OU_TABLE}?id=eq.${id}`, { method:'DELETE', prefer:'return=minimal' });
+    // 2. Eliminar también de licencias2
+    await sbFetch(`${TABLE}?clave=eq.${encodeURIComponent(clave)}`, { method:'DELETE', prefer:'return=minimal' });
+    showToast('🗑️ Usuario eliminado','#ef4444');
+    logActivity('🗑️','Usuario org eliminado: '+clave);
+    cargarOrgUsuarios();
+  } catch(e){ showToast('❌ '+e.message,'#ef4444'); }
+}
+
+// Cerrar modal edit org con backdrop
+document.getElementById('modalEditOrg').addEventListener('click', function(e){
+  if(e.target===this) cerrarModalEditOrg();
+});
+document.getElementById('modalOrgLogin').addEventListener('click', function(e){
+  if(e.target===this) this.classList.remove('open');
+});
+
+// ── TOAST ────────────────────────────────────────
+function showToast(msg, color='#10b981') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = color+'44';
+  t.style.color = color;
+  t.classList.remove('hidden');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(()=>t.classList.add('hidden'), 3200);
+}
+
+// ── CERRAR MODALES CON BACKDROP ──────────────────
+['modalFecha','modalWA','modalConfirm','modalEditar','modalSim'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', function(e){
+    if(e.target===this) this.classList.remove('open');
+  });
+});
+
+// ── INIT ─────────────────────────────────────────
+document.getElementById('loginPass').focus();
+actualizarPlaceholderClave();
+
+/* ── Cargar usuarios PictoCrisis ── */
+async function cargarUsuariosPC() {
+  const _PC_URL = "https://kyjdefvwlosiqsttjeea.supabase.co";
+  const _PC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5amRlZnZ3bG9zaXFzdHRqZWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MDY5MjQsImV4cCI6MjA5NDI4MjkyNH0.nCZgtG88pzUk7V3RXaGZEwTbS9K3ZgcLgWPdNrQA1Ec";
+  const container = document.getElementById('pcUsersContainer');
+  if(!container) return;
+  container.innerHTML = '<div class="loading">Cargando...</div>';
+  try {
+    const orgsRes = await fetch(_PC_URL+'/rest/v1/organizaciones?select=id,nombre,limite_usuarios,activa&order=nombre', {headers:{'apikey':_PC_KEY,'Authorization':'Bearer '+_PC_KEY}});
+    const orgs = await orgsRes.json();
+    const usersRes = await fetch(_PC_URL+'/rest/v1/policias?select=id,codigo,nombre,rango,org_id&order=nombre', {headers:{'apikey':_PC_KEY,'Authorization':'Bearer '+_PC_KEY}});
+    const users = await usersRes.json();
+    if(!orgs.length){container.innerHTML='<div class="loading">No hay organizaciones.</div>';return;}
+    let html='';
+    orgs.forEach(org=>{
+      const ou=users.filter(u=>u.org_id===org.id);
+      html+=`<div style="margin-bottom:20px"><div style="font-weight:700;font-size:.9rem;margin-bottom:8px;color:#4fc3f7">🏢 ${org.nombre} <span style="color:#9090a8;font-size:.75rem">(${ou.length}/${org.limite_usuarios||15} · ${org.activa?'✅':'❌'})</span></div>`;
+      if(!ou.length){html+='<div style="color:#9090a8;font-size:.8rem;padding:8px">Sin usuarios aún.</div>';}
+      else{ou.forEach(u=>{html+=`<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.04);border-radius:8px;padding:10px 14px;margin-bottom:6px"><div><div style="font-weight:600">${u.nombre||'—'}</div><div style="font-size:.75rem;color:#4fc3f7;font-family:monospace">${u.codigo}</div><div style="font-size:.7rem;color:#9090a8">${u.rango||'Agente'}</div></div><button onclick="eliminarUsuarioPC('${u.id}','${u.nombre||''}')" style="background:rgba(183,28,28,.2);border:1px solid rgba(183,28,28,.3);border-radius:6px;color:#ff6b6b;padding:6px 12px;font-size:.75rem;cursor:pointer">🗑️</button></div>`;});}
+      html+='</div>';
+    });
+    container.innerHTML=html;
+  }catch(e){container.innerHTML=`<div class="loading">❌ ${e.message}</div>`;}
+}
+async function eliminarUsuarioPC(id,nombre){
+  // No confirm() - Chrome blocks it in inactive tabs
+  const _PC_URL="https://kyjdefvwlosiqsttjeea.supabase.co";
+  const _PC_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5amRlZnZ3bG9zaXFzdHRqZWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MDY5MjQsImV4cCI6MjA5NDI4MjkyNH0.nCZgtG88pzUk7V3RXaGZEwTbS9K3ZgcLgWPdNrQA1Ec";
+  try{
+    const res=await fetch(_PC_URL+'/rest/v1/policias?id=eq.'+id,{
+      method:'DELETE',
+      headers:{'apikey':_PC_KEY,'Authorization':'Bearer '+_PC_KEY,'Prefer':'return=minimal'}
+    });
+    if(res.ok||res.status===204){showToast('🗑️ Usuario eliminado','#ff9800');cargarUsuariosPC();}
+    else {
+      const txt = await res.text();
+      showToast('❌ Error: '+res.status+' '+txt.substring(0,50),'#ef4444');
+    }
+  }catch(e){showToast('❌ '+e.message,'#ef4444');}
+}
+</script>
+
+</body>
+</html>
