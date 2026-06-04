@@ -8537,7 +8537,7 @@ function _bsRender(appName) {
       if (q.type === 'stars') {
         html += '<div style="display:flex;gap:4px;justify-content:center;">';
         for (let i = 1; i <= 5; i++) {
-          html += '<button onclick="_bsAns('' + q.id + '',' + i + ','' + appName + '')" style="font-size:26px;background:none;border:none;cursor:pointer;filter:' + (ans >= i ? 'none' : 'grayscale(1) opacity(.4)') + '">⭐</button>';
+          html += '<button onclick="_bsAns(\'' + q.id + '\',' + i + ',\'' + appName + '\')" style="font-size:26px;background:none;border:none;cursor:pointer;filter:' + (ans >= i ? 'none' : 'grayscale(1) opacity(.4)') + '">⭐</button>';
         }
         html += '</div>';
         if (ans) html += '<div style="text-align:center;color:#ffd166;font-size:10px;font-weight:700;margin-top:4px;">' + ['','Muy difícil','Difícil','Regular','Bien','¡Excelente!'][ans] + '</div>';
@@ -8546,7 +8546,7 @@ function _bsRender(appName) {
         html += '<div style="display:flex;gap:8px;">';
         ['Sí','No'].forEach(opt => {
           const sel = ans === opt;
-          html += '<button onclick="_bsAns('' + q.id + '','' + opt + '','' + appName + '')" style="flex:1;padding:10px;border-radius:10px;border:2.5px solid ' + (sel ? (opt==='Sí'?'#22c55e':'#ef4444') : 'rgba(255,255,255,.15)') + ';background:' + (sel ? (opt==='Sí'?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)') : 'transparent') + ';color:' + (sel ? (opt==='Sí'?'#86efac':'#fca5a5') : 'rgba(255,255,255,.7)') + ';font-family:inherit;font-weight:900;font-size:15px;cursor:pointer;">' + (opt==='Sí'?'✅ SÍ':'❌ NO') + '</button>';
+          html += '<button onclick="_bsAns(\'' + q.id + '\',\'' + opt + '\',\'' + appName + '\')" style="flex:1;padding:10px;border-radius:10px;border:2.5px solid ' + (sel ? (opt==='Sí'?'#22c55e':'#ef4444') : 'rgba(255,255,255,.15)') + ';background:' + (sel ? (opt==='Sí'?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)') : 'transparent') + ';color:' + (sel ? (opt==='Sí'?'#86efac':'#fca5a5') : 'rgba(255,255,255,.7)') + ';font-family:inherit;font-weight:900;font-size:15px;cursor:pointer;">' + (opt==='Sí'?'✅ SÍ':'❌ NO') + '</button>';
         });
         html += '</div>';
       }
@@ -8554,12 +8554,12 @@ function _bsRender(appName) {
         html += '<div style="display:flex;flex-direction:column;gap:5px;">';
         q.opts.forEach(opt => {
           const sel = ans === opt;
-          html += '<button onclick="_bsAns('' + q.id + '','' + opt + '','' + appName + '')" style="padding:9px 12px;border-radius:9px;text-align:left;border:2px solid ' + (sel?'#3a86ff':'rgba(255,255,255,.15)') + ';background:' + (sel?'rgba(58,134,255,.15)':'transparent') + ';color:' + (sel?'#93c5fd':'rgba(255,255,255,.75)') + ';font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">' + opt + '</button>';
+          html += '<button onclick="_bsAns(\'' + q.id + '\',\'' + opt + '\',\'' + appName + '\')" style="padding:9px 12px;border-radius:9px;text-align:left;border:2px solid ' + (sel?'#3a86ff':'rgba(255,255,255,.15)') + ';background:' + (sel?'rgba(58,134,255,.15)':'transparent') + ';color:' + (sel?'#93c5fd':'rgba(255,255,255,.75)') + ';font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">' + opt + '</button>';
         });
         html += '</div>';
       }
       if (q.type === 'text') {
-        html += '<textarea oninput="_bsAns('' + q.id + '',this.value,'' + appName + '')" placeholder="Tu respuesta..." style="width:100%;min-height:70px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);border-radius:9px;padding:9px;color:white;font-family:inherit;font-size:12px;resize:vertical;outline:none;box-sizing:border-box;">' + (ans||'') + '</textarea>';
+        html += '<textarea oninput="_bsAns(\'' + q.id + '\',this.value,\'' + appName + '\')" placeholder="Tu respuesta..." style="width:100%;min-height:70px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);border-radius:9px;padding:9px;color:white;font-family:inherit;font-size:12px;resize:vertical;outline:none;box-sizing:border-box;">' + (ans||'') + '</textarea>';
       }
       html += '</div>';
     });
