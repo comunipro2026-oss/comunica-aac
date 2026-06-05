@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>PictoCrisis® — Panel de Organización</title>
+<style>
+:root {
+  --red: #B71C1C;
+  --red2: #D32F2F;
+  --dark: #0a0a0f;
+  --dark2: #13131a;
+  --dark3: #1a1a24;
+  --card: #1e1e2a;
+  --border: rgba(255,255,255,0.08);
+  --text: #f0f0f5;
+  --text2: #9090a8;
+  --green: #06d6a0;
+  --blue: #4fc3f7;
+  --accent: #ff6b6b;
+  --orange: #ff9800;
+  --purple: #9c27b0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* ── LOGIN ── */
+#loginGate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(183,28,28,0.3) 0%, transparent 70%);
+}
+.login-header { text-align: center; margin-bottom: 32px; }
+.login-shield { font-size: 3rem; margin-bottom: 8px; }
+.login-title { font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; }
+.login-title span { color: var(--red2); }
+.login-sub { font-size: 0.75rem; color: var(--text2); letter-spacing: 3px; margin-top: 4px; }
+.login-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 400px;
+}
+.login-label { font-size: 0.7rem; color: var(--text2); letter-spacing: 2px; margin-bottom: 8px; display: block; }
+.login-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  margin-bottom: 16px;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.login-input:focus { border-color: var(--red2); }
+.login-input[type="password"] { text-transform: none; letter-spacing: normal; font-family: inherit; }
+.login-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--red), var(--red2));
+  border: none;
+  border-radius: 10px;
+  padding: 16px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.login-btn:hover { opacity: 0.9; }
+.login-err { color: var(--accent); font-size: 0.8rem; text-align: center; margin-top: 12px; min-height: 20px; }
+
+/* ── APP ── */
+#appPanel { display: none; }
+#appPanel.show { display: block; }
+
+.top-bar {
+  background: var(--dark2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.top-org { font-weight: 700; font-size: 1rem; }
+.top-org span { color: var(--red2); }
+.top-meta { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+.logout-btn {
+  background: rgba(183,28,28,0.2);
+  border: 1px solid rgba(183,28,28,0.4);
+  border-radius: 8px;
+  color: var(--accent);
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.container { padding: 24px 20px; max-width: 700px; margin: 0 auto; }
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+.stat-num { font-size: 1.8rem; font-weight: 900; color: var(--blue); }
+.stat-num.red { color: var(--accent); }
+.stat-num.orange { color: var(--orange); }
+.stat-label { font-size: 0.6rem; color: var(--text2); letter-spacing: 1px; margin-top: 4px; }
+
+.section-title {
+  font-size: 0.75rem;
+  color: var(--text2);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+/* Crear usuario */
+.create-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; }
+.form-group.full { grid-column: 1/-1; }
+.form-label { font-size: 0.65rem; color: var(--text2); letter-spacing: 1px; margin-bottom: 6px; }
+.form-input, .form-select {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 0.9rem;
+  outline: none;
+}
+.form-input:focus, .form-select:focus { border-color: var(--blue); }
+.form-select option { background: var(--dark2); }
+
+/* Días de acceso selector */
+.dias-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.dias-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--text2);
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.dias-btn.active {
+  background: rgba(79,195,247,0.15);
+  border-color: var(--blue);
+  color: var(--blue);
+}
+.dias-custom {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  width: 70px;
+  outline: none;
+  text-align: center;
+}
+.dias-custom:focus { border-color: var(--blue); }
+
+.tipo-acceso-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.tipo-btn {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--text2);
+  padding: 10px 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.tipo-btn.active-prueba {
+  background: rgba(255,152,0,0.15);
+  border-color: var(--orange);
+  color: var(--orange);
+}
+.tipo-btn.active-pago {
+  background: rgba(6,214,160,0.15);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.create-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #1565C0, #1976D2);
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  margin-top: 16px;
+}
+.create-btn:hover { opacity: 0.9; }
+.create-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.create-btn.pago-btn {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+}
+
+.pago-nota {
+  background: rgba(6,214,160,0.08);
+  border: 1px solid rgba(6,214,160,0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.78rem;
+  color: var(--green);
+  margin-top: 12px;
+  line-height: 1.5;
+  display: none;
+}
+.pago-nota.show { display: block; }
+
+.limit-bar-wrap { margin-bottom: 8px; }
+.limit-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text2); margin-bottom: 6px; }
+.limit-bar { background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; }
+.limit-fill { background: linear-gradient(90deg, var(--green), var(--blue)); height: 6px; border-radius: 4px; transition: width 0.4s; }
+
+/* Lista usuarios */
+.user-list { display: flex; flex-direction: column; gap: 10px; }
+.user-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.user-item.vencido { border-color: rgba(255,107,107,0.3); background: rgba(255,107,107,0.05); }
+.user-item.por-vencer { border-color: rgba(255,152,0,0.3); background: rgba(255,152,0,0.05); }
+.user-item.prueba { border-color: rgba(255,152,0,0.2); }
+
+.user-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.user-info { display: flex; flex-direction: column; gap: 3px; }
+.user-name { font-weight: 700; font-size: 0.95rem; }
+.user-code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: var(--blue);
+  background: rgba(79,195,247,0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.user-rango { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+.user-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.badge-prueba { background: rgba(255,152,0,0.15); color: var(--orange); }
+.badge-activo { background: rgba(6,214,160,0.15); color: var(--green); }
+.badge-vencido { background: rgba(255,107,107,0.15); color: var(--accent); }
+.badge-retencion { background: rgba(156,39,176,0.15); color: #ce93d8; }
+
+.vence-tag {
+  font-size: 0.7rem;
+  margin-top: 4px;
+}
+.vence-tag.ok { color: var(--green); }
+.vence-tag.warn { color: var(--orange); }
+.vence-tag.bad { color: var(--accent); }
+.vence-tag.ret { color: #ce93d8; }
+
+.btn-small {
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  font-weight: 600;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.btn-wa { background: rgba(37,211,102,0.15); border-color: rgba(37,211,102,0.3); color: #25d366; }
+.btn-wa:hover { background: rgba(37,211,102,0.3); }
+.btn-del { background: rgba(183,28,28,0.15); border-color: rgba(183,28,28,0.3); color: var(--accent); }
+.btn-del:hover { background: rgba(183,28,28,0.3); }
+.btn-toggle-on { background: rgba(255,152,0,0.15); border-color: rgba(255,152,0,0.3); color: var(--orange); }
+.btn-toggle-off { background: rgba(6,214,160,0.15); border-color: rgba(6,214,160,0.3); color: var(--green); }
+.btn-renovar { background: rgba(79,195,247,0.15); border-color: rgba(79,195,247,0.3); color: var(--blue); }
+.btn-renovar:hover { background: rgba(79,195,247,0.3); }
+
+.empty-msg { text-align: center; color: var(--text2); padding: 40px 20px; font-size: 0.9rem; }
+
+/* Modal renovar */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+}
+.modal-title { font-size: 1.1rem; font-weight: 900; margin-bottom: 6px; }
+.modal-sub { font-size: 0.78rem; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+.modal-btn {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.modal-btn.green { background: linear-gradient(135deg, #1b5e20, #2e7d32); }
+.modal-btn.blue { background: linear-gradient(135deg, #1565C0, #1976D2); }
+.modal-btn.gray { background: rgba(255,255,255,0.08); color: var(--text2); }
+.modal-dias-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: transform 0.3s;
+  z-index: 9999;
+  white-space: nowrap;
+}
+.toast.on { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 480px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .stat-row { grid-template-columns: repeat(2,1fr); }
+  .stat-num { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginGate">
+  <div class="login-header">
+    <div class="login-shield">🛡️</div>
+    <div class="login-title">Picto<span>Crisis</span>®</div>
+    <div class="login-sub">PANEL DE ORGANIZACIÓN</div>
+  </div>
+  <div class="login-card">
+    <label class="login-label">CÓDIGO DE ADMINISTRADOR</label>
+    <input class="login-input" id="orgCodigo" type="text" placeholder="PC-XXXXXX" maxlength="9"
+           oninput="formatLoginCode(this)" onkeydown="if(event.key==='Enter')doOrgLogin()">
+    <label class="login-label">CONTRASEÑA</label>
+    <input class="login-input" id="orgPass" type="password" placeholder="••••••••"
+           onkeydown="if(event.key==='Enter')doOrgLogin()">
+    <button class="login-btn" onclick="doOrgLogin()">🔐 INGRESAR</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP PANEL -->
+<div id="appPanel">
+  <div class="top-bar">
+    <div>
+      <div class="top-org" id="orgNombre">Organización</div>
+      <div class="top-meta" id="orgMeta"></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">↩ SALIR</button>
+  </div>
+  <div class="container">
+
+    <!-- Stats -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-label">USUARIOS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statLimite">0</div>
+        <div class="stat-label">LÍMITE</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num orange" id="statPrueba">0</div>
+        <div class="stat-label">EN PRUEBA</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num red" id="statVencidos">0</div>
+        <div class="stat-label">VENCIDOS</div>
+      </div>
+    </div>
+
+    <div class="limit-bar-wrap">
+      <div class="limit-label">
+        <span>Uso de licencias</span>
+        <span id="limitText">0/0</span>
+      </div>
+      <div class="limit-bar"><div class="limit-fill" id="limitFill" style="width:0%"></div></div>
+    </div>
+
+    <br>
+    <!-- Crear usuario -->
+    <div class="section-title">➕ NUEVO USUARIO</div>
+    <div class="create-card">
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="form-label">NOMBRE</div>
+          <input class="form-input" id="newNombre" type="text" placeholder="Juan">
+        </div>
+        <div class="form-group">
+          <div class="form-label">APELLIDO</div>
+          <input class="form-input" id="newApellido" type="text" placeholder="García">
+        </div>
+        <div class="form-group full">
+          <div class="form-label">RANGO / ROL</div>
+          <select class="form-select" id="newRango">
+            <option value="Agente">👮 Agente</option>
+            <option value="Suboficial">🎖️ Suboficial</option>
+            <option value="Oficial">⭐ Oficial</option>
+            <option value="Comisario">🏅 Comisario</option>
+            <option value="Médico">🩺 Médico</option>
+            <option value="Enfermero">💊 Enfermero</option>
+            <option value="Docente">📚 Docente</option>
+            <option value="Director">🏫 Director</option>
+            <option value="Otro">👤 Otro</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <div class="form-label">TELÉFONO WHATSAPP (opcional)</div>
+          <input class="form-input" id="newTelefono" type="tel" placeholder="598912345678">
+          <div style="font-size:0.65rem;color:var(--text2);margin-top:4px;">Con código de país. Ej: 598 para Uruguay</div>
+        </div>
+
+        <!-- Tipo de acceso -->
+        <div class="form-group full">
+          <div class="form-label">TIPO DE ACCESO</div>
+          <div class="tipo-acceso-row">
+            <button class="tipo-btn active-prueba" id="tipoPrueba" onclick="setTipo('prueba')">🔬 PRUEBA GRATUITA</button>
+            <button class="tipo-btn" id="tipoPago" onclick="setTipo('pago')">✅ PAGO CONFIRMADO</button>
+          </div>
+        </div>
+
+        <!-- Días -->
+        <div class="form-group full">
+          <div class="form-label">DÍAS DE ACCESO</div>
+          <div class="dias-selector">
+            <button class="dias-btn active" onclick="setDias(14, this)">14 días</button>
+            <button class="dias-btn" onclick="setDias(30, this)">30 días</button>
+            <button class="dias-btn" onclick="setDias(90, this)">90 días</button>
+            <button class="dias-btn" onclick="setDias(365, this)">1 año</button>
+            <input class="dias-custom" id="diasCustom" type="number" min="1" max="999" placeholder="días"
+                   oninput="setDias(parseInt(this.value)||14, null)">
+          </div>
+        </div>
+      </div>
+
+      <div class="pago-nota" id="pagoNota">
+        💰 <strong>Recordatorio:</strong> Solo dar acceso DESPUÉS de confirmar el pago. Al crear, se abrirá WhatsApp con las credenciales listas para enviar.
+      </div>
+
+      <button class="create-btn" id="createBtn" onclick="crearUsuario()">🔬 DAR ACCESO DE PRUEBA</button>
+    </div>
+
+    <!-- Lista usuarios -->
+    <div class="section-title">👥 MIS USUARIOS</div>
+    <div class="user-list" id="userList">
+      <div class="empty-msg">Cargando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal renovar/extender -->
+<div class="modal-overlay" id="modalRenovar">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">Renovar acceso</div>
+    <div class="modal-sub" id="modalSub">Confirmá el pago antes de dar acceso.</div>
+    <div class="form-label" style="margin-bottom:8px;">DÍAS A AGREGAR</div>
+    <div class="modal-dias-row">
+      <button class="dias-btn active" onclick="setModalDias(30, this)">30 días</button>
+      <button class="dias-btn" onclick="setModalDias(90, this)">90 días</button>
+      <button class="dias-btn" onclick="setModalDias(365, this)">1 año</button>
+      <input class="dias-custom" id="modalDiasCustom" type="number" min="1" max="999" placeholder="días"
+             oninput="setModalDias(parseInt(this.value)||30, null)">
+    </div>
+    <button class="modal-btn green" onclick="confirmarRenovacion()">✅ CONFIRMAR PAGO Y RENOVAR</button>
+    <button class="modal-btn blue" id="modalReenviarWA" onclick="reenviarWA()">📲 REENVIAR WHATSAPP</button>
+    <button class="modal-btn gray" onclick="cerrarModal()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL = "https://kyjdefvwlosiqsttjeea.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5amRlZnZ3bG9zaXFzdHRqZWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MDY5MjQsImV4cCI6MjA5NDI4MjkyNH0.nCZgtG88pzUk7V3RXaGZEwTbS9K3ZgcLgWPdNrQA1Ec";
+
+let currentOrg = null;
+let currentAdmin = null;
+let _tipoAcceso = 'prueba';
+let _diasAcceso = 14;
+let _modalDias = 30;
+let _modalUserId = null;
+let _modalUserData = null;
+
+function sbHeaders() {
+  return {
+    'apikey': SB_KEY,
+    'Authorization': `Bearer ${SB_KEY}`,
+    'Content-Type': 'application/json'
+  };
+}
+
+async function sbGet(table, params) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: sbHeaders() });
+  if (!res.ok) throw new Error('Error ' + res.status);
+  return res.json();
+}
+
+async function sbPost(table, body) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: { ...sbHeaders(), 'Prefer': 'return=representation' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('Error ' + res.status);
+  return res.json();
+}
+
+async function sbPatch(table, id, body) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { ...sbHeaders(), 'Prefer': 'return=minimal' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('Error ' + res.status);
+}
+
+async function sbDelete(table, id) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: sbHeaders()
+  });
+  if (!res.ok) throw new Error('Error ' + res.status);
+}
+
+/* ── HELPERS FECHA ── */
+function fechaVencimiento(dias) {
+  const d = new Date();
+  d.setDate(d.getDate() + dias);
+  return d.toISOString().slice(0,10);
+}
+
+function diasRestantes(fechaStr) {
+  if (!fechaStr) return null;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const vence = new Date(fechaStr + 'T00:00:00');
+  return Math.round((vence - hoy) / (1000*60*60*24));
+}
+
+function formatFecha(fechaStr) {
+  if (!fechaStr) return '';
+  const [y,m,d] = fechaStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+/* ── UI TIPO ACCESO ── */
+function setTipo(tipo) {
+  _tipoAcceso = tipo;
+  const btnP = document.getElementById('tipoPrueba');
+  const btnPago = document.getElementById('tipoPago');
+  const nota = document.getElementById('pagoNota');
+  const createBtn = document.getElementById('createBtn');
+
+  if (tipo === 'prueba') {
+    btnP.className = 'tipo-btn active-prueba';
+    btnPago.className = 'tipo-btn';
+    nota.classList.remove('show');
+    createBtn.className = 'create-btn';
+    createBtn.textContent = '🔬 DAR ACCESO DE PRUEBA';
+  } else {
+    btnP.className = 'tipo-btn';
+    btnPago.className = 'tipo-btn active-pago';
+    nota.classList.add('show');
+    createBtn.className = 'create-btn pago-btn';
+    createBtn.textContent = '✅ CONFIRMAR PAGO Y DAR ACCESO';
+  }
+}
+
+function setDias(n, btn) {
+  _diasAcceso = n || 14;
+  document.querySelectorAll('.dias-selector .dias-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function setModalDias(n, btn) {
+  _modalDias = n || 30;
+  document.querySelectorAll('.modal-dias-row .dias-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+/* ── FORMAT CODE ── */
+function formatLoginCode(input) {
+  let v = input.value.toUpperCase().replace(/[^A-Z0-9-]/g,'');
+  if (!v.startsWith('PC-')) {
+    if (v.startsWith('PC')) v = 'PC-' + v.slice(2);
+    else if (v.startsWith('P')) v = 'PC-' + v.slice(1);
+    else v = 'PC-' + v;
+  }
+  v = 'PC-' + v.slice(3).slice(0,6);
+  input.value = v;
+}
+
+/* ── LOGIN ── */
+async function doOrgLogin() {
+  const codigo = document.getElementById('orgCodigo').value.trim().toUpperCase();
+  const pass = document.getElementById('orgPass').value;
+  const err = document.getElementById('loginErr');
+  err.textContent = '';
+  if (!codigo || !pass) { err.textContent = '⚠️ Completá todos los campos.'; return; }
+  try {
+    const admins = await sbGet('org_admins', `codigo=eq.${encodeURIComponent(codigo)}&activa=eq.true&select=*`);
+    if (!admins.length) { err.textContent = '❌ Código no encontrado o inactivo.'; return; }
+    const admin = admins[0];
+    if (admin.password !== pass) { err.textContent = '❌ Contraseña incorrecta.'; return; }
+    const orgs = await sbGet('organizaciones', `id=eq.${admin.org_id}&activa=eq.true&select=*`);
+    if (!orgs.length) { err.textContent = '❌ Organización inactiva. Contactá al administrador.'; return; }
+    currentAdmin = admin;
+    currentOrg = orgs[0];
+    mostrarPanel();
+  } catch(e) {
+    err.textContent = '❌ Error de conexión: ' + e.message;
+  }
+}
+
+/* ── PANEL ── */
+async function mostrarPanel() {
+  document.getElementById('loginGate').style.display = 'none';
+  document.getElementById('appPanel').classList.add('show');
+  document.getElementById('orgNombre').textContent = currentOrg.nombre;
+  document.getElementById('orgMeta').textContent = `${currentOrg.tipo || 'Organización'} · Vence: ${currentOrg.fecha_vencimiento || 'Sin límite'}`;
+  await cargarUsuarios();
+}
+
+async function cargarUsuarios() {
+  const lista = document.getElementById('userList');
+  lista.innerHTML = '<div class="empty-msg">Cargando...</div>';
+  try {
+    const usuarios = await sbGet('policias', `org_id=eq.${currentOrg.id}&select=*`);
+    const limite = currentOrg.limite_usuarios || 15;
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+
+    let enPrueba = 0, vencidos = 0;
+    usuarios.forEach(u => {
+      const dias = diasRestantes(u.fecha_vencimiento);
+      if (u.tipo_acceso === 'prueba') enPrueba++;
+      if (dias !== null && dias < 0) vencidos++;
+    });
+
+    document.getElementById('statTotal').textContent = usuarios.length;
+    document.getElementById('statLimite').textContent = limite;
+    document.getElementById('statPrueba').textContent = enPrueba;
+    document.getElementById('statVencidos').textContent = vencidos;
+    document.getElementById('limitText').textContent = `${usuarios.length}/${limite}`;
+    document.getElementById('limitFill').style.width = Math.min(100, (usuarios.length/limite)*100) + '%';
+
+    if (!usuarios.length) {
+      lista.innerHTML = '<div class="empty-msg">🙌 Aún no hay usuarios. ¡Creá el primero!</div>';
+      return;
+    }
+
+    lista.innerHTML = usuarios.map(u => {
+      const dias = diasRestantes(u.fecha_vencimiento);
+      let claseItem = 'user-item';
+      let venceHtml = '';
+      let badgeHtml = '';
+
+      if (u.tipo_acceso === 'prueba') {
+        badgeHtml = '<span class="badge badge-prueba">PRUEBA</span>';
+      } else if (dias !== null && dias < 0) {
+        badgeHtml = '<span class="badge badge-vencido">VENCIDO</span>';
+      } else {
+        badgeHtml = '<span class="badge badge-activo">ACTIVO</span>';
+      }
+
+      if (dias !== null) {
+        if (dias < 0) {
+          claseItem += ' vencido';
+          const diasRet = 30 + dias; // días de retención restantes
+          if (diasRet > 0) {
+            venceHtml = `<div class="vence-tag ret">📦 Datos retenidos ${diasRet} días más · Venció ${formatFecha(u.fecha_vencimiento)}</div>`;
+            badgeHtml = '<span class="badge badge-retencion">RETENCIÓN</span>';
+          } else {
+            venceHtml = `<div class="vence-tag bad">❌ Venció ${formatFecha(u.fecha_vencimiento)}</div>`;
+          }
+        } else if (dias <= 7) {
+          claseItem += ' por-vencer';
+          venceHtml = `<div class="vence-tag warn">⚠️ Vence en ${dias} día${dias!==1?'s':''} (${formatFecha(u.fecha_vencimiento)})</div>`;
+        } else {
+          venceHtml = `<div class="vence-tag ok">✅ Vence ${formatFecha(u.fecha_vencimiento)} (${dias} días)</div>`;
+        }
+      }
+
+      const inactivo = u.activa === false;
+
+      return `
+      <div class="${claseItem}">
+        <div class="user-top">
+          <div class="user-info">
+            <div class="user-name" style="opacity:${inactivo?0.5:1}">${u.nombre || '—'} ${badgeHtml} ${inactivo ? '<span style="color:#ff9800;font-size:0.7rem;">INACTIVO</span>' : ''}</div>
+            <div class="user-code">${u.codigo}</div>
+            <div class="user-rango">${u.rango || 'Agente'} · ${u.dependencia || ''}</div>
+            ${venceHtml}
+          </div>
+        </div>
+        <div class="user-actions">
+          <button class="btn-small btn-wa" onclick="compartirWA('${u.codigo}', '${(u.nombre||'').replace(/'/g,"\\'")}', '${u.telefono||''}')">📲 WhatsApp</button>
+          <button class="btn-small btn-renovar" onclick="abrirModalRenovar('${u.id}', '${(u.nombre||'').replace(/'/g,"\\'")}', '${u.codigo}', '${u.fecha_vencimiento||''}', '${u.telefono||''}')">🔄 Renovar</button>
+          <button class="btn-small ${inactivo ? 'btn-toggle-off' : 'btn-toggle-on'}" onclick="toggleUsuario('${u.id}', ${!inactivo})">${inactivo ? '✅ Activar' : '🚫 Dar baja'}</button>
+          <button class="btn-small btn-del" onclick="eliminarUsuario('${u.id}', '${(u.nombre||'').replace(/'/g,"\\'")}')">🗑️</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    lista.innerHTML = `<div class="empty-msg">❌ Error: ${e.message}</div>`;
+  }
+}
+
+/* ── CREAR USUARIO ── */
+function genCodigo() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'PC-';
+  for(let i=0;i<6;i++) code += chars[Math.floor(Math.random()*chars.length)];
+  return code;
+}
+
+let _creandoUsuario = false;
+async function crearUsuario() {
+  if(_creandoUsuario) return;
+  _creandoUsuario = true;
+  const nombre = document.getElementById('newNombre').value.trim();
+  const apellido = document.getElementById('newApellido').value.trim();
+  const rango = document.getElementById('newRango').value;
+  const telefono = document.getElementById('newTelefono').value.trim().replace(/\D/g,'');
+  const btn = document.getElementById('createBtn');
+
+  if (!nombre) { showToast('⚠️ El nombre es obligatorio', '#ef4444'); _creandoUsuario=false; return; }
+
+  const limite = currentOrg.limite_usuarios || 15;
+  const usuarios = await sbGet('policias', `org_id=eq.${currentOrg.id}&select=id`);
+  if (usuarios.length >= limite) {
+    showToast('❌ Límite de usuarios alcanzado', '#ef4444');
+    _creandoUsuario = false; return;
+  }
+
+  // Leer días del input custom si fue modificado
+  const customVal = parseInt(document.getElementById('diasCustom').value);
+  if (customVal && customVal > 0) _diasAcceso = customVal;
+
+  btn.disabled = true;
+  btn.textContent = '⏳ CREANDO...';
+
+  try {
+    const codigo = genCodigo();
+    const nombreCompleto = [nombre, apellido].filter(Boolean).join(' ');
+    const vencimiento = fechaVencimiento(_diasAcceso);
+    const dataRetencionExpira = fechaVencimiento(_diasAcceso + 30);
+
+    await sbPost('policias', {
+      codigo,
+      nombre: nombreCompleto,
+      rango,
+      dependencia: currentOrg.nombre,
+      org_id: currentOrg.id,
+      tipo_acceso: _tipoAcceso,
+      fecha_vencimiento: vencimiento,
+      data_expira: dataRetencionExpira,
+      telefono: telefono || null
+    });
+
+    showToast(`✅ Usuario creado: ${codigo}`, '#06d6a0');
+
+    // Abrir WhatsApp
+    if (telefono) {
+      compartirWAConTel(codigo, nombreCompleto, telefono, vencimiento);
+    } else {
+      compartirWA(codigo, nombreCompleto, '', vencimiento);
+    }
+
+    document.getElementById('newNombre').value = '';
+    document.getElementById('newApellido').value = '';
+    document.getElementById('newTelefono').value = '';
+    document.getElementById('diasCustom').value = '';
+    await cargarUsuarios();
+  } catch(e) {
+    showToast('❌ Error: ' + e.message, '#ef4444');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = _tipoAcceso === 'prueba' ? '🔬 DAR ACCESO DE PRUEBA' : '✅ CONFIRMAR PAGO Y DAR ACCESO';
+    _creandoUsuario = false;
+  }
+}
+
+/* ── MODAL RENOVAR ── */
+function abrirModalRenovar(id, nombre, codigo, fechaVence, telefono) {
+  _modalUserId = id;
+  _modalUserData = { nombre, codigo, fechaVence, telefono };
+  document.getElementById('modalTitle').textContent = `Renovar acceso — ${nombre}`;
+  const dias = diasRestantes(fechaVence);
+  let sub = `Código: ${codigo}`;
+  if (dias !== null) {
+    if (dias < 0) sub += ` · ⚠️ Venció hace ${Math.abs(dias)} días`;
+    else sub += ` · Vence en ${dias} días (${formatFecha(fechaVence)})`;
+  }
+  sub += '\n\n💰 Confirmá el pago ANTES de dar acceso.';
+  document.getElementById('modalSub').textContent = sub;
+  document.getElementById('modalRenovar').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modalRenovar').classList.remove('open');
+  _modalUserId = null;
+  _modalUserData = null;
+}
+
+async function confirmarRenovacion() {
+  if (!_modalUserId) return;
+  const customVal = parseInt(document.getElementById('modalDiasCustom').value);
+  if (customVal && customVal > 0) _modalDias = customVal;
+
+  try {
+    // Calcular nueva fecha desde HOY (no desde vencimiento anterior)
+    const nuevaFecha = fechaVencimiento(_modalDias);
+    const nuevaRetencion = fechaVencimiento(_modalDias + 30);
+    await sbPatch('policias', _modalUserId, {
+      fecha_vencimiento: nuevaFecha,
+      data_expira: nuevaRetencion,
+      tipo_acceso: 'pago',
+      activa: true
+    });
+    showToast(`✅ Acceso renovado por ${_modalDias} días`, '#06d6a0');
+
+    // Abrir WhatsApp con confirmación
+    if (_modalUserData) {
+      const { nombre, codigo, telefono } = _modalUserData;
+      if (telefono) {
+        compartirWAConTel(codigo, nombre, telefono, nuevaFecha);
+      } else {
+        compartirWA(codigo, nombre, '', nuevaFecha);
+      }
+    }
+    cerrarModal();
+    await cargarUsuarios();
+  } catch(e) {
+    showToast('❌ Error: ' + e.message, '#ef4444');
+  }
+}
+
+function reenviarWA() {
+  if (!_modalUserData) return;
+  const { nombre, codigo, fechaVence, telefono } = _modalUserData;
+  if (telefono) {
+    compartirWAConTel(codigo, nombre, telefono, fechaVence);
+  } else {
+    compartirWA(codigo, nombre, '', fechaVence);
+  }
+}
+
+/* ── ELIMINAR / TOGGLE ── */
+async function eliminarUsuario(id, nombre) {
+  if (!confirm(`¿Eliminar a ${nombre}?`)) return;
+  try {
+    await sbDelete('policias', id);
+    showToast('🗑️ Usuario eliminado', '#ff9800');
+    await cargarUsuarios();
+  } catch(e) {
+    showToast('❌ Error: ' + e.message, '#ef4444');
+  }
+}
+
+async function toggleUsuario(id, activar) {
+  try {
+    await sbPatch('policias', id, { activa: activar });
+    showToast(activar ? '✅ Usuario activado' : '🚫 Usuario dado de baja', activar ? '#06d6a0' : '#ff9800');
+    await cargarUsuarios();
+  } catch(e) { showToast('❌ ' + e.message, '#ef4444'); }
+}
+
+/* ── LOGOUT ── */
+function doLogout() {
+  currentOrg = null; currentAdmin = null;
+  document.getElementById('loginGate').style.display = 'flex';
+  document.getElementById('appPanel').classList.remove('show');
+  document.getElementById('orgCodigo').value = '';
+  document.getElementById('orgPass').value = '';
+  document.getElementById('loginErr').textContent = '';
+}
+
+/* ── WHATSAPP ── */
+function compartirWAConTel(codigo, nombre, telefono, fechaVence) {
+  const link = 'https://comunipro2026-oss.github.io/pictoccrisis-policia/';
+  const venceStr = fechaVence ? ` · Válido hasta: ${formatFecha(fechaVence)}` : '';
+  const msg = `🛡️ *PictoCrisis® — Acceso institucional*\n\nHola ${nombre}!\n\nTu código de acceso es:\n*${codigo}*${venceStr}\n\nIngresá desde:\n${link}\n\n_Guardá este mensaje para acceder cuando lo necesites._`;
+  window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function compartirWA(codigo, nombre, telefono, fechaVence) {
+  const link = 'https://comunipro2026-oss.github.io/pictoccrisis-policia/';
+  const venceStr = fechaVence ? ` · Válido hasta: ${formatFecha(fechaVence)}` : '';
+  const msg = `🛡️ *PictoCrisis® — Acceso institucional*\n\nHola ${nombre}!\n\nTu código de acceso es:\n*${codigo}*${venceStr}\n\nIngresá desde:\n${link}\n\n_Guardá este mensaje para acceder cuando lo necesites._`;
+  if (telefono) {
+    window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(msg)}`, '_blank');
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+}
+
+/* ── TOAST ── */
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.color = color || '#f0f0f5';
+  t.classList.add('on');
+  setTimeout(() => t.classList.remove('on'), 2500);
+}
+</script>
+</body>
+</html>
