@@ -31,7 +31,7 @@ jobs:
       
       - name: Subir reporte como artefacto
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: comunicap-reports
           path: scripts/automation/reporte_comunicap_*.json
