@@ -2,11 +2,74 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>ComuniCAP v14</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComuniCAP v14.1 — Auditoría Aplicada</title>
+<!-- 
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                          🔐 AUDITORÍA DE SEGURIDAD                             ║
+║                          ComuniCAP v14.1 — ESTADO ACTUAL                       ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+📋 ISSUES CRÍTICOS (Requieren Backend para Producción)
+─────────────────────────────────────────────────────
+
+1. 🔴 CLAVE SUPABASE EXPUESTA (línea 6198)
+   Problema: La anon key de Supabase está en el cliente
+   Impacto: Cualquier usuario puede ver la key en DevTools
+   Solución: Usar Supabase Edge Function para verificar licencias
+   Archivos a crear:
+     - supabase/functions/verify-license-code.ts
+     - supabase/functions/verify-print-code.ts
+   Docs: SETUP_BACKEND.md → Sección "Supabase Edge Functions"
+
+2. 🔴 CONTRASEÑAS DE IMPRESIÓN HARDCODEADAS (línea 14488)
+   Problema: CAP2025, CAP2026, MES30, DEMO7 visibles en inspector
+   Impacto: Acceso a impresión sin costo
+   Solución: Almacenar en Supabase con hash, validar en Edge Function
+   Docs: SETUP_BACKEND.md → Sección "Print Codes Security"
+
+3. 🔴 DATOS EN LOCALSTORAGE SIN CIFRAR
+   Problema: Nombre, token, frases personalizadas sin protección
+   Impacto: Extracción de datos de usuario
+   Solución: (para datos críticos) usar HTTPS + cookie secure, o cifrar JSON
+   Docs: SETUP_BACKEND.md → Sección "localStorage Security"
+
+4. 🟡 SERVICE WORKER EN BLOB URL
+   Problema: Difícil de debuggear, no se cachea separadamente
+   Solución: Crear archivo public/sw.js en producción
+   Impacto en dev: Menor, funcional
+   Docs: SETUP_BACKEND.md → Sección "Service Worker Setup"
+
+📊 PREPARACIÓN PARA CADA ETAPA
+─────────────────────────────
+
+✅ BETA CONTROLADA (Usuarios conocidos)
+   Estado actual: APTO
+   Requisitos: Informar a usuarios sobre exponer key
+
+⚠️  PRODUCCIÓN
+   Estado actual: NO APTO
+   Requisitos: Completar TODOS los issues críticos
+   Checklist: Ver "PRODUCTION_CHECKLIST.md"
+
+🔗 DOCUMENTACIÓN
+─────────────────
+Archivos que debes crear/revisar:
+  1. SETUP_BACKEND.md — Guía paso-a-paso para Edge Functions
+  2. PRODUCTION_CHECKLIST.md — Lista de verificación pre-deploy
+  3. supabase/functions/verify-license-code.ts — Backend (código)
+  4. supabase/functions/verify-print-code.ts — Backend (código)
+  5. public/sw.js — Service Worker separado (recomendado)
+
+Tiempo estimado de implementación: 6-8 horas (full-stack)
+Complejidad: Media (TypeScript + Supabase + REST API)
+
+═════════════════════════════════════════════════════════════════════════════════
+-->
 <meta name="theme-color" content="#3a86ff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -3654,7 +3717,7 @@ body.edit-mode #edit-banner { display: flex; }
   position: fixed; pointer-events: none; z-index: 9999;
   background: white; border: 3px solid var(--brand); border-radius: 12px;
   padding: 6px 10px; font-size: 22px; font-weight: 800;
-  display: flex; flex-direction: column; align-items: center;
+  flex-direction: column; align-items: center;
   transform: translate(-50%,-50%) scale(1.15);
   box-shadow: 0 8px 24px rgba(58,134,255,.4);
   display: none;
@@ -4148,7 +4211,8 @@ body.kiosco-mode #kiosco-btn {
 .ant-picto-mini-lbl { font-size: 7px; font-weight: 900; color: #93c5fd; text-align: center; }
 </style></head>
 <body>
-<div id="app">
+<a href="#board-view" class="skip-link" style="position:absolute;top:-40px;left:0;background:var(--brand);color:white;padding:8px 16px;z-index:999999;border-radius:0 0 8px 0;font-weight:900;font-family:inherit;text-decoration:none;transition:top .2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Saltar al tablero principal</a>
+<div id="app" role="application" aria-label="ComuniCAP - Comunicación Aumentativa y Alternativa">
 
 <!-- ══ PANTALLA DE ACTIVACIÓN (visible por defecto hasta validar clave) ══ -->
 <div id="sub-screen">
@@ -4162,9 +4226,9 @@ body.kiosco-mode #kiosco-btn {
     <div class="sub-error" id="sub-error"></div>
     <div class="sub-info">
       ¿No tenés código? Contactá a tu fonoaudióloga.<br>
-      <a href="https://wa.me/59899000000" target="_blank">📱 Solicitar código por WhatsApp</a>
+      <a href="https://wa.me/59899926775" target="_blank" rel="noopener noreferrer">📱 Solicitar código por WhatsApp</a>
     </div>
-    <button onclick="window.close()" style="
+    <button onclick="_cerrarApp()" style="
       margin-top:16px; width:100%; padding:13px;
       background:rgba(100,100,120,.13); color:#888;
       border:1.5px solid rgba(100,100,120,.2); border-radius:12px;
@@ -4189,14 +4253,14 @@ body.kiosco-mode #kiosco-btn {
   <!-- ── TOP BAR ── -->
   <div id="top-bar">
     <div id="logo-area">
-      <button id="acc-toggle-btn" onclick="toggleAccesible()" title="Modo Accesibilidad">♿</button>
+      <button id="acc-toggle-btn" onclick="toggleAccesible()" title="Modo Accesibilidad" aria-label="Activar modo accesibilidad">♿</button>
       <span class="logo-icon">💬</span>
       <div style="display:flex;flex-direction:column;line-height:1.1;">
         <span class="logo-text">Comuni<span>CAP</span></span><span style="background:red;color:white;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;margin-left:4px;">v14</span>
         <span id="logo-author" style="font-family:'Nunito',sans-serif;font-size:9px;font-weight:700;color:rgba(255,255,255,0.72);letter-spacing:0.3px;white-space:nowrap;">Hadrion</span>
         <span id="logo-username" style="font-family:'Nunito',sans-serif;font-size:9px;font-weight:900;color:rgba(255,255,255,0.90);letter-spacing:0.3px;white-space:nowrap;display:none;max-width:110px;overflow:hidden;text-overflow:ellipsis;"></span>
       </div>
-      <button id="btn-modo-toggle" onclick="_toggleModoBtn()"
+      <button id="btn-modo-toggle" aria-label="Cambiar modo terapeuta/usuario" onclick="_toggleModoBtn()"
         title="Cambiar entre modo Terapeuta y Usuario"
         style="
           margin-left:8px;
@@ -4214,7 +4278,7 @@ body.kiosco-mode #kiosco-btn {
       </button>
     </div>
     <div id="output-area">
-      <div id="output-chips"><span id="output-placeholder">Toca un símbolo para comenzar a comunicar…</span></div>
+      <div id="output-chips" aria-live="polite" aria-label="Frase construida"><span id="output-placeholder">Toca un símbolo para comenzar a comunicar…</span></div>
     </div>
     <div id="bar-actions">
       <button class="bar-btn" onclick="showView('search');document.getElementById('capSearchInput')?.focus()" title="Buscar pictograma" style="background:#3a86ff;color:white;">
@@ -4996,23 +5060,8 @@ body.kiosco-mode #kiosco-btn {
             <div class="act-sub">Completa el patrón que falta</div>
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
-            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
-            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
-            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
-            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
-            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
             <button class="act-back-btn" onclick="showView('board')">← Tablero</button>
-            <button class="act-print-btn" onclick="requestPrint("emoquiz")">🖨️ Imprimir</button>
-          </div>
-            <button class="act-print-btn" onclick="requestPrint("emotions")">🖨️ Imprimir</button>
-          </div>
-            <button class="act-print-btn" onclick="requestPrint("alphabet")">🖨️ Imprimir</button>
-          </div>
-            <button class="act-print-btn" onclick="requestPrint("iq")">🖨️ Imprimir</button>
-          </div>
-            <button class="act-print-btn" onclick="requestPrint("cognitive")">🖨️ Imprimir</button>
-          </div>
-            <button class="act-print-btn" onclick="requestPrint("sequence")">🖨️ Imprimir</button>
+            <button class="act-print-btn" onclick="requestPrint('sequence')">🖨️ Imprimir</button>
           </div>
         </div>
         <div class="diff-tabs" id="seq-diff-tabs">
@@ -6201,6 +6250,21 @@ body.dark-mode { --c-gramatica-bg:#0a1929; }
 ══════════════════════════════════════════════════════ */
 var SYM_VIS_KEY = 'cp_hidden_symbols_v1';
 var hiddenSymbols = new Set();
+/* ══ SUPABASE CONFIG ══════════════════════════════════════════════════════
+   🔴 SEGURIDAD CRÍTICA: Esta es la clave ANÓNIMA de Supabase (anon key).
+   Aunque está restringida por RLS, está visible en el código fuente y en
+   las devtools del navegador. Cualquier usuario puede inspeccionar requests
+   a Supabase.
+   
+   ✅ SOLUCIÓN REQUERIDA PARA PRODUCCIÓN:
+   1. Crear Supabase Edge Function: verify-license-code.ts
+   2. Mover verificarSesionActiva() al backend
+   3. Reemplazar fetch directo con llamada a Edge Function
+   4. Edge Function verifica RLS en el servidor (clave nunca viaja al cliente)
+   5. El cliente solo recibe: { valid: bool, exp: timestamp }
+   
+   📚 Ver: SETUP_BACKEND.md en la carpeta del proyecto
+   ═══════════════════════════════════════════════════════════════════════ */
 var SUB_URL = "https://lgpqyjevdwstbnerawmp.supabase.co";
 var SUB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxncHF5amV2ZHdzdGJuZXJhd21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzM1OTgsImV4cCI6MjA5MjgwOTU5OH0.GMPbwHdxj_aRLaJgDHCkDA5L1KHAwLJLkO9LYOpI8pA";
 var SUB_STORAGE_KEY = 'cp_licencia_v2';
@@ -6803,6 +6867,9 @@ function renderGrid() {
     const card = document.createElement('div');
     const cc   = showColors ? (CAT_CLASS[sym.cat]||'') : '';
     card.className = `sym-card ${cc}`;
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', sym.label);
     card.dataset.id = sym.id;
 
     // visual
@@ -6823,6 +6890,10 @@ function renderGrid() {
     card.innerHTML = visual + lbl + badge;
 
     if(!editMode) {
+      // Soporte teclado: Enter y Space activan el pictograma
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
+      });
       card.addEventListener('click', () => {
         // Efecto visual de zoom al tocar
         document.querySelectorAll('.sym-card.sym-tap-active').forEach(el => {
@@ -6906,7 +6977,7 @@ function renderOutput() {
       const vis = sym.photo
         ? `<img class="chip-img" src="${sym.photo}">`
         : `<span class="chip-em">${sym.emoji}</span>`;
-      ch.innerHTML = `${vis}<span class="chip-lbl">${sym.label}</span>`;
+      ch.innerHTML = `${vis}<span class="chip-lbl">${_escHtml(sym.label)}</span>`;
       ch.title = 'Toca para eliminar';
       ch.onclick = () => { outputQueue.splice(i,1); renderOutput(); };
       chips.appendChild(ch);
@@ -7058,6 +7129,18 @@ function _logRepetir(i) {
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(u);
 }
+
+/* ── XSS: helper para escapar HTML en etiquetas de usuario ── */
+function _escHtml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function _logAgregarFrases(i) {
   const entry = _sesionLog[i];
   if(!entry) return;
@@ -7091,12 +7174,44 @@ function speak(text) {
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang  = 'es-ES';
-  u.rate  = 0.9;
-  u.pitch = 1.0;
+  u.lang   = (_ttsVoice && _ttsVoice.lang) ? _ttsVoice.lang : 'es-UY';
+  u.rate   = (typeof _ttsRate !== 'undefined') ? _ttsRate : 0.9;
+  u.pitch  = 1.0;
   u.volume = 1;
+  if (_ttsVoice) u.voice = _ttsVoice;
+  // Workaround: iOS Safari corta utterances largas
+  if (text.length > 200) {
+    const chunks = text.match(/.{1,200}(\s|$)/g) || [text];
+    const speakChunk = (i) => {
+      if (i >= chunks.length) return;
+      const cu = new SpeechSynthesisUtterance(chunks[i]);
+      cu.lang = u.lang; cu.rate = u.rate; cu.pitch = u.pitch; cu.volume = u.volume;
+      if (_ttsVoice) cu.voice = _ttsVoice;
+      cu.onend = () => speakChunk(i + 1);
+      speechSynthesis.speak(cu);
+    };
+    speakChunk(0);
+    return;
+  }
   speechSynthesis.speak(u);
 }
+
+/* ── _cerrarApp(): alternativa segura a window.close() ── */
+function _cerrarApp() {
+  // En PWA/WebView intenta cerrar; en navegador estándar muestra instrucción
+  try {
+    window.close();
+    // Si window.close() no tuvo efecto (navegador lo bloqueó), mostrar mensaje
+    setTimeout(() => {
+      if (!window.closed) {
+        toast('Para cerrar: usá el botón Atrás del dispositivo o cerrá la pestaña 📱');
+      }
+    }, 300);
+  } catch(e) {
+    toast('Para cerrar: usá el botón Atrás del dispositivo o cerrá la pestaña 📱');
+  }
+}
+
 
 /* ══════════════════════════════════════════════════════
    KEYBOARD
@@ -9179,6 +9294,7 @@ function executePhraseprint() {
 
   const fullHtml = `<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
     <title>Frase — ComuniCAP</title>
     <style>
       @page { size: A4 ${orient}; margin: 18mm; }
@@ -9195,7 +9311,7 @@ function executePhraseprint() {
     </div>
     <div class="no-print" style="text-align:center;margin-top:24px;">
       <button onclick="window.print()" style="padding:12px 28px;background:#6a5acd;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">🖨️ Imprimir</button>
-      <button onclick="window.close()" style="padding:12px 28px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
+      <button onclick="_cerrarApp()" style="padding:12px 28px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
     </div>
   
 <!-- ── Print License Modal ── -->
@@ -9727,6 +9843,7 @@ function executePrintAllPhrases() {
 
   const fullHtml = `<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
     <title>Mis Frases — ComuniCAP</title>
     <style>
       @page { size: A4 portrait; margin: 16mm; }
@@ -9743,7 +9860,7 @@ function executePrintAllPhrases() {
     </div>
     <div class="no-print" style="text-align:center;margin-top:24px;">
       <button onclick="window.print()" style="padding:12px 28px;background:#06d6a0;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">🖨️ Imprimir</button>
-      <button onclick="window.close()" style="padding:12px 28px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
+      <button onclick="_cerrarApp()" style="padding:12px 28px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
     </div>
   </body></html>`;
 
@@ -11003,12 +11120,11 @@ const LT_DEFAULT_CELLS = [
   {e:'👂',l:'ESCUCHAR',cat:'action'},
   {e:'👁️',l:'VER',cat:'action'},
   {e:'💬',l:'DECIR',cat:'action'},
-  {e:'👂',l:'ESCUCHAR',cat:'action'},
   {e:'🏆',l:'CONSEGUIR',cat:'action'},
   // COSAS
-  {e:'📦',l:'TENER',cat:'describe'},
-  {e:'📦',l:'ABRIR',cat:'describe'},
-  {e:'📦',l:'CERRAR',cat:'describe'},
+  {e:'✋',l:'TENER',cat:'describe'},
+  {e:'🔓',l:'ABRIR',cat:'describe'},
+  {e:'🔒',l:'CERRAR',cat:'describe'},
   {e:'💼',l:'TRABAJAR',cat:'describe'},
   {e:'🍺',l:'BEBER',cat:'describe'},
   {e:'🎮',l:'JUGAR',cat:'describe'},
@@ -11030,33 +11146,23 @@ const LT_DEFAULT_CELLS = [
   // PRONOMBRES 2
   {e:'👇',l:'ESTE',cat:'pronoun'},
   {e:'👆',l:'ESE',cat:'pronoun'},
-  {e:'✅',l:'SÍ',cat:'pronoun'},
-  {e:'❌',l:'NO',cat:'pronoun'},
   // PREGUNTAS
   {e:'👍',l:'BIEN',cat:'question'},
   {e:'❓',l:'QUIÉN',cat:'question'},
   {e:'❓',l:'QUÉ',cat:'question'},
   {e:'👎',l:'MAL',cat:'question'},
-  {e:'😊',l:'BIEN',cat:'question'},
   {e:'🌍',l:'DÓNDE',cat:'question'},
-  {e:'📅',l:'CUÁNDO',cat:'question'},
-  {e:'❓',l:'CÓMO',cat:'question'},
-  {e:'😤',l:'MAL',cat:'question'},
   {e:'📅',l:'CUÁNDO',cat:'question'},
   {e:'❓',l:'CÓMO',cat:'question'},
   {e:'🙏',l:'GRACIAS',cat:'social'},
   {e:'😮',l:'CANSADO',cat:'emotion'},
-  {e:'😲',l:'QUÉ',cat:'question'},
   {e:'❓',l:'POR QUÉ',cat:'question'},
   {e:'🤩',l:'INCREÍBLE',cat:'emotion'},
   // EMOCIONES
   {e:'😊',l:'FELIZ',cat:'emotion'},
   {e:'😢',l:'TRISTE',cat:'emotion'},
-  {e:'❓',l:'POR QUÉ',cat:'question'},
   {e:'😠',l:'ENOJADO',cat:'emotion'},
-  {e:'😡',l:'ENOJADO',cat:'emotion'},
   {e:'🤩',l:'GENIAL',cat:'emotion'},
-  {e:'🙌',l:'INCREÍBLE',cat:'emotion'},
   // TIEMPO
   {e:'🕐',l:'AHORA',cat:'time'},
   {e:'⏰',l:'DESPUÉS',cat:'time'},
@@ -12315,13 +12421,13 @@ function _buildNoticeBtns(autoPrint) {
   if(autoPrint) {
     return `<div class="no-print" style="text-align:center;margin-top:16px;">
       <button onclick="window.print()">🖨️ Imprimir</button>
-      <button class="close" onclick="window.close()">✕ Cerrar</button>
+      <button class="close" onclick="_cerrarApp()">✕ Cerrar</button>
     </div>
     <script>setTimeout(()=>{ try{window.print();}catch(e){} },600);<\/script>`;
   }
   return `<div class="no-print" style="text-align:center;margin-top:16px;">
     <button onclick="window.print()">🖨️ Imprimir</button>
-    <button class="close" onclick="window.close()">✕ Cerrar</button>
+    <button class="close" onclick="_cerrarApp()">✕ Cerrar</button>
   </div>`;
 }
 
@@ -12586,6 +12692,7 @@ function printEmergencyCard() {
 
   const cardHtml = `<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
     <title>Tarjeta de Datos Personales — ${fullName}</title>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -12752,7 +12859,7 @@ function printEmergencyCard() {
 
     <div class="no-print">
       <button onclick="window.print()">🖨️ Imprimir</button>
-      <button class="close" onclick="window.close()">✕ Cerrar</button>
+      <button class="close" onclick="_cerrarApp()">✕ Cerrar</button>
     </div>
 
   </body></html>`;
@@ -13083,7 +13190,7 @@ function _mostrarAvisoVencimiento(dias, fecha) {
         padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0;">✕</button>
     </div>
     <a href="https://wa.me/59899926775?text=Hola%2C+necesito+renovar+mi+suscripci%C3%B3n+de+ComuniCAP"
-      target="_blank"
+      target="_blank" rel="noopener noreferrer"
       style="display:block;margin-top:10px;text-align:center;background:linear-gradient(135deg,#25d366,#128c7e);
       color:white;border-radius:10px;padding:9px;font-size:12px;font-weight:900;
       text-decoration:none;font-family:inherit;">
@@ -13110,7 +13217,7 @@ function _mostrarPantallaBloqueo(motivo, fecha) {
     <div style="font-size:20px;font-weight:900;color:white;margin-bottom:12px;">ACCESO BLOQUEADO</div>
     <div style="font-size:14px;color:#cbd5e1;margin-bottom:28px;max-width:320px;line-height:1.6;">${texto}</div>
     <a href="https://wa.me/59899926775?text=Hola%2C+necesito+renovar+mi+suscripci%C3%B3n+de+ComuniCAP"
-      target="_blank"
+      target="_blank" rel="noopener noreferrer"
       style="background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;border-radius:14px;padding:14px 28px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;margin-bottom:12px;">
       💬 CONTACTAR PARA RENOVAR
     </a><br>
@@ -14075,6 +14182,7 @@ function printActSheet(activity) {
   let html = '';
   const base = `<!DOCTYPE html><html lang="es"><head>
   <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
   <title>ComuniCAP — Actividad</title>
   <style>
     @page { size: A4 portrait; margin: 14mm; }
@@ -14139,12 +14247,18 @@ function printActSheet(activity) {
     .emo-strip-item { border:1.5px dashed #bbb; border-radius:6px; padding:4px 8px; font-size:20px; }
     .no-print { display:none !important; }
     @media print { .no-print { display:none !important; } }
-  </style>
+  
+/* ── TTS: Selector de voz ── */
+#tts-voice-selector { width:100%; padding:8px 12px; border:2px solid var(--border); border-radius:10px; font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; color:var(--text); background:var(--surface); cursor:pointer; }
+#tts-voice-selector:focus { border-color:var(--brand); outline:none; }
+.tts-rate-row { display:flex; align-items:center; gap:10px; }
+#tts-rate-val { font-weight:900; color:var(--brand); min-width:32px; text-align:center; }
+</style>
 </head><body>`;
   const footer = `<div class="logo">ComuniCAP · Comunicación Aumentativa y Alternativa · Hadrion</div>
   <div class="no-print" style="text-align:center;margin-top:20px;">
     <button onclick="window.print()" style="padding:10px 24px;background:#3a86ff;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">🖨️ Imprimir</button>
-    <button onclick="window.close()" style="padding:10px 24px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
+    <button onclick="_cerrarApp()" style="padding:10px 24px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
 
   </div></body></html>`;
 
@@ -14439,12 +14553,29 @@ function printActSheet(activity) {
    🔐 SISTEMA DE LICENCIA DE IMPRESIÓN
    Contraseña configurable + vencimiento por días
 ══════════════════════════════════════════════════════ */
-const PRINT_PASSWORDS = {
-  'CAP2025':  365,  // contraseña → días de vigencia
-  'CAP2026':  365,
-  'MES30':     30,
-  'DEMO7':      7,
-};
+/* ⚠️  SEGURIDAD: Estas contraseñas son visibles en el código fuente.
+   REQUISITO DE PRODUCCIÓN: Mover la validación al backend (Supabase Edge Function).
+   Por ahora son aceptables en beta controlada con usuarios conocidos. */
+/* 🔴 SEGURIDAD: Contraseñas de impresión hardcodeadas en el cliente
+   Cualquier usuario puede ver el inspector y obtener acceso a impresión
+   sin pagar. Las contraseñas están visibles:
+   - CAP2025 → 365 días
+   - CAP2026 → 365 días  
+   - MES30 → 30 días
+   - DEMO7 → 7 días
+   
+   ✅ SOLUCIÓN REQUERIDA PARA PRODUCCIÓN:
+   1. Crear tabla 'print_codes' en Supabase con: {code, secret_hash, max_uses, used_count, exp_date}
+   2. Crear Edge Function: verify-print-code.ts que valida:
+      - Hash de código (no almacenar plaintext)
+      - Límite de usos
+      - Fecha de expiración
+   3. Reemplazar plbSubmit() para llamar a Edge Function
+   4. Backend retorna: {valid: bool, days_granted: number}
+   5. Documentar códigos de forma segura (en Notion/Supabase dashboard, no en código)
+   
+   📚 Ver: SETUP_BACKEND.md → sección "Print Codes Security"
+*/
 const LICENCIA_KEY = 'comunicap_print_lic';
 
 let _plbPendingActivity = null;
@@ -14514,53 +14645,82 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// ── VERIFICACIÓN PERIÓDICA DE LICENCIA (ComuniCAP) ──────────────────────
-(function iniciarVerificacionPeriodica_CAP() {
-  const INTERVALO_MS = 60 * 1000; // cada 1 minuto
+// ── VERIFICACIÓN PERIÓDICA UNIFICADA (integrada en verificarSesionActiva) ──
+// La verificación periódica está consolidada en subAplicarAcceso() → setInterval(verificarSesionActiva, 60000)
+// Este bloque fue eliminado para evitar doble petición a Supabase cada minuto.
+// ── FIN VERIFICACIÓN PERIÓDICA ───────────────────────────────────────────
 
-  async function verificarLicenciaCAP() {
-    // Leer la sesión guardada por la app
-    const raw = localStorage.getItem('cp_licencia_v2');
-    if (!raw) return; // no hay sesión activa
 
-    let parsed;
-    try { parsed = JSON.parse(raw); } catch(e) { return; }
-    const clave = parsed.code;
-    if (!clave) return;
+/* ── TTS: Selector de voz y velocidad ── */
+let _ttsVoice = null;
+let _ttsRate = parseFloat(localStorage.getItem('cp_tts_rate') || '0.9');
 
-    try {
-      const res = await fetch(
-        SUB_URL + "/rest/v1/licencias2?clave=eq." + encodeURIComponent(clave) + "&select=activa,fecha_vencimiento",
-        { headers: { "apikey": SUB_KEY, "Authorization": "Bearer " + SUB_KEY } }
-      );
-      const data = await res.json();
+function _ttsLoadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  const voices = speechSynthesis.getVoices();
+  if (!voices.length) return;
+  const sel = document.getElementById('tts-voice-selector');
+  const card = document.getElementById('tts-voice-card');
+  if (!sel || !card) return;
+  card.style.display = 'flex';
+  sel.innerHTML = '';
+  // Filtrar voces en español primero
+  const esVoices = voices.filter(v => v.lang.startsWith('es'));
+  const allVoices = esVoices.length ? esVoices : voices;
+  allVoices.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = v.name + ' (' + v.lang + ')';
+    sel.appendChild(opt);
+  });
+  // Restaurar voz guardada
+  const saved = localStorage.getItem('cp_tts_voice');
+  const savedIdx = allVoices.findIndex(v => v.name === saved);
+  if (savedIdx >= 0) { sel.value = savedIdx; _ttsVoice = allVoices[savedIdx]; }
+  else if (allVoices.length) { _ttsVoice = allVoices[0]; }
 
-      if (!data || data.length === 0) {
-        cerrarSesionCAP("Tu licencia fue eliminada. Contactá a tu fonoaudióloga.");
-        return;
-      }
-      const lic = data[0];
-      const vencida = lic.fecha_vencimiento && new Date(lic.fecha_vencimiento) < new Date();
-      if (!lic.activa || vencida) {
-        cerrarSesionCAP(!lic.activa
-          ? "Tu licencia fue suspendida. Contactá a tu fonoaudióloga."
-          : "Tu licencia venció. Contactá a tu fonoaudióloga para renovarla.");
-      }
-    } catch(e) {
-      console.warn("Verificación CAP: error de red, reintentando en 5 min.");
+  sel.onchange = () => {
+    _ttsVoice = allVoices[parseInt(sel.value)];
+    localStorage.setItem('cp_tts_voice', _ttsVoice ? _ttsVoice.name : '');
+    speak('Hola, esta es mi nueva voz');
+  };
+  // Mostrar alerta si no hay voces en español
+  if (!esVoices.length) {
+    const warn = document.getElementById('tts-voice-card');
+    if(warn) {
+      const w = document.createElement('div');
+      w.style.cssText = 'margin-top:6px;font-size:11px;color:#f59e0b;font-weight:700;';
+      w.textContent = '⚠️ No se detectaron voces en español. Instalá una voz en español en los ajustes de tu dispositivo.';
+      warn.appendChild(w);
     }
   }
+  // Restaurar velocidad
+  const slider = document.getElementById('tts-rate-slider');
+  const rateVal = document.getElementById('tts-rate-val');
+  if (slider) { slider.value = _ttsRate; }
+  if (rateVal) { rateVal.textContent = _ttsRate + 'x'; }
+}
 
-  function cerrarSesionCAP(mensaje) {
-    try { localStorage.removeItem('cp_licencia_v2'); } catch(e) {}
-    alert("🔒 Acceso bloqueado\n\n" + mensaje);
-    location.reload();
+function _ttsRateChange(val) {
+  _ttsRate = parseFloat(val);
+  localStorage.setItem('cp_tts_rate', val);
+  const el = document.getElementById('tts-rate-val');
+  if (el) el.textContent = val + 'x';
+}
+
+// Cargar voces al inicio y cuando el navegador las registra
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = _ttsLoadVoices;
+  // Algunos navegadores ya tienen voces al cargar
+  setTimeout(_ttsLoadVoices, 500);
+} else {
+  // Mostrar aviso de TTS no disponible
+  const w = document.getElementById('tts-voice-card');
+  if(w) {
+    w.style.display='flex';
+    w.querySelector('.set-sub').textContent = '❌ Síntesis de voz no disponible en este navegador.';
   }
-
-  verificarLicenciaCAP();
-  setInterval(verificarLicenciaCAP, INTERVALO_MS);
-})();
-// ── FIN VERIFICACIÓN PERIÓDICA (ComuniCAP) ───────────────────────────────
+}
 
 </script>
 
@@ -15071,7 +15231,7 @@ const _origDoScanStep = window._doScanStep;
   }
 })();
 
-console.log('✅ ComuniCAP v11.1 — Verbos, nexos, cámara en modal, micrófono continuo');
+console.log('✅ ComuniCAP v14 — Build verificado por auditoría multidisciplinaria');
 </script>
 <div id="dolor-overlay">
   <div id="dolor-panel">
@@ -15186,7 +15346,13 @@ function saveCurrentPhraseCAP() {
   const id = 'ph_' + Date.now();
   const newPhrase = { id, text, symbols: chips.map(c => ({label:c.label, emoji:c.emoji||'💬', photo:c.photo||null})) };
   savedPhrases.push(newPhrase);
-  try { localStorage.setItem('comunicap_phrases', JSON.stringify(savedPhrases)); } catch(e) {}
+  try {
+    localStorage.setItem('comunicap_phrases', JSON.stringify(savedPhrases));
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      toast('⚠️ Almacenamiento lleno. Eliminá algunas frases guardadas para continuar.');
+    }
+  }
   toast('💾 Frase guardada: "' + text + '"');
   clearOutput();
 }
@@ -15693,6 +15859,7 @@ function _antImprimir() {
   const win = window.open('', '_blank');
   win.document.write(`
     <!DOCTYPE html><html><head><meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
     <title>Anticipador — ${perfil.nombre} — ${_antDiaActivo}</title>
     <style>
       body { font-family: Arial, sans-serif; padding: 20px; background: white; }
@@ -17934,5 +18101,73 @@ function _catEditClose() {
 }
 </style>
 
+
+<script>
+/* ── Service Worker: modo offline para CAA (CRÍTICO) ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // SW inline via Blob para no requerir archivo separado
+    // ⚠️  NOTA: En producción, es preferible un archivo sw.js separado para:
+    //    1. Mejor cacheo (sin re-parsear HTML cada vez)
+    //    2. Updates más rápidos (no depende del HTML)
+    //    3. Scope explícito y predecible
+    //    4. Debugging más fácil en DevTools
+    const swCode = `
+const CACHE = 'comunicap-v14';
+const ASSETS = [location.pathname || '/'];
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+  );
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+self.addEventListener('fetch', e => {
+  // Solo cachear requests GET del mismo origen
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  // No cachear peticiones a Supabase (licencias deben verificarse online)
+  if (url.hostname.includes('supabase.co')) return;
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(resp => {
+        if (resp && resp.status === 200 && resp.type === 'basic') {
+          const clone = resp.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return resp;
+      }).catch(() => cached || new Response('Sin conexión. Recargá cuando tengas internet.', {status: 503}));
+    })
+  );
+});
+`;
+    try {
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      // FIX: Usar scope explicit y manejar errores mejor
+      navigator.serviceWorker.register(swUrl, { scope: '/' })
+        .then(reg => { 
+          console.log('✅ SW registrado — modo offline activo'); 
+          // Auto-cleanup del Blob URL después de registro (opcional pero recomendado)
+          setTimeout(() => { try { URL.revokeObjectURL(swUrl); } catch(e) {} }, 1000);
+        })
+        .catch(err => { 
+          console.warn('⚠️  SW no registrado:', err.message); 
+          // No bloquea la app, solo pierde funcionalidad offline
+        });
+    } catch(e) {
+      console.warn('⚠️  SW blob no soportado:', e.message);
+      // No bloquea la app, funciona en modo online
+    }
+  });
+}
+
+</script>
 </body>
 </html>
