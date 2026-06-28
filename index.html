@@ -6692,6 +6692,55 @@ function _loadSymbolsPersisted() {
 }
 _loadSymbolsPersisted();
 
+// ══════════════════════════════════════════════════════
+// SINCRONIZACIÓN CON SUPABASE
+// ══════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://lgpqyjevdwstbnerawmp.supabase.co';
+const SUPABASE_KEY = 'sb_secret_3S5RPLUCLOJWvT2FsodP7w_uTF3Y_A8';
+
+async function _syncToSupabase(data, tableName = 'pictogramas') {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify(data)
+    });
+    if (response.ok) {
+      console.log('✅ Sincronizado con Supabase');
+      return true;
+    } else {
+      console.warn('⚠️ Error al sincronizar:', await response.text());
+      return false;
+    }
+  } catch (err) {
+    console.warn('📡 Sin conexión - guardado local:', err);
+    return false;
+  }
+}
+
+async function _persistSymbolsWithSync() {
+  // Guardar en localStorage
+  _persistSymbols();
+  
+  // Intentar sincronizar con Supabase (opcional, no bloquea)
+  const custom = symbols.filter(s => s.id >= 200 || s.photo || s.video);
+  if (custom.length > 0) {
+    custom.forEach(sym => {
+      _syncToSupabase({
+        etiqueta: sym.label,
+        emoji: sym.emoji,
+        categoria: sym.cat || 'custom',
+        foto: sym.photo || null,
+        activo: true
+      });
+    });
+  }
+}
+
 const CAT_CLASS = {
   pronoun:'cc-pronoun', action:'cc-action', describe:'cc-describe',
   question:'cc-question', place:'cc-place', social:'cc-social',
@@ -7107,7 +7156,59 @@ function kbdConvertToPictos(text) {
 ══════════════════════════════════════════════════════ */
 const ALL_VIEWS = ['board','keyboard','settings','sequence','cognitive','iq','alphabet','food'];
 
+// ══════════════════════════════════════════════════════
+// STACK DE NAVEGACIÓN - Permite ir hacia atrás sin cerrar
+// ══════════════════════════════════════════════════════
+let _navStack = ['board'];
+let _currentViewIndex = 0;
+
+function _pushView(view) {
+  if (_navStack[_currentViewIndex] !== view) {
+    _navStack = _navStack.slice(0, _currentViewIndex + 1);
+    _navStack.push(view);
+    _currentViewIndex++;
+  }
+  localStorage.setItem('_nav_stack', JSON.stringify(_navStack));
+  localStorage.setItem('_nav_index', _currentViewIndex);
+}
+
+function _goBack() {
+  if (_currentViewIndex > 0) {
+    _currentViewIndex--;
+    const prevView = _navStack[_currentViewIndex];
+    showView(prevView);
+  }
+}
+
+function _restoreNavStack() {
+  try {
+    _navStack = JSON.parse(localStorage.getItem('_nav_stack') || '["board"]');
+    _currentViewIndex = parseInt(localStorage.getItem('_nav_index') || '0');
+  } catch(e) {
+    _navStack = ['board'];
+    _currentViewIndex = 0;
+  }
+}
+
+// Restaurar stack al cargar
+_restoreNavStack();
+
+// Interceptar tecla BACK del dispositivo
+document.addEventListener('backbutton', (e) => {
+  e.preventDefault();
+  _goBack();
+}, false);
+
+// También con ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && _currentViewIndex > 0) {
+    _goBack();
+  }
+});
+
 function showView(view) {
+  _pushView(view); // Guardar en stack
+  
   document.getElementById('board-view').style.display    = view==='board'    ? 'block' : 'none';
   document.getElementById('keyboard-view').style.display = view==='keyboard' ? 'flex'  : 'none';
   document.getElementById('settings-view').style.display = view==='settings' ? 'flex'  : 'none';
