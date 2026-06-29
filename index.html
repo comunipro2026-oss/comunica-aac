@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -72,7 +72,6 @@ Complejidad: Media (TypeScript + Supabase + REST API)
 -->
 <meta name="theme-color" content="#3a86ff">
 <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="ComuniCAP">
 <link rel="apple-touch-icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;rect width='100' height='100' rx='20' fill='%233a86ff'/&gt;&lt;text y='.9em' font-size='80' x='10'&gt;💬&lt;/text&gt;&lt;/svg&gt;">
@@ -1653,9 +1652,7 @@ body.edit-mode #board-action-bar .bab-edit {
   border-radius: var(--radius-lg);
   padding: 24px;
   width: 100%;
-  max-width: 420px;
-  max-height: 92vh;
-  overflow-y: auto;
+  max-width: 400px;
   box-shadow: var(--shadow-lg);
   animation: modalIn .2s cubic-bezier(.34,1.56,.64,1);
 }
@@ -1721,47 +1718,13 @@ body.edit-mode #board-action-bar .bab-edit {
 /* emoji picker */
 #emoji-picker-row {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 6px;
-  background: var(--bg);
-  border-radius: 10px;
-  padding: 8px;
-  border: 2px solid var(--border);
-}
-#emoji-search-input {
-  width: 100%;
-  padding: 8px 10px;
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  font-weight: 700;
-  outline: none;
-  box-sizing: border-box;
-}
-#emoji-search-input:focus { border-color: var(--brand); }
-#emoji-cat-tabs {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-#emoji-cat-tabs button {
-  padding: 4px 8px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  font-size: 18px;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: background .1s;
-}
-#emoji-cat-tabs button:hover, #emoji-cat-tabs button.active { background: var(--brand-light); }
-#emoji-grid-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  max-height: 160px;
+  max-height: 120px;
   overflow-y: auto;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 8px;
 }
 .epick {
   font-size: 26px;
@@ -4246,15 +4209,7 @@ body.kiosco-mode #kiosco-btn {
 }
 .ant-picto-mini-em { font-size: 18px; line-height: 1; }
 .ant-picto-mini-lbl { font-size: 7px; font-weight: 900; color: #93c5fd; text-align: center; }
-</style>
-<style>
-.modo-ceo #ceo-toolbar { display:flex !important; }
-.modo-ceo .sym-btn { position:relative; }
-.modo-ceo .sym-btn::after { content:'✏️'; position:absolute; top:2px; right:2px; font-size:10px; opacity:0; transition:.2s; }
-.modo-ceo .sym-btn:hover::after { opacity:1; }
-</style>
-
-</head>
+</style></head>
 <body>
 <a href="#board-view" class="skip-link" style="position:absolute;top:-40px;left:0;background:var(--brand);color:white;padding:8px 16px;z-index:999999;border-radius:0 0 8px 0;font-weight:900;font-family:inherit;text-decoration:none;transition:top .2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Saltar al tablero principal</a>
 <div id="app" role="application" aria-label="ComuniCAP - Comunicación Aumentativa y Alternativa">
@@ -4330,7 +4285,7 @@ body.kiosco-mode #kiosco-btn {
 <span class="bi">🔍</span>
 <span>Buscar</span>
 </button>
-      <button class="bar-btn" onclick="_goBack()" aria-label="Volver atrás" title="Ir atrás" id="nav-back-btn" style="background:#7c3aed;color:white;display:none;">
+      <button class="bar-btn" onclick="_goBack()" title="Ir atrás" id="nav-back-btn" style="background:#7c3aed;color:white;display:none;">
 <span class="bi">⬅️</span>
 <span>Atrás</span>
 </button>
@@ -4558,7 +4513,7 @@ body.kiosco-mode #kiosco-btn {
     </div>
 
     <!-- CONTENT -->
-    <div id="content-area" role="main" aria-label="Área principal de comunicación">
+    <div id="content-area">
       <!-- mobile cat scroll -->
       <div id="cat-scroll">
         <button class="cat-pill active" style="background:var(--brand-light);border-color:var(--brand);color:var(--brand-dark)" onclick="pillCat(this,'todo')">🏠 Todo</button>
@@ -4619,7 +4574,7 @@ body.kiosco-mode #kiosco-btn {
           <div id="kbd-picto-label">📌 FRASE EN PICTOGRAMAS:</div>
           <div id="kbd-picto-strip"></div>
         </div>
-        <button class="modal-btn ghost" style="padding:12px;font-size:14px;" onclick="showView('board')" aria-label="Tablero de comunicación">← Volver al tablero</button>
+        <button class="modal-btn ghost" style="padding:12px;font-size:14px;" onclick="showView('board')">← Volver al tablero</button>
       </div>
 
       
@@ -5791,11 +5746,7 @@ body.kiosco-mode #kiosco-btn {
 
     <div class="modal-field">
       <label>Emoji / Pictograma</label>
-      <div id="emoji-picker-row">
-        <input id="emoji-search-input" type="text" placeholder="🔍 Buscar emoji... (ej: casa, auto, agua)" oninput="emojiSearch(this.value)">
-        <div id="emoji-cat-tabs"></div>
-        <div id="emoji-grid-container"></div>
-      </div>
+      <div id="emoji-picker-row"></div>
     </div>
 
     <div class="modal-field">
@@ -5847,8 +5798,8 @@ body.kiosco-mode #kiosco-btn {
 
     <div class="modal-actions">
       <button class="modal-btn ghost" onclick="closeModal()">Cancelar</button>
-      <button class="modal-btn danger" id="btn-delete" onclick="confirmDelete()" aria-label="Eliminar pictograma">🗑️ Eliminar</button>
-      <button class="modal-btn primary" onclick="saveSymbol()" aria-label="Guardar cambios">💾 Guardar</button>
+      <button class="modal-btn danger" id="btn-delete" onclick="confirmDelete()">🗑️ Eliminar</button>
+      <button class="modal-btn primary" onclick="saveSymbol()">💾 Guardar</button>
     </div>
   </div>
 </div>
@@ -6318,70 +6269,6 @@ var SUB_URL = "https://lgpqyjevdwstbnerawmp.supabase.co";
 
 // ══ FUNCIONES DE API (Sin keys en el cliente) ══
 var SUB_ANON = "sb_publishable_ezLQMGeIrqgHPMyINUGHKw_mTDTNR61";
-
-// ══ USUARIO CEO / HADRION ══
-// El código CEO no está hardcodeado — se detecta por plan='ceo' devuelto desde Supabase
-var _CEO_NAME = 'Hadrion';
-var _isCEO = false;
-
-function _detectarCEO(plan) {
-  _isCEO = (plan === 'ceo');
-  if (_isCEO) {
-    document.body.classList.add('modo-ceo');
-    _capEditHabilitado = true;
-    console.log('🔑 Modo CEO activado');
-  }
-  return _isCEO;
-}
-
-// ══ PICTOGRAMAS GLOBALES (CEO edita → todos ven) ══
-async function ceoGuardarPictogramaGlobal(picto) {
-  // picto: { emoji, etiqueta, categoria, orden }
-  try {
-    const existing = await fetch(
-      SUB_URL + '/rest/v1/pictogramas?app=eq.comunicap&etiqueta=eq.' + encodeURIComponent(picto.etiqueta) + '&categoria=eq.' + picto.categoria,
-      { headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON } }
-    );
-    const data = await existing.json();
-    
-    if (data && data.length > 0) {
-      // UPDATE
-      await fetch(SUB_URL + '/rest/v1/pictogramas?id=eq.' + data[0].id, {
-        method: 'PATCH',
-        headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ emoji: picto.emoji, etiqueta: picto.etiqueta, activo: true })
-      });
-      toast('✅ Pictograma actualizado para todos los usuarios');
-    } else {
-      // INSERT
-      await fetch(SUB_URL + '/rest/v1/pictogramas', {
-        method: 'POST',
-        headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ app: 'comunicap', emoji: picto.emoji, etiqueta: picto.etiqueta, categoria: picto.categoria, orden: picto.orden || 99, activo: true })
-      });
-      toast('✅ Pictograma agregado para todos los usuarios');
-    }
-    await cargarPictogramasSupabase();
-    renderGrid();
-  } catch(e) {
-    toast('❌ Error al guardar: ' + e.message);
-  }
-}
-
-async function ceoEliminarPictogramaGlobal(etiqueta, categoria) {
-  try {
-    await fetch(
-      SUB_URL + '/rest/v1/pictogramas?app=eq.comunicap&etiqueta=eq.' + encodeURIComponent(etiqueta) + '&categoria=eq.' + categoria,
-      { method: 'PATCH', headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ activo: false }) }
-    );
-    toast('✅ Pictograma ocultado para todos los usuarios');
-    await cargarPictogramasSupabase();
-    renderGrid();
-  } catch(e) {
-    toast('❌ Error: ' + e.message);
-  }
-}
 
 async function apiVerifyLicense(code) {
   try {
@@ -7462,22 +7349,6 @@ function _goBack() {
   showView(prev, true); // true = don't push to history
 }
 
-function closeSidebar() {
-  const sidebar = document.getElementById('sidebar') || document.querySelector('.sidebar');
-  if (sidebar) sidebar.classList.remove('open', 'active', 'show');
-}
-
-function _setPinTerapeuta(pin) {
-  if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
-    toast('⚠️ El PIN debe tener 4 dígitos numéricos');
-    return;
-  }
-  localStorage.setItem('cap_pin_terapeuta', pin);
-  toast('✅ PIN guardado correctamente');
-  const input = document.getElementById('pin-terapeuta-config');
-  if (input) input.value = '';
-}
-
 function showView(view, _fromBack) {
   // Track history
   if (!_fromBack) {
@@ -7548,11 +7419,6 @@ function sidebarCat(el, cat) {
 function pillCat(el, cat) {
   // Special case: emergency category opens the panel directly
   if (cat === 'emergency') { openEmergencyPanel(); return; }
-  // In edit mode, open category editor
-  if (editMode && cat !== 'todo' && cat !== 'emergency') {
-    _catEditOpen(cat);
-    return;
-  }
   document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   showView('board');
@@ -7853,7 +7719,6 @@ function openEdit(e, id) {
       _modalHideMedia();
     }
     buildEmojiPicker(sym.photo ? '' : sym.emoji);
-    setTimeout(emojiPickerInit, 30);
     document.getElementById('btn-delete').style.display = '';
     document.getElementById('modal-box').querySelector('.modal-title').textContent = '✏️ Editar pictograma';
   }
@@ -9467,7 +9332,7 @@ function executePhraseprint() {
 
   const fullHtml = `<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
     <title>Frase — ComuniCAP</title>
     <style>
       @page { size: A4 ${orient}; margin: 18mm; }
@@ -9554,200 +9419,6 @@ function executePhraseprint() {
   <!-- Grid de pictogramas -->
   <div class="ant-pm-grid" id="antPmGrid"></div>
 </div>
-
-
-<!-- ══ CEO TOOLBAR ══ -->
-<div id="ceo-toolbar" style="display:none;position:fixed;bottom:70px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:8px;">
-  <button onclick="ceoAgregarPictograma()" 
-    style="background:linear-gradient(135deg,#06d6a0,#0097a7);color:white;border:none;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(6,214,160,.5);" 
-    title="Agregar pictograma global">➕</button>
-  <button onclick="ceoModoEdicion()" 
-    style="background:linear-gradient(135deg,#3a86ff,#7c3aed);color:white;border:none;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(58,134,255,.5);" 
-    title="Editar pictograma global">✏️</button>
-  <div style="background:rgba(0,0,0,.7);color:#06d6a0;font-size:9px;font-weight:900;text-align:center;border-radius:8px;padding:3px 6px;">CEO</div>
-</div>
-
-<script>
-// ══ CEO UI ══
-function _initCEOUI() {
-  if (!_isCEO) return;
-  const toolbar = document.getElementById('ceo-toolbar');
-  if (toolbar) toolbar.style.display = 'flex';
-}
-
-function ceoAgregarPictograma() {
-  const emoji = prompt('Emoji del pictograma:');
-  if (!emoji) return;
-  const etiqueta = prompt('Nombre/etiqueta (ej: AUTO, CASA):');
-  if (!etiqueta) return;
-  const cats = ['action','thing','place','social','time','describe','question','pronoun','health','hygiene','food2','clothes','animales','frutas','verduras'];
-  const cat = prompt('Categoría:
-' + cats.join(', '), 'thing');
-  if (!cat) return;
-  ceoGuardarPictogramaGlobal({ emoji, etiqueta: etiqueta.toLowerCase(), categoria: cat });
-}
-
-function ceoModoEdicion() {
-  if (!editMode) {
-    editMode = true;
-    document.querySelector('.edit-toggle')?.classList.add('active');
-    renderGrid();
-    toast('✏️ Modo edición CEO activado — tocá un pictograma para editarlo globalmente');
-  } else {
-    editMode = false;
-    document.querySelector('.edit-toggle')?.classList.remove('active');
-    renderGrid();
-    toast('✅ Modo edición desactivado');
-  }
-}
-
-// Hook save en modal para CEO - si es CEO guarda globalmente
-const _origSaveModal = window.saveModal;
-window.saveModal = async function(...args) {
-  if (_isCEO && _editingSymbolId != null) {
-    const emoji = document.getElementById('edit-emoji')?.value || '';
-    const label = document.getElementById('edit-label')?.value || '';
-    const cat = document.getElementById('edit-cat')?.value || 'thing';
-    if (emoji && label) {
-      await ceoGuardarPictogramaGlobal({ emoji, etiqueta: label.toLowerCase(), categoria: cat });
-    }
-  }
-  if (typeof _origSaveModal === 'function') _origSaveModal(...args);
-};
-
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(_initCEOUI, 500);
-});
-<\/script>
-
-
-<script>
-// ══ EMOJI PICKER COMPLETO (mismo set que WhatsApp/Unicode) ══
-const EMOJI_CATS = [
-  { id: 'recientes', label: '🕐', name: 'Recientes' },
-  { id: 'caras', label: '😀', name: 'Caras y emociones' },
-  { id: 'personas', label: '👋', name: 'Personas y cuerpo' },
-  { id: 'animales', label: '🐶', name: 'Animales y naturaleza' },
-  { id: 'comida', label: '🍎', name: 'Comida y bebida' },
-  { id: 'viajes', label: '🚗', name: 'Viajes y lugares' },
-  { id: 'actividades', label: '⚽', name: 'Actividades' },
-  { id: 'objetos', label: '💡', name: 'Objetos' },
-  { id: 'simbolos', label: '❤️', name: 'Símbolos' },
-  { id: 'banderas', label: '🏳️', name: 'Banderas' },
-];
-
-const EMOJI_DATA = {
-  caras: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','💫','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾'],
-  personas: ['👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦵','🦶','👂','🦻','👃','🫀','🫁','🧠','🦷','🦴','👀','👁️','👅','👄','💋','🩸','👶','🧒','👦','👧','🧑','👱','👨','🧔','👩','🧓','👴','👵','🙍','🙎','🙅','🙆','💁','🙋','🧏','🙇','🤦','🤷','👮','🕵️','💂','🥷','👷','🤴','👸','👳','👲','🧕','🤵','👰','🤰','🤱','👼','🎅','🤶','🦸','🦹','🧙','🧝','🧛','🧟','🧞','🧜','🧚','🧑‍🤝‍🧑','👫','👬','👭','💑','💏','👨‍👩‍👦','👨‍👩‍👧','👨‍👩‍👧‍👦','👨‍👦','👩‍👦','👨‍👧','👩‍👧'],
-  animales: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦕','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🦣','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐈‍⬛','🪶','🐓','🦃','🦤','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦫','🦦','🦥','🐁','🐀','🐿️','🦔','🐾','🐉','🐲','🌵','🎄','🌲','🌳','🌴','🪵','🌱','🌿','☘️','🍀','🎍','🎋','🍃','🍂','🍁','🍄','🌾','💐','🌷','🌹','🥀','🌺','🌸','🌼','🌻','🌞','🌝','🌛','🌜','🌚','🌕','🌖','🌗','🌘','🌑','🌒','🌓','🌔','🌙','🌟','⭐','🌠','🌌','☀️','🌤️','⛅','🌥️','☁️','🌦️','🌧️','⛈️','🌩️','🌨️','❄️','☃️','⛄','🌬️','💨','💧','💦','🌊','🌈','🔥','🌪️','🌫️','⚡','🌶️','🌍','🌎','🌏'],
-  comida: ['🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶️','🫑','🥑','🧄','🧅','🥔','🍠','🥐','🥯','🍞','🥖','🥨','🧀','🥚','🍳','🧈','🥞','🧇','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🫓','🥪','🥙','🧆','🌮','🌯','🫔','🥗','🥘','🫕','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🦪','🍤','🍙','🍚','🍘','🍥','🥮','🍢','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🧃','🥤','🧋','☕','🍵','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🍾','🧉','🍶','🍴','🥄','🫙','🧂','🥢','🥡'],
-  viajes: ['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🏍️','🛵','🛺','🚲','🛴','🛹','🛼','🚏','🛣️','🛤️','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','⛵','🚤','🛥️','🛳️','⛴️','🚢','✈️','🛩️','🛫','🛬','🪂','💺','🚁','🚟','🚠','🚡','🛰️','🚀','🛸','🛶','⛺','🌁','🌃','🏙️','🌄','🌅','🌆','🌇','🌉','🌌','🎠','🎡','🎢','💈','🎪','🛖','🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏭','🏯','🏰','💒','🗼','🗽','⛪','🕌','⛩️','🕍','🕋','⛲','⛺','🌐','🗺️','🧭','🏔️','⛰️','🌋','🗻','🏕️','🏖️','🏜️','🏝️','🏞️','🏟️','🏛️'],
-  actividades: ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🥍','🏑','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','🤺','⛹️','🤾','🏌️','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚵','🚴','🏆','🥇','🥈','🥉','🏅','🎖️','🏵️','🎗️','🎫','🎟️','🎪','🤹','🎭','🩰','🎨','🎬','🎤','🎧','🎼','🎵','🎶','🎷','🪗','🎸','🎹','🪘','🎺','🎻','🪕','🥁','🪩','🎮','🕹️','🎯','🎳','🎰','🎲','🧩','🪄','🪅','🎭','🎨','🖼️','🎠','🎡','🎢'],
-  objetos: ['👓','🕶️','🥽','🌂','☂️','🧵','🪡','🧶','🪢','👔','👕','👖','🧣','🧤','🧥','🧦','👗','👘','🥻','🩱','🩲','🩳','👙','👚','👛','👜','👝','🎒','🧳','👒','🎩','🧢','⛑️','📿','💄','💍','💎','🔇','🔈','🔉','🔊','📢','📣','📯','🔔','🔕','🎵','🎶','📻','🎷','🎸','🎹','🎺','🎻','🥁','📱','☎️','📞','📟','📠','🔋','🔌','💻','🖥️','🖨️','⌨️','🖱️','🖲️','💽','💾','💿','📀','🎥','🎞️','📽️','📺','📷','📸','📹','📼','🔍','🔎','🕯️','💡','🔦','🏮','🪔','📔','📕','📖','📗','📘','📙','📚','📓','📃','📄','📑','🗒️','🗓️','📊','📈','📉','🗃️','🗄️','🗑️','📦','📫','📪','📬','📭','📮','🗳️','✏️','✒️','🖊️','🖋️','📝','📁','📂','🗂️','📋','🗒️','📌','📍','✂️','🖇️','📎','🔒','🔓','🔏','🔐','🔑','🗝️','🔨','🪓','⛏️','⚒️','🛠️','🗡️','⚔️','🛡️','🔧','🪛','🔩','⚙️','🗜️','🪤','🧲','💊','💉','🩸','🩹','🩺','🌡️','🧬','🦠','🧪','🧫','🧲','🪣','🧹','🧺','🧻','🚽','🚿','🛁','🧴','💈','🔭','🪞','🛋️','🛏️','🚪','🪟','🧸','🪆','🎎','🎍','🎐','🎏','🎑','🧧','🎀','🎁','🎊','🎉','🎈','🎋','✨','🎇','🎆'],
-  simbolos: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','❗','❕','❓','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🛗','🈳','🈹','🚰','🛂','🛃','🛄','🛅','🚹','🚺','🚼','⚧️','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆙','🆒','🆕','🆓','🆖','0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟','🔢','⏏️','▶️','⏸️','⏹️','⏺️','⏭️','⏮️','⏩','⏪','⏫','⏬','◀️','🔼','🔽','➡️','⬅️','⬆️','⬇️','↗️','↘️','↙️','↖️','↕️','↔️','↩️','↪️','⤴️','⤵️','🔀','🔁','🔂','🔄','🔃','✔️','☑️','🔘','🔲','🔳','⬛','⬜','◼️','◻️','◾','◽','▪️','▫️','🟥','🟧','🟨','🟩','🟦','🟪','⚫','⚪','🟫','🔶','🔷','🔸','🔹','🔺','🔻','💠','🔘','🔲'],
-  banderas: ['🏳️','🏴','🏴‍☠️','🚩','🏁','🎌','🏳️‍🌈','🏳️‍⚧️','🇦🇷','🇧🇷','🇧🇴','🇨🇱','🇨🇴','🇨🇷','🇨🇺','🇩🇴','🇪🇨','🇸🇻','🇬🇹','🇭🇳','🇲🇽','🇳🇮','🇵🇦','🇵🇾','🇵🇪','🇵🇷','🇺🇾','🇻🇪','🇺🇸','🇪🇸','🇫🇷','🇩🇪','🇬🇧','🇮🇹','🇯🇵','🇨🇳','🇷🇺','🇨🇦','🇦🇺','🇰🇷','🇵🇹','🇳🇱','🇸🇪','🇳🇴','🇩🇰','🇫🇮','🇨🇭','🇦🇹','🇧🇪','🇵🇱','🇬🇷','🇹🇷','🇮🇱','🇸🇦','🇮🇳','🇵🇰','🇮🇩','🇵🇭','🇻🇳','🇹🇭','🇲🇽'],
-};
-
-// Mapeo de nombres en español para búsqueda
-const EMOJI_NAMES = {
-  '😀':'cara feliz sonrisa','😂':'risa llorando carcajada','😍':'enamorado corazones ojos','😭':'llora triste llorando','😡':'enojado bravo furioso',
-  '👋':'hola mano saludar','👍':'bien aprobado ok pulgar arriba','👎':'mal pulgar abajo','❤️':'corazón amor rojo','🙏':'gracias por favor manos juntas rezar',
-  '🐶':'perro perrito cachorro','🐱':'gato gatito','🐮':'vaca','🐷':'chancho cerdo puerco','🐔':'gallina pollo','🐟':'pez pescado',
-  '🍎':'manzana fruta roja','🍌':'banana plátano','🍕':'pizza','🍔':'hamburguesa','🍦':'helado','🎂':'torta cumpleaños pastel',
-  '🏠':'casa hogar','🚗':'auto carro coche','🚌':'colectivo bus micro','✈️':'avión viajar vuelo','🚂':'tren',
-  '⚽':'pelota fútbol','🎮':'videojuego consola','🎵':'música nota','📱':'celular teléfono','💻':'computadora laptop',
-  '💊':'pastilla medicamento','🏥':'hospital clínica','👨‍⚕️':'doctor médico','💉':'vacuna inyección','🚑':'ambulancia',
-  '🛁':'baño bañera','🚿':'ducha ducharse','🪥':'cepillo dientes','🧼':'jabón lavarse manos','🚽':'inodoro baño',
-  '🍽️':'plato comer comida','🥛':'leche vaso','☕':'café té caliente','💧':'agua tomar beber',
-  '😴':'dormir cansado sueño','🌙':'noche luna','☀️':'sol día mañana','⭐':'estrella',
-  '✏️':'lápiz escribir dibujar','📚':'libro estudiar leer','🏫':'escuela colegio','👨‍🏫':'maestro profesor',
-  '👕':'ropa remera camiseta','👖','pantalón','👗':'vestido','🧥':'abrigo campera',
-  '🎉':'fiesta celebración cumpleaños','🎁':'regalo presente','🎈':'globo',
-};
-
-let _emojiCurrentCat = 'caras';
-let _emojiRecientes = JSON.parse(localStorage.getItem('cap_emoji_recientes') || '[]');
-
-function emojiPickerInit() {
-  // Render category tabs
-  const tabs = document.getElementById('emoji-cat-tabs');
-  if (!tabs) return;
-  tabs.innerHTML = EMOJI_CATS.map(c => 
-    `<button onclick="emojiSetCat('${c.id}')" id="emoji-tab-${c.id}" title="${c.name}">${c.label}</button>`
-  ).join('');
-  emojiSetCat('caras');
-}
-
-function emojiSetCat(catId) {
-  _emojiCurrentCat = catId;
-  document.querySelectorAll('#emoji-cat-tabs button').forEach(b => b.classList.remove('active'));
-  const tab = document.getElementById('emoji-tab-' + catId);
-  if (tab) tab.classList.add('active');
-  
-  let emojis;
-  if (catId === 'recientes') {
-    emojis = _emojiRecientes.length ? _emojiRecientes : ['😀','👋','❤️','🏠','🚗','🍎'];
-  } else {
-    emojis = EMOJI_DATA[catId] || [];
-  }
-  emojiRenderGrid(emojis);
-}
-
-function emojiRenderGrid(emojis) {
-  const grid = document.getElementById('emoji-grid-container');
-  if (!grid) return;
-  const current = document.getElementById('edit-emoji')?.value || '';
-  grid.innerHTML = emojis.map(e => 
-    `<span class="epick${e === current ? ' sel' : ''}" onclick="emojiSelect('${e}')" title="${e}">${e}</span>`
-  ).join('');
-}
-
-function emojiSelect(emoji) {
-  // Set in input field
-  const input = document.getElementById('edit-emoji');
-  if (input) input.value = emoji;
-  // Update preview
-  const prev = document.getElementById('modal-prev-em');
-  if (prev) prev.textContent = emoji;
-  // Update selected state
-  document.querySelectorAll('.epick').forEach(e => e.classList.remove('sel'));
-  event.target.classList.add('sel');
-  // Save to recientes
-  _emojiRecientes = [emoji, ..._emojiRecientes.filter(e => e !== emoji)].slice(0, 24);
-  localStorage.setItem('cap_emoji_recientes', JSON.stringify(_emojiRecientes));
-}
-
-function emojiSearch(q) {
-  if (!q.trim()) { emojiSetCat(_emojiCurrentCat); return; }
-  q = q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  
-  const results = [];
-  // Search by name mapping
-  Object.entries(EMOJI_NAMES).forEach(([emoji, names]) => {
-    if (names.normalize('NFD').replace(/[̀-ͯ]/g,'').includes(q)) results.push(emoji);
-  });
-  // Also search all emojis in all categories
-  Object.values(EMOJI_DATA).forEach(arr => {
-    arr.forEach(e => { if (!results.includes(e) && e.toLowerCase().includes(q)) results.push(e); });
-  });
-  
-  emojiRenderGrid(results.length ? results : ['🔍']);
-}
-
-// Hook into openModal
-const _origOpenModal = window.openModal || function(){};
-window.openModal = function(...args) {
-  if (typeof _origOpenModal === 'function') _origOpenModal(...args);
-  setTimeout(emojiPickerInit, 50);
-};
-
-// Also init when modal opens via editMode click
-document.addEventListener('DOMContentLoaded', function() {
-  // Patch openEditModal if exists
-  const orig = window.openEditModal;
-  if (orig) window.openEditModal = function(...a) { orig(...a); setTimeout(emojiPickerInit, 50); };
-});
-<\/script>
 
 </body></html>`;
 
@@ -10210,7 +9881,7 @@ function executePrintAllPhrases() {
 
   const fullHtml = `<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
     <title>Mis Frases — ComuniCAP</title>
     <style>
       @page { size: A4 portrait; margin: 16mm; }
@@ -11213,15 +10884,13 @@ renderGrid();
 
     const idx = CAT_ORDER.indexOf(currentCat);
     if (dx < 0) {
-      // swipe left → next category (do nothing if at end)
-      if (idx < CAT_ORDER.length - 1) {
-        activateCat(CAT_ORDER[idx + 1]);
-      }
+      // swipe left → next category
+      const next = CAT_ORDER[Math.min(idx + 1, CAT_ORDER.length - 1)];
+      if (next !== currentCat) activateCat(next);
     } else {
-      // swipe right → previous category (do nothing if at start)
-      if (idx > 0) {
-        activateCat(CAT_ORDER[idx - 1]);
-      }
+      // swipe right → previous category
+      const prev = CAT_ORDER[Math.max(idx - 1, 0)];
+      if (prev !== currentCat) activateCat(prev);
     }
   }, { passive: true });
 })();
@@ -13061,18 +12730,10 @@ function printEmergencyCard() {
 
   const cardHtml = `<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
     <title>Tarjeta de Datos Personales — ${fullName}</title>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-
-/* ── Accesibilidad: targets mínimos touch (WCAG 2.2 - 44px) ── */
-button, [role="button"], input[type="button"], input[type="submit"] {
-  min-height: 44px;
-  min-width: 44px;
-}
-/* Excepción para botones muy pequeños decorativos */
-.epick, .pb-epick, .lt-epick { min-height: unset; min-width: unset; }
       body { font-family: 'Arial', sans-serif; background: #f5f5f5; padding: 20px; color: #1a1a1a; }
 
       /* ── TARJETA PRINCIPAL ── */
@@ -13300,8 +12961,6 @@ function subGuardarLocal(data) {
     const token = _genToken();
     const payload = JSON.stringify({ code: data.code, plan: data.plan, expiry: data.expiry||null, ts: Date.now(), token: token, nombre: data.nombre||null, apellido: data.apellido||null });
     localStorage.setItem(SUB_STORAGE_KEY, payload);
-    // Detect CEO
-    _detectarCEO(data.plan);
     // Register session in Supabase
     _registrarSesion(data.code, token, 'https://lgpqyjevdwstbnerawmp.supabase.co', SUB_ANON, 'licencias2', 'clave');
   } catch(e) {}
@@ -13352,8 +13011,7 @@ async function subVerificarRemota(code) {
     if(exp < new Date()) throw new Error("Esta licencia venció el " + lic.fecha_vencimiento.split("-").reverse().join("/"));
   }
 
-  // ── Control de dispositivos (CEO no tiene límite) ──
-  if (lic.plan !== 'ceo') {
+  // ── Control de dispositivos ──
   const deviceId = getDeviceId();
   const dispositivos = Array.isArray(lic.dispositivos) ? lic.dispositivos : [];
   const limite = lic.plan === 'clinica' ? (lic.limite_pacientes || 15) : 1;
@@ -13378,7 +13036,6 @@ async function subVerificarRemota(code) {
       }
     );
   }
-  } // fin if (lic.plan !== 'ceo')
 
   // ── Guardar nombre automáticamente si viene de Supabase ──
   const nombreCompleto = [lic.nombre, lic.apellido].filter(Boolean).join(' ').trim();
@@ -13468,8 +13125,7 @@ async function subActivar() {
 function subAplicarAcceso(lic) {
   subActiva = true;
   subPlan   = lic.plan;
-  // Detectar CEO por plan
-  _detectarCEO(lic.plan);
+  // Mostrar onboarding si es primer uso
   setTimeout(_initOnboarding, 800);
   // Inicializar modo terapeuta
   setTimeout(_initModoTerapeuta, 900);
@@ -13730,10 +13386,8 @@ async function subRevalidar(local) {
 
   const local = subCargarLocal();
   if(local && local.code) {
-    // Re-detect CEO on startup
-    _detectarCEO(local.plan);
     // Verificar vencimiento local antes de mostrar
-    if(local.expiry && local.plan !== 'ceo') {
+    if(local.expiry) {
       const exp = new Date(local.expiry + "T23:59:59");
       if(exp < new Date()) {
         // Venció localmente, mostrar pantalla de activación
@@ -13741,8 +13395,6 @@ async function subRevalidar(local) {
         document.getElementById('sub-screen').classList.remove('hidden');
         return;
       }
-    } else if (local.plan === 'ceo') {
-      // CEO nunca vence
     }
     // Sesión válida: ocultar login y activar
     document.getElementById('sub-screen').classList.add('hidden');
@@ -14561,7 +14213,7 @@ function printActSheet(activity) {
   let html = '';
   const base = `<!DOCTYPE html><html lang="es"><head>
   <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
   <title>ComuniCAP — Actividad</title>
   <style>
     @page { size: A4 portrait; margin: 14mm; }
@@ -15805,8 +15457,7 @@ function camOpen(mode) {
   overlay.style.display = 'flex';
   
   // Start camera
-  const facingMode = window._camFacing || 'environment';
-  navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false })
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
     .then(stream => {
       _camStream = stream;
       const video = document.getElementById('cam-preview');
@@ -15833,20 +15484,6 @@ function camClose() {
   document.getElementById('cam-recording-indicator').style.display = 'none';
   document.getElementById('cam-timer').style.display = 'none';
   _camRecording = false;
-}
-
-function camFlip() {
-  window._camFacing = (window._camFacing === 'environment') ? 'user' : 'environment';
-  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: window._camFacing }, audio: false })
-    .then(stream => {
-      _camStream = stream;
-      document.getElementById('cam-preview').srcObject = stream;
-    })
-    .catch(() => {
-      window._camFacing = window._camFacing === 'environment' ? 'user' : 'environment';
-      toast('⚠️ No se puede cambiar de cámara');
-    });
 }
 
 function camCapture() {
@@ -16257,7 +15894,7 @@ function _antImprimir() {
   const win = window.open('', '_blank');
   win.document.write(`
     <!DOCTYPE html><html><head><meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
     <title>Anticipador — ${perfil.nombre} — ${_antDiaActivo}</title>
     <style>
       body { font-family: Arial, sans-serif; padding: 20px; background: white; }
@@ -16376,13 +16013,22 @@ async function _antGenerarIA() {
   result.style.display = 'none';
 
   try {
-    const local = subCargarLocal();
-    const resp = await fetch('https://lgpqyjevdwstbnerawmp.supabase.co/functions/v1/anticipador-ia', {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUB_ANON },
-      body: JSON.stringify({ actividad: texto, nombre_usuario: local?.nombre || '' })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        system: `Sos un asistente para fonoaudiólogos que trabajan con usuarios de CAA (comunicación aumentativa y alternativa) en Uruguay. 
+Tu tarea: dado el nombre de una actividad en español, devolvé SOLO un JSON válido con esta estructura exacta, sin texto adicional, sin bloques de código:
+{"emojis":["🎨","✏️","🖍️"],"pictogramas":["pintura","lápiz","crayón"],"sugerencia":"Frase de anticipación breve para el alumno (máx 12 palabras)"}
+- emojis: array de 3 emojis que representen visualmente la actividad
+- pictogramas: array de 3 palabras clave simples relacionadas (en español, sin tildes en la respuesta JSON)
+- sugerencia: frase motivadora corta en vos rioplatense para anticipar la actividad al alumno`,
+        messages: [{ role: 'user', content: `Actividad: ${texto}` }]
+      })
     });
-        const data = await resp.json();
+    const data = await resp.json();
     const raw = (data.content || []).map(b => b.text || '').join('');
     let parsed;
     try {
@@ -16443,7 +16089,7 @@ const _BETA = {
   MAX_USERS: 10,
   DAYS: 20,
   SB_URL: "https://lgpqyjevdwstbnerawmp.supabase.co",
-  SB_KEY: "sb_publishable_ezLQMGeIrqgHPMyINUGHKw_mTDTNR61",
+  SB_KEY: SUB_ANON,
   ADMIN_EMAIL: "comunipro12@gmail.com",
   EMAILJS_SVC: "service_65f8zaq",
   EMAILJS_TPL: "template_iqdmr15",
@@ -17456,7 +17102,7 @@ function antPictoGuardar() {
     <div id="cam-recording-indicator" style="display:none;text-align:center;color:#ef4444;font-weight:900;font-size:13px;margin-top:8px;">🔴 GRABANDO...</div>
     <div id="cam-timer" style="display:none;text-align:center;color:#ffd166;font-weight:900;font-size:20px;margin:4px 0;">0s</div>
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <button id="cam-capture-btn" onclick="camCapture()" aria-label="Sacar foto"
+      <button id="cam-capture-btn" onclick="camCapture()"
         style="flex:1;padding:14px;background:linear-gradient(135deg,#3a86ff,#7c3aed);color:white;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;">
         📷 SACAR FOTO
       </button>
@@ -17464,12 +17110,8 @@ function antPictoGuardar() {
         style="flex:1;padding:14px;background:linear-gradient(135deg,#ef4444,#b91c1c);color:white;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;">
         🎬 GRABAR
       </button>
-      <button onclick="camFlip()" aria-label="Cambiar cámara frontal o trasera"
-        style="padding:14px;background:rgba(255,255,255,.15);color:white;border:none;border-radius:12px;font-size:20px;cursor:pointer;" title="Cambiar cámara">
-        🔄
-      </button>
     </div>
-    <button onclick="camClose()" aria-label="Cerrar cámara"
+    <button onclick="camClose()"
       style="width:100%;margin-top:8px;padding:12px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;">
       ✕ Cancelar
     </button>
@@ -18496,24 +18138,71 @@ function _catEditClose() {
 
 
 <script>
-/* ── Service Worker: modo offline para CAA ── */
-// El SW via blob no funciona en GitHub Pages (restricción de seguridad)
-// La app funciona perfectamente sin SW (modo online)
-// Para activar SW offline completo, crear archivo sw.js separado en el repo
-if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.href.includes('blob:')) {
+/* ── Service Worker: modo offline para CAA (CRÍTICO) ── */
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Solo intentar si hay un sw.js real disponible
-    fetch('/sw.js', { method: 'HEAD' })
-      .then(r => {
-        if (r.ok) {
-          navigator.serviceWorker.register('/sw.js', { scope: '/' })
-            .then(() => console.log('✅ SW offline activo'))
-            .catch(() => {});
+    // SW inline via Blob para no requerir archivo separado
+    // ⚠️  NOTA: En producción, es preferible un archivo sw.js separado para:
+    //    1. Mejor cacheo (sin re-parsear HTML cada vez)
+    //    2. Updates más rápidos (no depende del HTML)
+    //    3. Scope explícito y predecible
+    //    4. Debugging más fácil en DevTools
+    const swCode = `
+const CACHE = 'comunicap-v14';
+const ASSETS = [location.pathname || '/'];
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+  );
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+self.addEventListener('fetch', e => {
+  // Solo cachear requests GET del mismo origen
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  // No cachear peticiones a Supabase (licencias deben verificarse online)
+  if (url.hostname.includes('supabase.co')) return;
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(resp => {
+        if (resp && resp.status === 200 && resp.type === 'basic') {
+          const clone = resp.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
         }
-      })
-      .catch(() => {});
+        return resp;
+      }).catch(() => cached || new Response('Sin conexión. Recargá cuando tengas internet.', {status: 503}));
+    })
+  );
+});
+`;
+    try {
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      // FIX: Usar scope explicit y manejar errores mejor
+      navigator.serviceWorker.register(swUrl, { scope: '/' })
+        .then(reg => { 
+          console.log('✅ SW registrado — modo offline activo'); 
+          // Auto-cleanup del Blob URL después de registro (opcional pero recomendado)
+          setTimeout(() => { try { URL.revokeObjectURL(swUrl); } catch(e) {} }, 1000);
+        })
+        .catch(err => { 
+          console.warn('⚠️  SW no registrado:', err.message); 
+          // No bloquea la app, solo pierde funcionalidad offline
+        });
+    } catch(e) {
+      console.warn('⚠️  SW blob no soportado:', e.message);
+      // No bloquea la app, funciona en modo online
+    }
   });
 }
+
 </script>
 </body>
 </html>
