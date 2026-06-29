@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -72,6 +72,7 @@ Complejidad: Media (TypeScript + Supabase + REST API)
 -->
 <meta name="theme-color" content="#3a86ff">
 <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="ComuniCAP">
 <link rel="apple-touch-icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;rect width='100' height='100' rx='20' fill='%233a86ff'/&gt;&lt;text y='.9em' font-size='80' x='10'&gt;💬&lt;/text&gt;&lt;/svg&gt;">
@@ -1652,7 +1653,9 @@ body.edit-mode #board-action-bar .bab-edit {
   border-radius: var(--radius-lg);
   padding: 24px;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+  max-height: 92vh;
+  overflow-y: auto;
   box-shadow: var(--shadow-lg);
   animation: modalIn .2s cubic-bezier(.34,1.56,.64,1);
 }
@@ -1718,13 +1721,47 @@ body.edit-mode #board-action-bar .bab-edit {
 /* emoji picker */
 #emoji-picker-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 6px;
-  max-height: 120px;
-  overflow-y: auto;
   background: var(--bg);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 8px;
+  border: 2px solid var(--border);
+}
+#emoji-search-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 700;
+  outline: none;
+  box-sizing: border-box;
+}
+#emoji-search-input:focus { border-color: var(--brand); }
+#emoji-cat-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+#emoji-cat-tabs button {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background .1s;
+}
+#emoji-cat-tabs button:hover, #emoji-cat-tabs button.active { background: var(--brand-light); }
+#emoji-grid-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
 }
 .epick {
   font-size: 26px;
@@ -4209,7 +4246,15 @@ body.kiosco-mode #kiosco-btn {
 }
 .ant-picto-mini-em { font-size: 18px; line-height: 1; }
 .ant-picto-mini-lbl { font-size: 7px; font-weight: 900; color: #93c5fd; text-align: center; }
-</style></head>
+</style>
+<style>
+.modo-ceo #ceo-toolbar { display:flex !important; }
+.modo-ceo .sym-btn { position:relative; }
+.modo-ceo .sym-btn::after { content:'✏️'; position:absolute; top:2px; right:2px; font-size:10px; opacity:0; transition:.2s; }
+.modo-ceo .sym-btn:hover::after { opacity:1; }
+</style>
+
+</head>
 <body>
 <a href="#board-view" class="skip-link" style="position:absolute;top:-40px;left:0;background:var(--brand);color:white;padding:8px 16px;z-index:999999;border-radius:0 0 8px 0;font-weight:900;font-family:inherit;text-decoration:none;transition:top .2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Saltar al tablero principal</a>
 <div id="app" role="application" aria-label="ComuniCAP - Comunicación Aumentativa y Alternativa">
@@ -4285,7 +4330,7 @@ body.kiosco-mode #kiosco-btn {
 <span class="bi">🔍</span>
 <span>Buscar</span>
 </button>
-      <button class="bar-btn" onclick="_goBack()" title="Ir atrás" id="nav-back-btn" style="background:#7c3aed;color:white;display:none;">
+      <button class="bar-btn" onclick="_goBack()" aria-label="Volver atrás" title="Ir atrás" id="nav-back-btn" style="background:#7c3aed;color:white;display:none;">
 <span class="bi">⬅️</span>
 <span>Atrás</span>
 </button>
@@ -4513,7 +4558,7 @@ body.kiosco-mode #kiosco-btn {
     </div>
 
     <!-- CONTENT -->
-    <div id="content-area">
+    <div id="content-area" role="main" aria-label="Área principal de comunicación">
       <!-- mobile cat scroll -->
       <div id="cat-scroll">
         <button class="cat-pill active" style="background:var(--brand-light);border-color:var(--brand);color:var(--brand-dark)" onclick="pillCat(this,'todo')">🏠 Todo</button>
@@ -4574,7 +4619,7 @@ body.kiosco-mode #kiosco-btn {
           <div id="kbd-picto-label">📌 FRASE EN PICTOGRAMAS:</div>
           <div id="kbd-picto-strip"></div>
         </div>
-        <button class="modal-btn ghost" style="padding:12px;font-size:14px;" onclick="showView('board')">← Volver al tablero</button>
+        <button class="modal-btn ghost" style="padding:12px;font-size:14px;" onclick="showView('board')" aria-label="Tablero de comunicación">← Volver al tablero</button>
       </div>
 
       
@@ -5746,7 +5791,11 @@ body.kiosco-mode #kiosco-btn {
 
     <div class="modal-field">
       <label>Emoji / Pictograma</label>
-      <div id="emoji-picker-row"></div>
+      <div id="emoji-picker-row">
+        <input id="emoji-search-input" type="text" placeholder="🔍 Buscar emoji... (ej: casa, auto, agua)" oninput="emojiSearch(this.value)">
+        <div id="emoji-cat-tabs"></div>
+        <div id="emoji-grid-container"></div>
+      </div>
     </div>
 
     <div class="modal-field">
@@ -5798,8 +5847,8 @@ body.kiosco-mode #kiosco-btn {
 
     <div class="modal-actions">
       <button class="modal-btn ghost" onclick="closeModal()">Cancelar</button>
-      <button class="modal-btn danger" id="btn-delete" onclick="confirmDelete()">🗑️ Eliminar</button>
-      <button class="modal-btn primary" onclick="saveSymbol()">💾 Guardar</button>
+      <button class="modal-btn danger" id="btn-delete" onclick="confirmDelete()" aria-label="Eliminar pictograma">🗑️ Eliminar</button>
+      <button class="modal-btn primary" onclick="saveSymbol()" aria-label="Guardar cambios">💾 Guardar</button>
     </div>
   </div>
 </div>
@@ -6269,6 +6318,70 @@ var SUB_URL = "https://lgpqyjevdwstbnerawmp.supabase.co";
 
 // ══ FUNCIONES DE API (Sin keys en el cliente) ══
 var SUB_ANON = "sb_publishable_ezLQMGeIrqgHPMyINUGHKw_mTDTNR61";
+
+// ══ USUARIO CEO / HADRION ══
+// El código CEO no está hardcodeado — se detecta por plan='ceo' devuelto desde Supabase
+var _CEO_NAME = 'Hadrion';
+var _isCEO = false;
+
+function _detectarCEO(plan) {
+  _isCEO = (plan === 'ceo');
+  if (_isCEO) {
+    document.body.classList.add('modo-ceo');
+    _capEditHabilitado = true;
+    console.log('🔑 Modo CEO activado');
+  }
+  return _isCEO;
+}
+
+// ══ PICTOGRAMAS GLOBALES (CEO edita → todos ven) ══
+async function ceoGuardarPictogramaGlobal(picto) {
+  // picto: { emoji, etiqueta, categoria, orden }
+  try {
+    const existing = await fetch(
+      SUB_URL + '/rest/v1/pictogramas?app=eq.comunicap&etiqueta=eq.' + encodeURIComponent(picto.etiqueta) + '&categoria=eq.' + picto.categoria,
+      { headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON } }
+    );
+    const data = await existing.json();
+    
+    if (data && data.length > 0) {
+      // UPDATE
+      await fetch(SUB_URL + '/rest/v1/pictogramas?id=eq.' + data[0].id, {
+        method: 'PATCH',
+        headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ emoji: picto.emoji, etiqueta: picto.etiqueta, activo: true })
+      });
+      toast('✅ Pictograma actualizado para todos los usuarios');
+    } else {
+      // INSERT
+      await fetch(SUB_URL + '/rest/v1/pictogramas', {
+        method: 'POST',
+        headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ app: 'comunicap', emoji: picto.emoji, etiqueta: picto.etiqueta, categoria: picto.categoria, orden: picto.orden || 99, activo: true })
+      });
+      toast('✅ Pictograma agregado para todos los usuarios');
+    }
+    await cargarPictogramasSupabase();
+    renderGrid();
+  } catch(e) {
+    toast('❌ Error al guardar: ' + e.message);
+  }
+}
+
+async function ceoEliminarPictogramaGlobal(etiqueta, categoria) {
+  try {
+    await fetch(
+      SUB_URL + '/rest/v1/pictogramas?app=eq.comunicap&etiqueta=eq.' + encodeURIComponent(etiqueta) + '&categoria=eq.' + categoria,
+      { method: 'PATCH', headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ activo: false }) }
+    );
+    toast('✅ Pictograma ocultado para todos los usuarios');
+    await cargarPictogramasSupabase();
+    renderGrid();
+  } catch(e) {
+    toast('❌ Error: ' + e.message);
+  }
+}
 
 async function apiVerifyLicense(code) {
   try {
@@ -6864,7 +6977,7 @@ const CAT_CLASS = {
 ══════════════════════════════════════════════════════ */
 function renderGrid() {
   const grid = document.getElementById('sym-grid');
-  grid.innerHTML = '';
+  grid.textContent = '';
 
   // Inject a category print button for printable pictogram categories
   const PRINTABLE_CATS = {
@@ -6894,7 +7007,7 @@ function renderGrid() {
       catPrintBar.style.display = 'block';
     } else {
       catPrintBar.style.display = 'none';
-      catPrintBar.innerHTML = '';
+      catPrintBar.textContent = '';
     }
   }
 
@@ -6913,7 +7026,7 @@ function renderGrid() {
     // visual
     let visual = '';
     if(sym.photo) {
-      visual = `<img class="sym-photo" src="${sym.photo}" alt="${sym.label}">`;
+      visual = `<img class="sym-photo" src="${sym.photo}" alt="${_escHtml(sym.label)}">`;
     } else if(sym._numVal !== undefined) {
       // Number pictogram: big digit + dots
       const n = sym._numVal;
@@ -6922,7 +7035,7 @@ function renderGrid() {
     } else {
       visual = `<span class="sym-em">${sym.emoji}</span>`;
     }
-    const lbl = `<span class="sym-lbl" ${showLabels?'':'style="display:none"'}>${sym.label}</span>`;
+    const lbl = `<span class="sym-lbl" ${showLabels?'':'style="display:none"'}>${_escHtml(sym.label)}</span>`;
     const badge = `<div class="edit-badge" onclick="openEdit(event,${sym.id})">✏️</div>`;
 
     card.innerHTML = visual + lbl + badge;
@@ -7005,7 +7118,7 @@ function addSymbol(sym) {
 function renderOutput() {
   const chips = document.getElementById('output-chips');
   const ph    = document.getElementById('output-placeholder');
-  chips.innerHTML = '';
+  chips.textContent = '';
   if(!outputQueue.length) {
     chips.appendChild(ph);
   } else {
@@ -7295,14 +7408,14 @@ function kbdConvertToPictos(text) {
   }
 
   const strip = document.getElementById('kbd-picto-strip');
-  strip.innerHTML = '';
+  strip.textContent = '';
   matched.forEach(sym => {
     const chip = document.createElement('div');
     chip.className = 'kbd-pic-chip';
     const vis = sym.photo
       ? `<img class="kpc-em" src="${sym.photo}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;">`
       : `<span class="kpc-em">${sym.emoji}</span>`;
-    chip.innerHTML = vis + `<span class="kpc-lbl">${sym.label}</span>`;
+    chip.innerHTML = vis + `<span class="kpc-lbl">${_escHtml(sym.label)}</span>`;
     strip.appendChild(chip);
   });
 
@@ -7347,6 +7460,22 @@ function _goBack() {
   _navHistory.pop(); // remove current
   const prev = _navHistory[_navHistory.length - 1];
   showView(prev, true); // true = don't push to history
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar') || document.querySelector('.sidebar');
+  if (sidebar) sidebar.classList.remove('open', 'active', 'show');
+}
+
+function _setPinTerapeuta(pin) {
+  if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+    toast('⚠️ El PIN debe tener 4 dígitos numéricos');
+    return;
+  }
+  localStorage.setItem('cap_pin_terapeuta', pin);
+  toast('✅ PIN guardado correctamente');
+  const input = document.getElementById('pin-terapeuta-config');
+  if (input) input.value = '';
 }
 
 function showView(view, _fromBack) {
@@ -7419,6 +7548,11 @@ function sidebarCat(el, cat) {
 function pillCat(el, cat) {
   // Special case: emergency category opens the panel directly
   if (cat === 'emergency') { openEmergencyPanel(); return; }
+  // In edit mode, open category editor
+  if (editMode && cat !== 'todo' && cat !== 'emergency') {
+    _catEditOpen(cat);
+    return;
+  }
   document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   showView('board');
@@ -7490,7 +7624,7 @@ function enviarSolicitudWACAP() {
 ══════════════════════════════════════════════════════ */
 function buildEmojiPicker(selected) {
   const row = document.getElementById('emoji-picker-row');
-  row.innerHTML = '';
+  row.textContent = '';
   EMOJI_POOL.forEach(em => {
     const span = document.createElement('span');
     span.className = 'epick' + (em === selected ? ' sel' : '');
@@ -7719,6 +7853,7 @@ function openEdit(e, id) {
       _modalHideMedia();
     }
     buildEmojiPicker(sym.photo ? '' : sym.emoji);
+    setTimeout(emojiPickerInit, 30);
     document.getElementById('btn-delete').style.display = '';
     document.getElementById('modal-box').querySelector('.modal-title').textContent = '✏️ Editar pictograma';
   }
@@ -8019,7 +8154,7 @@ function renderSeqEx() {
 
   // Sequence row
   const row = document.getElementById('seq-row');
-  row.innerHTML = '';
+  row.textContent = '';
   ex.seq.forEach((em,i) => {
     if(i>0){ const ar=document.createElement('span'); ar.className='seq-arrow'; ar.textContent='→'; row.appendChild(ar); }
     const cell = document.createElement('div');
@@ -8031,7 +8166,7 @@ function renderSeqEx() {
   // Shuffle options
   const opts = [...ex.opts].sort(()=>Math.random()-.5);
   const grid = document.getElementById('seq-ans');
-  grid.innerHTML = '';
+  grid.textContent = '';
   opts.forEach(opt => {
     const btn = document.createElement('button');
     btn.className='ans-btn'; btn.textContent=opt;
@@ -8230,7 +8365,7 @@ function renderCogEx() {
   document.getElementById('cog-next').className = 'ex-next-btn';
   document.getElementById('cog-num').textContent = cogIdx+1;
 
-  body.innerHTML = '';
+  body.textContent = '';
 
   if(cogType==='memory') {
     q.textContent = '👀 MEMORIZA ESTOS EMOJIS:';
@@ -8276,7 +8411,7 @@ function renderCogEx() {
         b.onclick = () => checkCogAns(opt, localEx.answer, b);
         grid.appendChild(b);
       });
-      qArea.innerHTML = '';
+      qArea.textContent = '';
       qArea.appendChild(grid);
       qArea.style.display = 'flex';
     };
@@ -8364,7 +8499,7 @@ function renderIqEx() {
   document.getElementById('iq-num').textContent=iqIdx+1;
 
   q.textContent=ex.q;
-  body.innerHTML='';
+  body.textContent = '';
 
   if(ex.items) {
     const row=document.createElement('div');
@@ -8457,7 +8592,7 @@ function buildFoodGrid() {
   FOOD_ITEMS.forEach(([em, label]) => {
     const card=document.createElement('div');
     card.className='food-card';
-    card.innerHTML=`<div class="f-em">${em}</div><div class="f-lbl">${label}</div>`;
+    card.innerHTML = `<div class="f-em">${em}</div><div class="f-lbl">${_escHtml(label)}</div>`;
     card.onclick=()=>{ speak(label); toast('🔊 '+label); };
     grid.appendChild(card);
   });
@@ -8913,7 +9048,16 @@ function clearEmotionPage(idx) {
 ══════════════════════════════════════════════════════ */
 let builderQueue = [];   // [{label, emoji, photo}]
 let builderCat = 'todo';
-let savedPhrases = JSON.parse(localStorage.getItem('comunicap_phrases') || '[]');
+try {
+  savedPhrases = JSON.parse(localStorage.getItem('comunicap_phrases') || '[]');
+  // Validar tipo
+  if (!Array.isArray(savedPhrases) && typeof savedPhrases === 'object' && savedPhrases === null) {
+    savedPhrases = [];
+  }
+} catch(e) {
+  console.warn('⚠️ localStorage corrupto: comunicap_phrases');
+  savedPhrases = [];
+}
 
 function builderConvertText() {
   const input = document.getElementById('builder-text-input');
@@ -9003,7 +9147,7 @@ function builderBuildCatTabs() {
 
 function builderRenderGrid() {
   const grid = document.getElementById('builder-sym-grid');
-  grid.innerHTML = '';
+  grid.textContent = '';
   const list = builderCat === 'todo' ? symbols : symbols.filter(s => s.cat === builderCat);
   list.forEach(sym => {
     const card = document.createElement('div');
@@ -9011,13 +9155,13 @@ function builderRenderGrid() {
     card.className = `bld-sym-card ${cc}`;
     let vis;
     if(sym.photo) {
-      vis = `<img class="bs-img" src="${sym.photo}" alt="${sym.label}">`;
+      vis = `<img class="bs-img" src="${sym.photo}" alt="${_escHtml(sym.label)}">`;
     } else if(sym._numVal !== undefined) {
       vis = `<div class="num-digit" style="font-size:18px">${sym._numVal}</div><div class="num-dots" style="width:36px;height:36px">${buildDots(sym._numVal)}</div>`;
     } else {
       vis = `<span class="bs-em">${sym.emoji}</span>`;
     }
-    card.innerHTML = vis + `<span class="bs-lbl">${sym.label}</span>`;
+    card.innerHTML = vis + `<span class="bs-lbl">${_escHtml(sym.label)}</span>`;
     card.onclick = () => {
       builderQueue.push({label: sym.label, emoji: sym.emoji, photo: sym.photo||null});
       builderRenderStrip();
@@ -9030,7 +9174,7 @@ function builderRenderGrid() {
 function builderRenderStrip() {
   const strip = document.getElementById('builder-strip');
   const lbl2  = document.getElementById('builder-strip-label2');
-  strip.innerHTML = '';
+  strip.textContent = '';
   if(!builderQueue.length) {
     lbl2.style.display = 'none';
     const p = document.createElement('span');
@@ -9046,7 +9190,7 @@ function builderRenderStrip() {
     const vis = sym.photo
       ? `<img class="bc-img" src="${sym.photo}">`
       : `<span class="bc-em">${sym.emoji}</span>`;
-    chip.innerHTML = vis + `<span class="bc-lbl">${sym.label}</span><span class="bc-del" onclick="builderRemove(${i})">✕</span>`;
+    chip.innerHTML = vis + `<span class="bc-lbl">${_escHtml(sym.label)}</span><span class="bc-del" onclick="builderRemove(${i})">✕</span>`;
     strip.appendChild(chip);
   });
 }
@@ -9258,7 +9402,7 @@ function ppmSetLayout(lay, btn) {
 function ppmRenderPictos() {
   const wrap = document.getElementById('ppm-pictos-wrap');
   if (!wrap) return;
-  wrap.innerHTML = '';
+  wrap.textContent = '';
   if (!_ppSyms.length) {
     wrap.innerHTML = '<span style="font-size:12px;color:#aab;font-weight:700;">Sin pictogramas</span>';
     return;
@@ -9332,7 +9476,7 @@ function executePhraseprint() {
 
   const fullHtml = `<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
     <title>Frase — ComuniCAP</title>
     <style>
       @page { size: A4 ${orient}; margin: 18mm; }
@@ -9419,6 +9563,308 @@ function executePhraseprint() {
   <!-- Grid de pictogramas -->
   <div class="ant-pm-grid" id="antPmGrid"></div>
 </div>
+
+
+<!-- ══ CEO TOOLBAR ══ -->
+<div id="ceo-toolbar" style="display:none;position:fixed;bottom:70px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:8px;">
+  <button onclick="ceoAgregarPictograma()" 
+    style="background:linear-gradient(135deg,#06d6a0,#0097a7);color:white;border:none;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(6,214,160,.5);" 
+    title="Agregar pictograma global">➕</button>
+  <button onclick="ceoModoEdicion()" 
+    style="background:linear-gradient(135deg,#3a86ff,#7c3aed);color:white;border:none;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(58,134,255,.5);" 
+    title="Editar pictograma global">✏️</button>
+  <div style="background:rgba(0,0,0,.7);color:#06d6a0;font-size:9px;font-weight:900;text-align:center;border-radius:8px;padding:3px 6px;">CEO</div>
+</div>
+
+<script>
+// ══ CEO UI ══
+function _initCEOUI() {
+  if (!_isCEO) return;
+  const toolbar = document.getElementById('ceo-toolbar');
+  if (toolbar) toolbar.style.display = 'flex';
+}
+
+function ceoAgregarPictograma() {
+  const emoji = await uiPrompt('Emoji del pictograma:');
+  if (!emoji) return;
+  const etiqueta = await uiPrompt('Nombre/etiqueta (ej: AUTO, CASA):');
+  if (!etiqueta) return;
+  const cats = ['action','thing','place','social','time','describe','question','pronoun','health','hygiene','food2','clothes','animales','frutas','verduras'];
+  const cat = prompt('Categoría:
+' + cats.join(', '), 'thing');
+  if (!cat) return;
+  ceoGuardarPictogramaGlobal({ emoji, etiqueta: etiqueta.toLowerCase(), categoria: cat });
+}
+
+function ceoModoEdicion() {
+  if (!editMode) {
+    editMode = true;
+    document.querySelector('.edit-toggle')?.classList.add('active');
+    renderGrid();
+    toast('✏️ Modo edición CEO activado — tocá un pictograma para editarlo globalmente');
+  } else {
+    editMode = false;
+    document.querySelector('.edit-toggle')?.classList.remove('active');
+    renderGrid();
+    toast('✅ Modo edición desactivado');
+  }
+}
+
+// Hook save en modal para CEO - si es CEO guarda globalmente
+const _origSaveModal = window.saveModal;
+window.saveModal = async function(...args) {
+  if (_isCEO && _editingSymbolId != null) {
+    const emoji = document.getElementById('edit-emoji')?.value || '';
+    const label = document.getElementById('edit-label')?.value || '';
+    const cat = document.getElementById('edit-cat')?.value || 'thing';
+    if (emoji && label) {
+      await ceoGuardarPictogramaGlobal({ emoji, etiqueta: label.toLowerCase(), categoria: cat });
+    }
+  }
+  if (typeof _origSaveModal === 'function') _origSaveModal(...args);
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(_initCEOUI, 500);
+});
+<\/script>
+
+
+<script>
+// ══ EMOJI PICKER COMPLETO (mismo set que WhatsApp/Unicode) ══
+const EMOJI_CATS = [
+  { id: 'recientes', label: '🕐', name: 'Recientes' },
+  { id: 'caras', label: '😀', name: 'Caras y emociones' },
+  { id: 'personas', label: '👋', name: 'Personas y cuerpo' },
+  { id: 'animales', label: '🐶', name: 'Animales y naturaleza' },
+  { id: 'comida', label: '🍎', name: 'Comida y bebida' },
+  { id: 'viajes', label: '🚗', name: 'Viajes y lugares' },
+  { id: 'actividades', label: '⚽', name: 'Actividades' },
+  { id: 'objetos', label: '💡', name: 'Objetos' },
+  { id: 'simbolos', label: '❤️', name: 'Símbolos' },
+  { id: 'banderas', label: '🏳️', name: 'Banderas' },
+];
+
+const EMOJI_DATA = {
+  caras: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','💫','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾'],
+  personas: ['👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦵','🦶','👂','🦻','👃','🫀','🫁','🧠','🦷','🦴','👀','👁️','👅','👄','💋','🩸','👶','🧒','👦','👧','🧑','👱','👨','🧔','👩','🧓','👴','👵','🙍','🙎','🙅','🙆','💁','🙋','🧏','🙇','🤦','🤷','👮','🕵️','💂','🥷','👷','🤴','👸','👳','👲','🧕','🤵','👰','🤰','🤱','👼','🎅','🤶','🦸','🦹','🧙','🧝','🧛','🧟','🧞','🧜','🧚','🧑‍🤝‍🧑','👫','👬','👭','💑','💏','👨‍👩‍👦','👨‍👩‍👧','👨‍👩‍👧‍👦','👨‍👦','👩‍👦','👨‍👧','👩‍👧'],
+  animales: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦕','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🦣','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐈‍⬛','🪶','🐓','🦃','🦤','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦫','🦦','🦥','🐁','🐀','🐿️','🦔','🐾','🐉','🐲','🌵','🎄','🌲','🌳','🌴','🪵','🌱','🌿','☘️','🍀','🎍','🎋','🍃','🍂','🍁','🍄','🌾','💐','🌷','🌹','🥀','🌺','🌸','🌼','🌻','🌞','🌝','🌛','🌜','🌚','🌕','🌖','🌗','🌘','🌑','🌒','🌓','🌔','🌙','🌟','⭐','🌠','🌌','☀️','🌤️','⛅','🌥️','☁️','🌦️','🌧️','⛈️','🌩️','🌨️','❄️','☃️','⛄','🌬️','💨','💧','💦','🌊','🌈','🔥','🌪️','🌫️','⚡','🌶️','🌍','🌎','🌏'],
+  comida: ['🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶️','🫑','🥑','🧄','🧅','🥔','🍠','🥐','🥯','🍞','🥖','🥨','🧀','🥚','🍳','🧈','🥞','🧇','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🫓','🥪','🥙','🧆','🌮','🌯','🫔','🥗','🥘','🫕','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🦪','🍤','🍙','🍚','🍘','🍥','🥮','🍢','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🧃','🥤','🧋','☕','🍵','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🍾','🧉','🍶','🍴','🥄','🫙','🧂','🥢','🥡'],
+  viajes: ['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🏍️','🛵','🛺','🚲','🛴','🛹','🛼','🚏','🛣️','🛤️','⛽','🚨','🚥','🚦','🛑','🚧','⚓','🛟','⛵','🚤','🛥️','🛳️','⛴️','🚢','✈️','🛩️','🛫','🛬','🪂','💺','🚁','🚟','🚠','🚡','🛰️','🚀','🛸','🛶','⛺','🌁','🌃','🏙️','🌄','🌅','🌆','🌇','🌉','🌌','🎠','🎡','🎢','💈','🎪','🛖','🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏭','🏯','🏰','💒','🗼','🗽','⛪','🕌','⛩️','🕍','🕋','⛲','⛺','🌐','🗺️','🧭','🏔️','⛰️','🌋','🗻','🏕️','🏖️','🏜️','🏝️','🏞️','🏟️','🏛️'],
+  actividades: ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🥍','🏑','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','🤺','⛹️','🤾','🏌️','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚵','🚴','🏆','🥇','🥈','🥉','🏅','🎖️','🏵️','🎗️','🎫','🎟️','🎪','🤹','🎭','🩰','🎨','🎬','🎤','🎧','🎼','🎵','🎶','🎷','🪗','🎸','🎹','🪘','🎺','🎻','🪕','🥁','🪩','🎮','🕹️','🎯','🎳','🎰','🎲','🧩','🪄','🪅','🎭','🎨','🖼️','🎠','🎡','🎢'],
+  objetos: ['👓','🕶️','🥽','🌂','☂️','🧵','🪡','🧶','🪢','👔','👕','👖','🧣','🧤','🧥','🧦','👗','👘','🥻','🩱','🩲','🩳','👙','👚','👛','👜','👝','🎒','🧳','👒','🎩','🧢','⛑️','📿','💄','💍','💎','🔇','🔈','🔉','🔊','📢','📣','📯','🔔','🔕','🎵','🎶','📻','🎷','🎸','🎹','🎺','🎻','🥁','📱','☎️','📞','📟','📠','🔋','🔌','💻','🖥️','🖨️','⌨️','🖱️','🖲️','💽','💾','💿','📀','🎥','🎞️','📽️','📺','📷','📸','📹','📼','🔍','🔎','🕯️','💡','🔦','🏮','🪔','📔','📕','📖','📗','📘','📙','📚','📓','📃','📄','📑','🗒️','🗓️','📊','📈','📉','🗃️','🗄️','🗑️','📦','📫','📪','📬','📭','📮','🗳️','✏️','✒️','🖊️','🖋️','📝','📁','📂','🗂️','📋','🗒️','📌','📍','✂️','🖇️','📎','🔒','🔓','🔏','🔐','🔑','🗝️','🔨','🪓','⛏️','⚒️','🛠️','🗡️','⚔️','🛡️','🔧','🪛','🔩','⚙️','🗜️','🪤','🧲','💊','💉','🩸','🩹','🩺','🌡️','🧬','🦠','🧪','🧫','🧲','🪣','🧹','🧺','🧻','🚽','🚿','🛁','🧴','💈','🔭','🪞','🛋️','🛏️','🚪','🪟','🧸','🪆','🎎','🎍','🎐','🎏','🎑','🧧','🎀','🎁','🎊','🎉','🎈','🎋','✨','🎇','🎆'],
+  simbolos: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','❗','❕','❓','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🛗','🈳','🈹','🚰','🛂','🛃','🛄','🛅','🚹','🚺','🚼','⚧️','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆙','🆒','🆕','🆓','🆖','0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟','🔢','⏏️','▶️','⏸️','⏹️','⏺️','⏭️','⏮️','⏩','⏪','⏫','⏬','◀️','🔼','🔽','➡️','⬅️','⬆️','⬇️','↗️','↘️','↙️','↖️','↕️','↔️','↩️','↪️','⤴️','⤵️','🔀','🔁','🔂','🔄','🔃','✔️','☑️','🔘','🔲','🔳','⬛','⬜','◼️','◻️','◾','◽','▪️','▫️','🟥','🟧','🟨','🟩','🟦','🟪','⚫','⚪','🟫','🔶','🔷','🔸','🔹','🔺','🔻','💠','🔘','🔲'],
+  banderas: ['🏳️','🏴','🏴‍☠️','🚩','🏁','🎌','🏳️‍🌈','🏳️‍⚧️','🇦🇷','🇧🇷','🇧🇴','🇨🇱','🇨🇴','🇨🇷','🇨🇺','🇩🇴','🇪🇨','🇸🇻','🇬🇹','🇭🇳','🇲🇽','🇳🇮','🇵🇦','🇵🇾','🇵🇪','🇵🇷','🇺🇾','🇻🇪','🇺🇸','🇪🇸','🇫🇷','🇩🇪','🇬🇧','🇮🇹','🇯🇵','🇨🇳','🇷🇺','🇨🇦','🇦🇺','🇰🇷','🇵🇹','🇳🇱','🇸🇪','🇳🇴','🇩🇰','🇫🇮','🇨🇭','🇦🇹','🇧🇪','🇵🇱','🇬🇷','🇹🇷','🇮🇱','🇸🇦','🇮🇳','🇵🇰','🇮🇩','🇵🇭','🇻🇳','🇹🇭','🇲🇽'],
+};
+
+// Mapeo de nombres en español para búsqueda
+const EMOJI_NAMES = {
+  '😀':'cara feliz sonrisa','😂':'risa llorando carcajada','😍':'enamorado corazones ojos','😭':'llora triste llorando','😡':'enojado bravo furioso',
+  '👋':'hola mano saludar','👍':'bien aprobado ok pulgar arriba','👎':'mal pulgar abajo','❤️':'corazón amor rojo','🙏':'gracias por favor manos juntas rezar',
+  '🐶':'perro perrito cachorro','🐱':'gato gatito','🐮':'vaca','🐷':'chancho cerdo puerco','🐔':'gallina pollo','🐟':'pez pescado',
+  '🍎':'manzana fruta roja','🍌':'banana plátano','🍕':'pizza','🍔':'hamburguesa','🍦':'helado','🎂':'torta cumpleaños pastel',
+  '🏠':'casa hogar','🚗':'auto carro coche','🚌':'colectivo bus micro','✈️':'avión viajar vuelo','🚂':'tren',
+  '⚽':'pelota fútbol','🎮':'videojuego consola','🎵':'música nota','📱':'celular teléfono','💻':'computadora laptop',
+  '💊':'pastilla medicamento','🏥':'hospital clínica','👨‍⚕️':'doctor médico','💉':'vacuna inyección','🚑':'ambulancia',
+  '🛁':'baño bañera','🚿':'ducha ducharse','🪥':'cepillo dientes','🧼':'jabón lavarse manos','🚽':'inodoro baño',
+  '🍽️':'plato comer comida','🥛':'leche vaso','☕':'café té caliente','💧':'agua tomar beber',
+  '😴':'dormir cansado sueño','🌙':'noche luna','☀️':'sol día mañana','⭐':'estrella',
+  '✏️':'lápiz escribir dibujar','📚':'libro estudiar leer','🏫':'escuela colegio','👨‍🏫':'maestro profesor',
+  '👕':'ropa remera camiseta','👖','pantalón','👗':'vestido','🧥':'abrigo campera',
+  '🎉':'fiesta celebración cumpleaños','🎁':'regalo presente','🎈':'globo',
+};
+
+let _emojiCurrentCat = 'caras';
+try {
+  _emojiRecientes = JSON.parse(localStorage.getItem('cap_emoji_recientes') || '[]');
+  // Validar tipo
+  if (!Array.isArray(_emojiRecientes) && typeof _emojiRecientes === 'object' && _emojiRecientes === null) {
+    _emojiRecientes = [];
+  }
+} catch(e) {
+  console.warn('⚠️ localStorage corrupto: cap_emoji_recientes');
+  _emojiRecientes = [];
+}
+
+function emojiPickerInit() {
+  // Render category tabs
+  const tabs = document.getElementById('emoji-cat-tabs');
+  if (!tabs) return;
+  tabs.innerHTML = EMOJI_CATS.map(c => 
+    `<button onclick="emojiSetCat('${c.id}')" id="emoji-tab-${c.id}" title="${c.name}">${c.label}</button>`
+  ).join('');
+  emojiSetCat('caras');
+}
+
+function emojiSetCat(catId) {
+  _emojiCurrentCat = catId;
+  document.querySelectorAll('#emoji-cat-tabs button').forEach(b => b.classList.remove('active'));
+  const tab = document.getElementById('emoji-tab-' + catId);
+  if (tab) tab.classList.add('active');
+  
+  let emojis;
+  if (catId === 'recientes') {
+    emojis = _emojiRecientes.length ? _emojiRecientes : ['😀','👋','❤️','🏠','🚗','🍎'];
+  } else {
+    emojis = EMOJI_DATA[catId] || [];
+  }
+  emojiRenderGrid(emojis);
+}
+
+function emojiRenderGrid(emojis) {
+  const grid = document.getElementById('emoji-grid-container');
+  if (!grid) return;
+  const current = document.getElementById('edit-emoji')?.value || '';
+  grid.innerHTML = emojis.map(e => 
+    `<span class="epick${e === current ? ' sel' : ''}" onclick="emojiSelect('${e}')" title="${e}">${e}</span>`
+  ).join('');
+}
+
+function emojiSelect(emoji) {
+  // Set in input field
+  const input = document.getElementById('edit-emoji');
+  if (input) input.value = emoji;
+  // Update preview
+  const prev = document.getElementById('modal-prev-em');
+  if (prev) prev.textContent = emoji;
+  // Update selected state
+  document.querySelectorAll('.epick').forEach(e => e.classList.remove('sel'));
+  event.target.classList.add('sel');
+  // Save to recientes
+  _emojiRecientes = [emoji, ..._emojiRecientes.filter(e => e !== emoji)].slice(0, 24);
+  localStorage.setItem('cap_emoji_recientes', JSON.stringify(_emojiRecientes));
+}
+
+function emojiSearch(q) {
+  if (!q.trim()) { emojiSetCat(_emojiCurrentCat); return; }
+  q = q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  
+  const results = [];
+  // Search by name mapping
+  Object.entries(EMOJI_NAMES).forEach(([emoji, names]) => {
+    if (names.normalize('NFD').replace(/[̀-ͯ]/g,'').includes(q)) results.push(emoji);
+  });
+  // Also search all emojis in all categories
+  Object.values(EMOJI_DATA).forEach(arr => {
+    arr.forEach(e => { if (!results.includes(e) && e.toLowerCase().includes(q)) results.push(e); });
+  });
+  
+  emojiRenderGrid(results.length ? results : ['🔍']);
+}
+
+// Hook into openModal
+const _origOpenModal = window.openModal || function(){};
+window.openModal = function(...args) {
+  if (typeof _origOpenModal === 'function') _origOpenModal(...args);
+  setTimeout(emojiPickerInit, 50);
+};
+
+// Also init when modal opens via editMode click
+document.addEventListener('DOMContentLoaded', function() {
+  // Patch openEditModal if exists
+  const orig = window.openEditModal;
+  if (orig) window.openEditModal = function(...a) { orig(...a); setTimeout(emojiPickerInit, 50); };
+});
+<\/script>
+
+
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+  });
+}
+
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+</script>
+<!-- FIN CORRECCIONES -->
 
 </body></html>`;
 
@@ -9530,7 +9976,7 @@ function phrasesInit() {
 
 function phrasesRenderCatBar() {
   const bar = document.getElementById('phrases-cat-bar');
-  bar.innerHTML = '';
+  bar.textContent = '';
 
   // "Mis frases" tab — PRIMERO y destacado
   const myBtn = document.createElement('button');
@@ -9569,7 +10015,7 @@ function phrasesRenderCatBar() {
 
 function phrasesRenderList() {
   const list = document.getElementById('phrases-list');
-  list.innerHTML = '';
+  list.textContent = '';
 
   if(currentPhraseCat === '_saved') {
     if(!savedPhrases.length) {
@@ -9628,7 +10074,7 @@ function phraseBuildCard(text, syms, isSaved, id) {
     if(s.photo) {
       pic.innerHTML = `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
     } else {
-      pic.innerHTML = `<span>${s.emoji}</span><span class="pp-lbl">${s.label}</span>`;
+      pic.innerHTML = `<span>${s.emoji}</span><span class="pp-lbl">${_escHtml(s.label)}</span>`;
     }
     picWrap.appendChild(pic);
   });
@@ -9687,9 +10133,9 @@ function phraseBuildCard(text, syms, isSaved, id) {
     delBtn.title = 'Eliminar frase';
     delBtn.style.flex = '0';
     delBtn.style.minWidth = '50px';
-    delBtn.onclick = (e) => {
+    delBtn.onclick = async (e) => {
       e.stopPropagation();
-      if(confirm('¿Eliminar la frase "' + text + '"?')) {
+      if(await uiConfirm('¿Eliminar la frase "' + text + '"?')) {
         savedPhrases = savedPhrases.filter(p => p.id !== id);
         try { localStorage.setItem('comunicap_phrases', JSON.stringify(savedPhrases)); } catch(e){}
         phrasesRenderCatBar(); // actualiza contador
@@ -9881,7 +10327,7 @@ function executePrintAllPhrases() {
 
   const fullHtml = `<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
     <title>Mis Frases — ComuniCAP</title>
     <style>
       @page { size: A4 portrait; margin: 16mm; }
@@ -9900,7 +10346,106 @@ function executePrintAllPhrases() {
       <button onclick="window.print()" style="padding:12px 28px;background:#06d6a0;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">🖨️ Imprimir</button>
       <button onclick="_cerrarApp()" style="padding:12px 28px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
     </div>
-  </body></html>`;
+  
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+  });
+}
+
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+</script>
+<!-- FIN CORRECCIONES -->
+
+</body></html>`;
 
   document.getElementById('print-all-modal').style.display = 'none';
 
@@ -10033,8 +10578,8 @@ let pbEditIdx  = null;
 let pbEditPhoto= null;
 let pbInited   = false;
 
-function pbReset() {
-  if(!confirm('¿Restaurar el tablero a los pictogramas originales? Los cambios se perderán.')) return;
+async function pbReset() {
+  if(!(await uiConfirm('¿Restaurar el tablero a los pictogramas originales? Los cambios se perderán.'))) return;
   pbCells = PB_DEFAULT.map((c,i) => ({...c, id:i, photo:null}));
   pbInited = true;
   pbCols = 11; pbTheme = 'comunipro';
@@ -10064,7 +10609,7 @@ function pbRender() {
   const grid = document.getElementById('pb-grid');
   grid.style.gridTemplateColumns = `repeat(${pbCols}, 1fr)`;
   grid.className = `pb-theme-${pbTheme}`;
-  grid.innerHTML = '';
+  grid.textContent = '';
 
   pbCells.forEach((cell, i) => {
     const div = document.createElement('div');
@@ -10121,7 +10666,7 @@ function pbOpenModal(idx) {
 
 function pbBuildEmojiPicker(selected) {
   const row = document.getElementById('pb-emoji-row');
-  row.innerHTML = '';
+  row.textContent = '';
   EMOJI_POOL.forEach(em => {
     const span = document.createElement('span');
     span.className = 'pb-epick' + (em === selected ? ' sel' : '');
@@ -10297,12 +10842,12 @@ function renderEqEx() {
   const opts = [...wrongs, ex].sort(()=>Math.random()-.5);
 
   const grid = document.getElementById('eq-ans');
-  grid.innerHTML='';
+  grid.textContent = '';
   const exSnapshot = {name: ex.name, em: ex.em, color: ex.color, bg: ex.bg, desc: ex.desc};
   opts.forEach((opt, oi) => {
     const b = document.createElement('button');
     b.className='ans-btn';
-    b.innerHTML = `<span style="font-size:26px;line-height:1.2;display:block;">${opt.em}</span><span style="font-size:11px;font-weight:800;">${opt.name}</span>`;
+    b.innerHTML = `<span style="font-size:26px;line-height:1.2;display:block;">${opt.em}</span><span style="font-size:11px;font-weight:800;">${_escHtml(opt.name)}</span>`;
     const optName = opt.name;
     if(optName === exSnapshot.name) b.dataset.correct = '1';
     b.onclick = () => checkEqAns(optName, exSnapshot.name, b, exSnapshot);
@@ -10435,7 +10980,7 @@ function initSortCat() {
 
   // Render boards
   const boards = document.getElementById('sc-boards');
-  boards.innerHTML='';
+  boards.textContent = '';
   scActiveCats.forEach(cat => {
     const d = document.createElement('div');
     d.className = 'sc-board';
@@ -10443,7 +10988,7 @@ function initSortCat() {
     d.dataset.catid = cat.id;
     d.dataset.catcolor = cat.color;
     d.style.borderColor = cat.color + '66';
-    d.innerHTML = `<div class="sc-board-title" style="color:${cat.color};border-bottom-color:${cat.color}33">${cat.name}</div>
+    d.innerHTML = `<div class="sc-board-title" style="color:${cat.color};border-bottom-color:${cat.color}33">${_escHtml(cat.name)}</div>
       <div class="sc-board-items" id="sc-placed-${cat.id}"></div>`;
     // Touch drop by tap
     d.addEventListener('click', () => scDropByTap(cat.id, cat.color));
@@ -10453,7 +10998,7 @@ function initSortCat() {
 
   // Render bank
   const bank = document.getElementById('sc-bank-row');
-  bank.innerHTML='';
+  bank.textContent = '';
   allItems.forEach((item, i) => {
     const parts = item.text.split(' ');
     const em = parts[0];
@@ -10693,7 +11238,7 @@ function initPictoCat() {
 
   // Boards
   const boards = document.getElementById('pc-boards');
-  boards.innerHTML='';
+  boards.textContent = '';
   pcActiveCats.forEach(cat => {
     const d = document.createElement('div');
     d.className = 'sc-board';
@@ -10701,7 +11246,7 @@ function initPictoCat() {
     d.dataset.catid = cat.id;
     d.dataset.catcolor = cat.color;
     d.style.borderColor = cat.color + '66';
-    d.innerHTML = `<div class="sc-board-title" style="color:${cat.color};border-bottom-color:${cat.color}33">${cat.name}</div>
+    d.innerHTML = `<div class="sc-board-title" style="color:${cat.color};border-bottom-color:${cat.color}33">${_escHtml(cat.name)}</div>
       <div class="sc-board-items" id="pc-placed-${cat.id}"></div>`;
     d.addEventListener('click', () => pcDropByTap(cat.id, cat.color));
     boards.appendChild(d);
@@ -10709,7 +11254,7 @@ function initPictoCat() {
 
   // Bank
   const bank = document.getElementById('pc-bank-row');
-  bank.innerHTML='';
+  bank.textContent = '';
   allItems.forEach((item, i) => {
     const d = document.createElement('div');
     d.className = 'sc-item';
@@ -10884,13 +11429,15 @@ renderGrid();
 
     const idx = CAT_ORDER.indexOf(currentCat);
     if (dx < 0) {
-      // swipe left → next category
-      const next = CAT_ORDER[Math.min(idx + 1, CAT_ORDER.length - 1)];
-      if (next !== currentCat) activateCat(next);
+      // swipe left → next category (do nothing if at end)
+      if (idx < CAT_ORDER.length - 1) {
+        activateCat(CAT_ORDER[idx + 1]);
+      }
     } else {
-      // swipe right → previous category
-      const prev = CAT_ORDER[Math.max(idx - 1, 0)];
-      if (prev !== currentCat) activateCat(prev);
+      // swipe right → previous category (do nothing if at start)
+      if (idx > 0) {
+        activateCat(CAT_ORDER[idx - 1]);
+      }
     }
   }, { passive: true });
 })();
@@ -10932,17 +11479,35 @@ function emRequestGPS() {
 function openEmergencyPanel() {
   // Load saved contacts
   try {
-    const c1 = JSON.parse(localStorage.getItem('em_contact1')||'null');
-    const c2 = JSON.parse(localStorage.getItem('em_contact2')||'null');
+    try {
+  c1 = JSON.parse(localStorage.getItem('em_contact1') || 'null');
+  // Validar tipo
+  if (!Array.isArray(c1) && typeof c1 === 'object' && c1 === null) {
+    c1 = null;
+  }
+} catch(e) {
+  console.warn('⚠️ localStorage corrupto: em_contact1');
+  c1 = null;
+}
+    try {
+  c2 = JSON.parse(localStorage.getItem('em_contact2') || 'null');
+  // Validar tipo
+  if (!Array.isArray(c2) && typeof c2 === 'object' && c2 === null) {
+    c2 = null;
+  }
+} catch(e) {
+  console.warn('⚠️ localStorage corrupto: em_contact2');
+  c2 = null;
+}
     const div1 = document.getElementById('em-contact1-btn');
     const div2 = document.getElementById('em-contact2-btn');
     if(c1 && c1.name && c1.phone) {
       div1.style.display = 'block';
-      div1.innerHTML = `<a class="em-call-btn" href="tel:${c1.phone}" onclick="try{window.location.href='tel:${c1.phone}'}catch(e){}">📞 LLAMAR A ${c1.name.toUpperCase()}</a>`;
+      div1.innerHTML = `<a class="em-call-btn" href="tel:${c1.phone}" onclick="try{window.location.href='tel:${c1.phone}'}catch(e){}">📞 LLAMAR A ${_escHtml(c1.name.toUpperCase())}</a>`;
     } else { div1.style.display = 'none'; }
     if(c2 && c2.name && c2.phone) {
       div2.style.display = 'block';
-      div2.innerHTML = `<a class="em-call-btn" href="tel:${c2.phone}" onclick="try{window.location.href='tel:${c2.phone}'}catch(e){}">📞 LLAMAR A ${c2.name.toUpperCase()}</a>`;
+      div2.innerHTML = `<a class="em-call-btn" href="tel:${c2.phone}" onclick="try{window.location.href='tel:${c2.phone}'}catch(e){}">📞 LLAMAR A ${_escHtml(c2.name.toUpperCase())}</a>`;
     } else { div2.style.display = 'none'; }
   } catch(e) {}
   document.getElementById('emergency-panel').classList.add('open');
@@ -11252,7 +11817,7 @@ function ltInit() {
 function ltRender() {
   const grid = document.getElementById('lt-grid');
   grid.style.gridTemplateColumns = `repeat(${ltCols}, 1fr)`;
-  grid.innerHTML = '';
+  grid.textContent = '';
 
   ltCells.forEach((cell, idx) => {
     const div = document.createElement('div');
@@ -11299,7 +11864,7 @@ function ltOpenModal(idx) {
 
 function ltBuildEmojiPicker(selected) {
   const row = document.getElementById('lt-emoji-row');
-  row.innerHTML = '';
+  row.textContent = '';
   LT_EMOJIS.forEach(em => {
     const sp = document.createElement('span');
     sp.className = 'lt-epick' + (em===selected?' sel':'');
@@ -11321,7 +11886,7 @@ function ltSaveCell() {
   const lbl = document.getElementById('lt-edit-label').value.trim().toUpperCase();
   const cat = document.getElementById('lt-edit-cat').value;
   const em  = document.getElementById('lt-prev-em').textContent || '❓';
-  if(!lbl) { alert('Ingresá una etiqueta'); return; }
+  if(!lbl) { _showToast('Ingresá una etiqueta', 'info'); return; }
   if(ltIsNew) {
     ltCells.push({ e:em, l:lbl, cat, id: Date.now() });
   } else {
@@ -11357,8 +11922,8 @@ function ltEditTitle() {
   }
 }
 
-function ltReset() {
-  if(!confirm('¿Restaurar el tablero a los valores originales? Se perderán los cambios.')) return;
+async function ltReset() {
+  if(!(await uiConfirm('¿Restaurar el tablero a los valores originales? Se perderán los cambios.'))) return;
   ltCells = LT_DEFAULT_CELLS.map((c,i)=>({...c, id:i}));
   ltTitle = 'TABLERO BAJA TECNOLOGÍA';
   ltCols  = 5;
@@ -11442,7 +12007,7 @@ function initEmoMatch() {
 
 function renderEmoCards() {
   const grid = document.getElementById('emomatch-grid');
-  grid.innerHTML = '';
+  grid.textContent = '';
 
   emmData.forEach((em, i) => {
     const card = document.createElement('div');
@@ -11467,7 +12032,7 @@ function renderEmoCards() {
 
 function renderEmoPool() {
   const pool = document.getElementById('emomatch-pool');
-  pool.innerHTML = '';
+  pool.textContent = '';
   emmTokens.forEach((em, i) => {
     const tok = document.createElement('div');
     tok.className = 'emo-token';
@@ -11596,7 +12161,7 @@ function contactsSave() {
 function contactsRender() {
   const grid = document.getElementById('contacts-grid');
   if(!grid) return;
-  grid.innerHTML = '';
+  grid.textContent = '';
 
   contacts.forEach(c => {
     const card = document.createElement('div');
@@ -11829,7 +12394,7 @@ function showSosLocationModal(phone, baseMsg) {
   }
 
   const btns = modal.querySelector('#sos-loc-btns');
-  btns.innerHTML = '';
+  btns.textContent = '';
 
   // Button: try again after activating
   const retryBtn = document.createElement('button');
@@ -11884,7 +12449,7 @@ function openContactModal(id) {
 
   // Build avatar picker
   const row = document.getElementById('cm-avatar-row');
-  row.innerHTML = '';
+  row.textContent = '';
   CONTACT_AVATARS.forEach(av => {
     const sp = document.createElement('span');
     sp.className = 'cm-av';
@@ -11951,11 +12516,11 @@ function saveContact() {
   contactsRender();
 }
 
-function deleteContact() {
+async function deleteContact() {
   if(cmEditingId === null) return;
   const c = contacts.find(x=>x.id===cmEditingId);
   if(!c) return;
-  if(!confirm('¿Eliminar el contacto ' + c.name + '?')) return;
+  if(!(await uiConfirm('¿Eliminar el contacto ' + c.name + '?'))) return;
   contacts = contacts.filter(x=>x.id!==cmEditingId);
   contactsSave();
   closeContactModal();
@@ -12036,7 +12601,7 @@ function symVisRender(cat) {
 
   // Category filter pills
   const allCats = ['todo', ...new Set(symbols.map(s => s.cat))];
-  catsDiv.innerHTML = '';
+  catsDiv.textContent = '';
   allCats.forEach(c => {
     const pill = document.createElement('button');
     pill.textContent = c === 'todo' ? '🔤 Todos' : (CAT_LABELS_ES[c] || c);
@@ -12049,7 +12614,7 @@ function symVisRender(cat) {
 
   // Symbol grid
   const list = cat === 'todo' ? symbols : symbols.filter(s => s.cat === cat);
-  gridDiv.innerHTML = '';
+  gridDiv.textContent = '';
   list.forEach(sym => {
     if(sym._numVal !== undefined) return; // skip number pictograms
     const isHidden = hiddenSymbols.has(sym.id);
@@ -12060,7 +12625,7 @@ function symVisRender(cat) {
       background:${isHidden?'#f5f5f5':'var(--brand-light)'};cursor:pointer;
       opacity:${isHidden?'0.4':'1'};transition:all .15s;min-width:54px;`;
     btn.innerHTML = `<span style="font-size:22px;line-height:1">${sym.emoji||'?'}</span>
-      <span style="font-size:9px;font-weight:800;color:${isHidden?'#aaa':'var(--brand-dark)'};max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sym.label}</span>`;
+      <span style="font-size:9px;font-weight:800;color:${isHidden?'#aaa':'var(--brand-dark)'};max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(sym.label)}</span>`;
     btn.onclick = () => {
       if(hiddenSymbols.has(sym.id)) hiddenSymbols.delete(sym.id);
       else hiddenSymbols.add(sym.id);
@@ -12233,7 +12798,7 @@ function pmRenderPictoGrid(catKey) {
   const grid = document.getElementById('pm-pictos-grid');
   const countEl = document.getElementById('pm-pictos-count');
   if(!grid) return;
-  grid.innerHTML = '';
+  grid.textContent = '';
   const catSymbols = symbols.filter(s => s.cat === catKey);
   if(!pmSelectedPictoIds) pmSelectedPictoIds = {};
   // Init selection for this cat if not yet
@@ -12247,7 +12812,7 @@ function pmRenderPictoGrid(catKey) {
     const vis = sym.photo
       ? `<img src="${sym.photo}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;">`
       : `<span style="font-size:26px;line-height:1">${sym.emoji}</span>`;
-    cell.innerHTML = `${vis}<span style="font-size:10px;font-weight:800;color:${isSelected ? '#1d4ed8' : '#555'};text-align:center;word-break:break-word;max-width:66px;">${sym.label}</span>`;
+    cell.innerHTML = `${vis}<span style="font-size:10px;font-weight:800;color:${isSelected ? '#1d4ed8' : '#555'};text-align:center;word-break:break-word;max-width:66px;">${_escHtml(sym.label)}</span>`;
     cell.onclick = () => {
       if(pmSelectedPictoIds[catKey].has(sym.id)) {
         pmSelectedPictoIds[catKey].delete(sym.id);
@@ -12330,7 +12895,7 @@ function pmUpdatePreview() {
         ${photoHtml}
         <div style="flex:1;text-align:left;">
           <div style="font-size:10px;font-weight:900;color:#ff1744;letter-spacing:1px;">🆘 TARJETA DE EMERGENCIA</div>
-          <div style="font-size:13px;font-weight:900;color:#1a1a2e;">${name}</div>
+          <div style="font-size:13px;font-weight:900;color:#1a1a2e;">${_escHtml(name)}</div>
           <div style="margin-top:3px;">${contacts}</div>
         </div>
       </div>`;
@@ -12354,7 +12919,7 @@ function openPrintModal(context, preSelectType) {
   // Build category chips
   const catsSub = document.getElementById('pm-cats-sub');
   if(catsSub) {
-    catsSub.innerHTML = '';
+    catsSub.textContent = '';
     // Add instruction hint
     const hint = document.createElement('div');
     hint.style.cssText = 'width:100%;font-size:10px;color:#aab;font-weight:700;margin-bottom:2px;';
@@ -12506,6 +13071,105 @@ ${PB_THEME_CSS}
 <div class="pb-grid ${gridClass}">${gridHTML}</div>
 ${WATERMARK_HTML}
 ${_buildNoticeBtns(autoPrint)}
+
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+  });
+}
+
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+</script>
+<!-- FIN CORRECCIONES -->
+
 </body></html>`;
 }
 
@@ -12541,6 +13205,105 @@ h1 { font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:800; text-ali
 <div class="grid">${cardsHTML}</div>
 ${WATERMARK_HTML}
 ${_buildNoticeBtns(autoPrint)}
+
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+  });
+}
+
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+</script>
+<!-- FIN CORRECCIONES -->
+
 </body></html>`;
 }
 
@@ -12589,6 +13352,105 @@ h1 { font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:800; text-ali
 ${sectionsHTML}
 ${WATERMARK_HTML}
 ${_buildNoticeBtns(autoPrint)}
+
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+  });
+}
+
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+</script>
+<!-- FIN CORRECCIONES -->
+
 </body></html>`;
 }
 
@@ -12598,7 +13460,7 @@ function _openPrintWindow(html) {
   try {
     const win = window.open('','_blank');
     if(win) { win.document.write(html); win.document.close(); }
-    else { alert('El navegador bloqueó la ventana emergente. Habilitá las ventanas emergentes para imprimir.'); }
+    else { _showToast('El navegador bloqueó la ventana emergente. Habilitá las ventanas emergentes para imprimir.', 'info'); }
   } catch(e) { console.error('openPrintWindow:', e); }
 }
 
@@ -12641,8 +13503,8 @@ function executePrint() {
     const ph1  = document.getElementById('pm-em-ph1')?.value.trim() || '';
     const cn2  = document.getElementById('pm-em-cn2')?.value.trim() || '';
     const ph2  = document.getElementById('pm-em-ph2')?.value.trim() || '';
-    if(!name) { alert('Por favor ingresá el nombre del usuario antes de imprimir.'); return; }
-    if(!cn1 || !ph1) { alert('Por favor ingresá al menos un contacto de emergencia.'); return; }
+    if(!name) { _showToast('Por favor ingresá el nombre del usuario antes de imprimir.', 'info'); return; }
+    if(!cn1 || !ph1) { _showToast('Por favor ingresá al menos un contacto de emergencia.', 'info'); return; }
     try {
       localStorage.setItem('cp_em_name',       name);
       localStorage.setItem('cp_em_apellidos',   apellidos);
@@ -12730,10 +13592,18 @@ function printEmergencyCard() {
 
   const cardHtml = `<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
     <title>Tarjeta de Datos Personales — ${fullName}</title>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Accesibilidad: targets mínimos touch (WCAG 2.2 - 44px) ── */
+button, [role="button"], input[type="button"], input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+/* Excepción para botones muy pequeños decorativos */
+.epick, .pb-epick, .lt-epick { min-height: unset; min-width: unset; }
       body { font-family: 'Arial', sans-serif; background: #f5f5f5; padding: 20px; color: #1a1a1a; }
 
       /* ── TARJETA PRINCIPAL ── */
@@ -12900,7 +13770,106 @@ function printEmergencyCard() {
       <button class="close" onclick="_cerrarApp()">✕ Cerrar</button>
     </div>
 
-  </body></html>`;
+  
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+  });
+}
+
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+</script>
+<!-- FIN CORRECCIONES -->
+
+</body></html>`;
 
   closePrintModal();
 
@@ -12961,6 +13930,8 @@ function subGuardarLocal(data) {
     const token = _genToken();
     const payload = JSON.stringify({ code: data.code, plan: data.plan, expiry: data.expiry||null, ts: Date.now(), token: token, nombre: data.nombre||null, apellido: data.apellido||null });
     localStorage.setItem(SUB_STORAGE_KEY, payload);
+    // Detect CEO
+    _detectarCEO(data.plan);
     // Register session in Supabase
     _registrarSesion(data.code, token, 'https://lgpqyjevdwstbnerawmp.supabase.co', SUB_ANON, 'licencias2', 'clave');
   } catch(e) {}
@@ -12971,8 +13942,8 @@ function subCargarLocal() {
     const raw = localStorage.getItem(SUB_STORAGE_KEY);
     if(!raw) return null;
     const parsed = JSON.parse(raw);
-    // Verificar vencimiento
-    if(parsed.expiry) {
+    // Verificar vencimiento (CEO nunca vence)
+    if(parsed.expiry && parsed.plan !== 'ceo') {
       const exp = new Date(parsed.expiry + "T23:59:59");
       if(exp < new Date()) {
         localStorage.removeItem(SUB_STORAGE_KEY);
@@ -13011,7 +13982,8 @@ async function subVerificarRemota(code) {
     if(exp < new Date()) throw new Error("Esta licencia venció el " + lic.fecha_vencimiento.split("-").reverse().join("/"));
   }
 
-  // ── Control de dispositivos ──
+  // ── Control de dispositivos (CEO no tiene límite) ──
+  if (lic.plan !== 'ceo') {
   const deviceId = getDeviceId();
   const dispositivos = Array.isArray(lic.dispositivos) ? lic.dispositivos : [];
   const limite = lic.plan === 'clinica' ? (lic.limite_pacientes || 15) : 1;
@@ -13036,6 +14008,7 @@ async function subVerificarRemota(code) {
       }
     );
   }
+  } // fin if (lic.plan !== 'ceo')
 
   // ── Guardar nombre automáticamente si viene de Supabase ──
   const nombreCompleto = [lic.nombre, lic.apellido].filter(Boolean).join(' ').trim();
@@ -13125,7 +14098,8 @@ async function subActivar() {
 function subAplicarAcceso(lic) {
   subActiva = true;
   subPlan   = lic.plan;
-  // Mostrar onboarding si es primer uso
+  // Detectar CEO por plan
+  _detectarCEO(lic.plan);
   setTimeout(_initOnboarding, 800);
   // Inicializar modo terapeuta
   setTimeout(_initModoTerapeuta, 900);
@@ -13133,7 +14107,7 @@ function subAplicarAcceso(lic) {
   const badge = document.getElementById('plan-badge');
   badge.style.display = 'block';
   const nombreDisplay = lic.nombre ? lic.nombre + ' · ' : '';
-  badge.textContent = nombreDisplay + (lic.plan === 'clinica' ? '🏥 CLÍNICA' : '👤 INDIVIDUAL') + ' · ACTIVO';
+  badge.textContent = nombreDisplay + (lic.plan === 'ceo' ? '👑 CEO HADRION' : lic.plan === 'clinica' ? '🏥 CLÍNICA' : '👤 INDIVIDUAL') + ' · ACTIVO';
   // ── Mostrar nombre debajo de "Hadrion" en el top bar ──
   const logoUser = document.getElementById('logo-username');
   if (logoUser && lic.nombre) {
@@ -13146,8 +14120,8 @@ function subAplicarAcceso(lic) {
   if (micBtn) micBtn.style.display = 'flex';
   const btnCerrar = document.getElementById('btn-cerrar-sesion');
   if(btnCerrar) btnCerrar.style.display = 'flex';
-  // Aviso de vencimiento próximo al abrir la app
-  if(lic.expiry) {
+  // Aviso de vencimiento próximo al abrir la app (CEO nunca vence)
+  if(lic.expiry && lic.plan !== 'ceo') {
     const msRestantes = new Date(lic.expiry + 'T23:59:59') - new Date();
     const diasRestantes = Math.ceil(msRestantes / (1000 * 60 * 60 * 24));
     if(diasRestantes > 0 && diasRestantes <= 5) setTimeout(() => _mostrarAvisoVencimiento(diasRestantes, lic.expiry), 2000);
@@ -13160,6 +14134,9 @@ function subAplicarAcceso(lic) {
 /* ── Verificación periódica de sesión ── */
 async function verificarSesionActiva(code) {
   if(!code) return;
+  // CEO nunca vence ni necesita verificación periódica
+  const _localCEO = subCargarLocal();
+  if(_localCEO && _localCEO.plan === 'ceo') return;
   try {
     const res = await fetch(
       SUB_URL + '/rest/v1/licencias2?clave=eq.' + encodeURIComponent(code) + '&select=activa,fecha_vencimiento,sesion_token',
@@ -13213,7 +14190,7 @@ function _mostrarAvisoVencimiento(dias, fecha) {
     <div style="display:flex;align-items:center;gap:10px;">
       <div style="font-size:26px;flex-shrink:0;">${icono}</div>
       <div style="flex:1;">
-        <div style="font-size:12px;font-weight:900;color:white;margin-bottom:2px;">${texto}</div>
+        <div style="font-size:12px;font-weight:900;color:white;margin-bottom:2px;">${_escHtml(texto)}</div>
         <div style="font-size:10px;color:rgba(255,255,255,.7);">Renovar antes de que se bloquee el acceso</div>
       </div>
       <button onclick="document.getElementById('_cap_aviso_venc').remove()"
@@ -13246,7 +14223,7 @@ function _mostrarPantallaBloqueo(motivo, fecha) {
   div.innerHTML = `
     <div style="font-size:56px;margin-bottom:16px;">${motivo === 'vencida' ? '⏰' : '🔒'}</div>
     <div style="font-size:20px;font-weight:900;color:white;margin-bottom:12px;">ACCESO BLOQUEADO</div>
-    <div style="font-size:14px;color:#cbd5e1;margin-bottom:28px;max-width:320px;line-height:1.6;">${texto}</div>
+    <div style="font-size:14px;color:#cbd5e1;margin-bottom:28px;max-width:320px;line-height:1.6;">${_escHtml(texto)}</div>
     <a href="https://wa.me/59899926775?text=Hola%2C+necesito+renovar+mi+suscripci%C3%B3n+de+ComuniCAP"
       target="_blank" rel="noopener noreferrer"
       style="background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;border-radius:14px;padding:14px 28px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;margin-bottom:12px;">
@@ -13321,7 +14298,7 @@ async function _tomarControlDispositivo(code) {
 
 /* ── Confirmar cierre de sesión ── */
 function subCerrarSesionConfirm() {
-  if(confirm('🔒 ¿Cerrar sesión?\nTendrás que ingresar tu código la próxima vez.')) {
+  if(await uiConfirm('🔒 ¿Cerrar sesión?\nTendrás que ingresar tu código la próxima vez.')) {
     subCerrarSesion();
   }
 }
@@ -13386,8 +14363,10 @@ async function subRevalidar(local) {
 
   const local = subCargarLocal();
   if(local && local.code) {
+    // Re-detect CEO on startup
+    _detectarCEO(local.plan);
     // Verificar vencimiento local antes de mostrar
-    if(local.expiry) {
+    if(local.expiry && local.plan !== 'ceo') {
       const exp = new Date(local.expiry + "T23:59:59");
       if(exp < new Date()) {
         // Venció localmente, mostrar pantalla de activación
@@ -13395,6 +14374,8 @@ async function subRevalidar(local) {
         document.getElementById('sub-screen').classList.remove('hidden');
         return;
       }
+    } else if (local.plan === 'ceo') {
+      // CEO nunca vence
     }
     // Sesión válida: ocultar login y activar
     document.getElementById('sub-screen').classList.add('hidden');
@@ -13668,15 +14649,15 @@ function saveDatosPersonalesData() {
 
 function saveDatosPersonales() {
   const d = saveDatosPersonalesData();
-  if(!d.nombre) { alert('Por favor ingresá el nombre.'); return; }
+  if(!d.nombre) { _showToast('Por favor ingresá el nombre.', 'info'); return; }
   closeDatosPersonalesModal();
   toast('✅ Datos personales guardados');
 }
 
 function saveDatosPersonalesAndPrint() {
   const d = saveDatosPersonalesData();
-  if(!d.nombre) { alert('Por favor ingresá el nombre.'); return; }
-  if(!d.cn1 || !d.ph1) { alert('Por favor ingresá al menos un contacto de emergencia.'); return; }
+  if(!d.nombre) { _showToast('Por favor ingresá el nombre.', 'info'); return; }
+  if(!d.cn1 || !d.ph1) { _showToast('Por favor ingresá al menos un contacto de emergencia.', 'info'); return; }
   closeDatosPersonalesModal();
   printEmergencyCard();
 }
@@ -13854,7 +14835,7 @@ function _populateVoiceSelect() {
   const otherVoices = voices.filter(v => !v.lang.startsWith('es'));
   const sorted = [...esVoices, ...otherVoices];
 
-  sel.innerHTML = '';
+  sel.textContent = '';
   sorted.forEach(v => {
     const opt = document.createElement('option');
     opt.value = v.voiceURI;
@@ -14022,7 +15003,7 @@ function _renderPhrasesSearch() {
 
   const list = document.getElementById('phrases-list');
   if (!list) return;
-  list.innerHTML = '';
+  list.textContent = '';
 
   const found = allPhrases.filter(ph => {
     const t = (ph.text || ph.label || '').toLowerCase();
@@ -14213,7 +15194,7 @@ function printActSheet(activity) {
   let html = '';
   const base = `<!DOCTYPE html><html lang="es"><head>
   <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
   <title>ComuniCAP — Actividad</title>
   <style>
     @page { size: A4 portrait; margin: 14mm; }
@@ -14291,7 +15272,106 @@ function printActSheet(activity) {
     <button onclick="window.print()" style="padding:10px 24px;background:#3a86ff;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">🖨️ Imprimir</button>
     <button onclick="_cerrarApp()" style="padding:10px 24px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
 
-  </div></body></html>`;
+  </div>
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+  });
+}
+
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+</script>
+<!-- FIN CORRECCIONES -->
+
+</body></html>`;
 
   if (activity === 'sequence') {
     const diff = seqDiff || 'easy';
@@ -14569,7 +15649,7 @@ function printActSheet(activity) {
       ${footer}`;
   }
 
-  if (!html) { alert('No hay datos para imprimir'); return; }
+  if (!html) { _showToast('No hay datos para imprimir', 'info'); return; }
   const win = window.open('', '_blank');
   if (win) {
     win.document.write(html);
@@ -14698,7 +15778,7 @@ function _ttsLoadVoices() {
   const card = document.getElementById('tts-voice-card');
   if (!sel || !card) return;
   card.style.display = 'flex';
-  sel.innerHTML = '';
+  sel.textContent = '';
   // Filtrar voces en español primero
   const esVoices = voices.filter(v => v.lang.startsWith('es'));
   const allVoices = esVoices.length ? esVoices : voices;
@@ -15080,7 +16160,7 @@ function _updateCompanionDisplay() {
 
   if (!chips.length) {
     textEl.textContent = '—';
-    emojisEl.innerHTML = '';
+    emojisEl.textContent = '';
     return;
   }
 
@@ -15167,7 +16247,7 @@ function openRecentPhrases() {
   const list    = document.getElementById('recent-phrases-list');
   if (!overlay || !list) return;
 
-  list.innerHTML = '';
+  list.textContent = '';
   if (!_recentHistory.length) {
     list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text2);font-weight:700;">Aún no hay historial.<br>Seleccioná símbolos para guardarlos aquí.</div>';
   } else {
@@ -15457,7 +16537,8 @@ function camOpen(mode) {
   overlay.style.display = 'flex';
   
   // Start camera
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+  const facingMode = window._camFacing || 'environment';
+  navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false })
     .then(stream => {
       _camStream = stream;
       const video = document.getElementById('cam-preview');
@@ -15484,6 +16565,20 @@ function camClose() {
   document.getElementById('cam-recording-indicator').style.display = 'none';
   document.getElementById('cam-timer').style.display = 'none';
   _camRecording = false;
+}
+
+function camFlip() {
+  window._camFacing = (window._camFacing === 'environment') ? 'user' : 'environment';
+  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: window._camFacing }, audio: false })
+    .then(stream => {
+      _camStream = stream;
+      document.getElementById('cam-preview').srcObject = stream;
+    })
+    .catch(() => {
+      window._camFacing = window._camFacing === 'environment' ? 'user' : 'environment';
+      toast('⚠️ No se puede cambiar de cámara');
+    });
 }
 
 function camCapture() {
@@ -15665,7 +16760,16 @@ const _ANT_EMOJIS = {
   'ir':['🚶','➡️','🏃'],'venir':['⬅️','🚶','🏠'],'esperar':['⏳','⌚','😊'],
 };
 
-let _antPerfiles = JSON.parse(localStorage.getItem('ant_perfiles') || '[]');
+try {
+  _antPerfiles = JSON.parse(localStorage.getItem('ant_perfiles') || '[]');
+  // Validar tipo
+  if (!Array.isArray(_antPerfiles) && typeof _antPerfiles === 'object' && _antPerfiles === null) {
+    _antPerfiles = [];
+  }
+} catch(e) {
+  console.warn('⚠️ localStorage corrupto: ant_perfiles');
+  _antPerfiles = [];
+}
 let _antPerfilActivo = localStorage.getItem('ant_perfil_activo') || null;
 let _antDiaActivo = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][new Date().getDay()-1] || 'Lunes';
 
@@ -15704,7 +16808,7 @@ function _antSave() {
 }
 
 function _antNuevoPerfil() {
-  const nombre = prompt('Nombre del alumno:');
+  const nombre = await uiPrompt('Nombre del alumno:');
   if (!nombre || !nombre.trim()) return;
   const perfil = { id: Date.now().toString(), nombre: nombre.trim(), dias: {} };
   _antPerfiles.push(perfil);
@@ -15894,7 +16998,7 @@ function _antImprimir() {
   const win = window.open('', '_blank');
   win.document.write(`
     <!DOCTYPE html><html><head><meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://lgpqyjevdwstbnerawmp.supabase.co https://api.whatsapp.com https://api.anthropic.com;">
     <title>Anticipador — ${perfil.nombre} — ${_antDiaActivo}</title>
     <style>
       body { font-family: Arial, sans-serif; padding: 20px; background: white; }
@@ -15932,7 +17036,106 @@ function _antImprimir() {
       `).join('')}
     </div>
     <div class="footer">© ${new Date().getFullYear()} Hadrion · Adriana Soba · Uruguay · ComuniCAP – Anticipador de Actividades<br>Todos los derechos reservados. Prohibida su reproducción sin autorización.</div>
-    </body></html>
+    
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+  });
+}
+
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+</script>
+<!-- FIN CORRECCIONES -->
+
+</body></html>
   `);
   win.document.close();
   setTimeout(() => win.print(), 500);
@@ -16013,22 +17216,13 @@ async function _antGenerarIA() {
   result.style.display = 'none';
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const local = subCargarLocal();
+    const resp = await fetch('https://lgpqyjevdwstbnerawmp.supabase.co/functions/v1/anticipador-ia', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 400,
-        system: `Sos un asistente para fonoaudiólogos que trabajan con usuarios de CAA (comunicación aumentativa y alternativa) en Uruguay. 
-Tu tarea: dado el nombre de una actividad en español, devolvé SOLO un JSON válido con esta estructura exacta, sin texto adicional, sin bloques de código:
-{"emojis":["🎨","✏️","🖍️"],"pictogramas":["pintura","lápiz","crayón"],"sugerencia":"Frase de anticipación breve para el alumno (máx 12 palabras)"}
-- emojis: array de 3 emojis que representen visualmente la actividad
-- pictogramas: array de 3 palabras clave simples relacionadas (en español, sin tildes en la respuesta JSON)
-- sugerencia: frase motivadora corta en vos rioplatense para anticipar la actividad al alumno`,
-        messages: [{ role: 'user', content: `Actividad: ${texto}` }]
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUB_ANON },
+      body: JSON.stringify({ actividad: texto, nombre_usuario: local?.nombre || '' })
     });
-    const data = await resp.json();
+        const data = await resp.json();
     const raw = (data.content || []).map(b => b.text || '').join('');
     let parsed;
     try {
@@ -16089,7 +17283,7 @@ const _BETA = {
   MAX_USERS: 10,
   DAYS: 20,
   SB_URL: "https://lgpqyjevdwstbnerawmp.supabase.co",
-  SB_KEY: SUB_ANON,
+  SB_KEY: "sb_publishable_ezLQMGeIrqgHPMyINUGHKw_mTDTNR61",
   ADMIN_EMAIL: "comunipro12@gmail.com",
   EMAILJS_SVC: "service_65f8zaq",
   EMAILJS_TPL: "template_iqdmr15",
@@ -16423,9 +17617,9 @@ async function betaInit(appName) {
     window.history.replaceState({}, '', window.location.pathname);
     const result = await betaActivate(betaCode, appName);
     if (result.ok) {
-      alert('✅ ¡Código beta activado!\n\nBienvenido/a ' + result.name + '\n' + result.days + ' días de acceso completo a ' + appName);
+      _showToast('✅ ¡Código beta activado!\n\nBienvenido/a ' + result.name + '\n' + result.days + ' días de acceso completo a ' + appName, 'info');
     } else {
-      alert(result.msg);
+      _showToast(result.msg, 'warning');
     }
   }
   
@@ -16523,7 +17717,16 @@ function _calcularDias(fechaStr) {
 
 function _capDeletePhrase(id) {
   try {
-    let phrases = JSON.parse(localStorage.getItem('comunicap_phrases_v2') || '[]');
+    try {
+  phrases = JSON.parse(localStorage.getItem('comunicap_phrases_v2') || '[]');
+  // Validar tipo
+  if (!Array.isArray(phrases) && typeof phrases === 'object' && phrases === null) {
+    phrases = [];
+  }
+} catch(e) {
+  console.warn('⚠️ localStorage corrupto: comunicap_phrases_v2');
+  phrases = [];
+}
     phrases = phrases.filter(p => p.id !== id);
     localStorage.setItem('comunicap_phrases_v2', JSON.stringify(phrases));
     showMisFrases(); // refresh
@@ -16634,18 +17837,30 @@ function capBuscarPicto(query) {
     grid.innerHTML = '<div style="color:var(--text3);font-size:0.85rem;text-align:center;padding:32px;grid-column:1/-1;">No se encontraron pictogramas</div>';
     return;
   }
-  grid.innerHTML = '';
+  grid.textContent = '';
   results.slice(0, 30).forEach(function(el) { grid.appendChild(el); });
 }
 
 async function cargarPictogramasSupabase() {
   try {
+    // AbortController con timeout de 8 segundos
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    
     const res = await fetch(SUB_URL + '/rest/v1/pictogramas?app=eq.comunicap&activo=eq.true&order=categoria,orden&select=*', {
-      headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON }
+      headers: { apikey: SUB_ANON, Authorization: 'Bearer ' + SUB_ANON },
+      signal: controller.signal
     });
-    if (!res.ok) return;
+    
+    clearTimeout(timeout);
+    
+    if (!res.ok) {
+      console.warn('⚠️ Supabase respondió con error:', res.status);
+      return;
+    }
+    
     const data = await res.json();
-    if (!data || !data.length) return; // Sin datos remotos, usar locales
+    if (!data || !Array.isArray(data) || !data.length) return; // Sin datos remotos, usar locales
 
     // Agregar pictogramas que no existen localmente
     let added = 0;
@@ -16664,7 +17879,15 @@ async function cargarPictogramasSupabase() {
     });
 
     if (added > 0) renderGrid();
-  } catch(e) { /* falla silenciosamente, usa símbolos locales */ }
+  } catch(e) { 
+    clearTimeout(timeout);
+    if (e.name === 'AbortError') {
+      console.warn('⚠️ Timeout cargando pictogramas de Supabase (8s). Continuando con locales.');
+    } else {
+      console.warn('⚠️ Error cargando pictogramas de Supabase:', e.message);
+    }
+    /* Falla silenciosamente, usa símbolos locales */ 
+  }
 }
 
 function coreVocabTap(label, emoji) {
@@ -16715,7 +17938,7 @@ function handleVideoUpload(e) {
 }
 
 function showMsgHistory() {
-  if (!_msgHistory.length) { alert('Sin historial aún. Usá la app para construir mensajes.'); return; }
+  if (!_msgHistory.length) { _showToast('Sin historial aún. Usá la app para construir mensajes.', 'info'); return; }
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:20px;';
   const bx = document.createElement('div');
@@ -16727,7 +17950,7 @@ function showMsgHistory() {
   _msgHistory.forEach(function(h) {
     const row = document.createElement('div');
     row.style.cssText = 'padding:10px;border-bottom:1px solid #1f2937;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:8px;';
-    row.innerHTML = '<span style="font-size:1.3rem;">' + h.emoji + '</span><span style="font-size:0.88rem;color:#f1f5f9;flex:1;">' + h.text + '</span>';
+    row.innerHTML = '<span style="font-size:1.3rem;">' + h.emoji + '</span><span style="font-size:0.88rem;color:#f1f5f9;flex:1;">' + _escHtml(h.text) + '</span>';
     row.onclick = function() {
       if (typeof window.speechSynthesis !== 'undefined') {
         window.speechSynthesis.cancel();
@@ -17102,7 +18325,7 @@ function antPictoGuardar() {
     <div id="cam-recording-indicator" style="display:none;text-align:center;color:#ef4444;font-weight:900;font-size:13px;margin-top:8px;">🔴 GRABANDO...</div>
     <div id="cam-timer" style="display:none;text-align:center;color:#ffd166;font-weight:900;font-size:20px;margin:4px 0;">0s</div>
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <button id="cam-capture-btn" onclick="camCapture()"
+      <button id="cam-capture-btn" onclick="camCapture()" aria-label="Sacar foto"
         style="flex:1;padding:14px;background:linear-gradient(135deg,#3a86ff,#7c3aed);color:white;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;">
         📷 SACAR FOTO
       </button>
@@ -17110,8 +18333,12 @@ function antPictoGuardar() {
         style="flex:1;padding:14px;background:linear-gradient(135deg,#ef4444,#b91c1c);color:white;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;">
         🎬 GRABAR
       </button>
+      <button onclick="camFlip()" aria-label="Cambiar cámara frontal o trasera"
+        style="padding:14px;background:rgba(255,255,255,.15);color:white;border:none;border-radius:12px;font-size:20px;cursor:pointer;" title="Cambiar cámara">
+        🔄
+      </button>
     </div>
-    <button onclick="camClose()"
+    <button onclick="camClose()" aria-label="Cerrar cámara"
       style="width:100%;margin-top:8px;padding:12px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;">
       ✕ Cancelar
     </button>
@@ -17515,6 +18742,105 @@ function _catEditClose() {
     </button>
   </div>
 </div>
+
+
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+  });
+}
+
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
+</script>
+<!-- FIN CORRECCIONES -->
 
 </body>
 
@@ -18138,71 +19464,123 @@ function _catEditClose() {
 
 
 <script>
-/* ── Service Worker: modo offline para CAA (CRÍTICO) ── */
-if ('serviceWorker' in navigator) {
+/* ── Service Worker: modo offline para CAA ── */
+// El SW via blob no funciona en GitHub Pages (restricción de seguridad)
+// La app funciona perfectamente sin SW (modo online)
+// Para activar SW offline completo, crear archivo sw.js separado en el repo
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.href.includes('blob:')) {
   window.addEventListener('load', () => {
-    // SW inline via Blob para no requerir archivo separado
-    // ⚠️  NOTA: En producción, es preferible un archivo sw.js separado para:
-    //    1. Mejor cacheo (sin re-parsear HTML cada vez)
-    //    2. Updates más rápidos (no depende del HTML)
-    //    3. Scope explícito y predecible
-    //    4. Debugging más fácil en DevTools
-    const swCode = `
-const CACHE = 'comunicap-v14';
-const ASSETS = [location.pathname || '/'];
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
-  );
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
-});
-self.addEventListener('fetch', e => {
-  // Solo cachear requests GET del mismo origen
-  if (e.request.method !== 'GET') return;
-  const url = new URL(e.request.url);
-  // No cachear peticiones a Supabase (licencias deben verificarse online)
-  if (url.hostname.includes('supabase.co')) return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(resp => {
-        if (resp && resp.status === 200 && resp.type === 'basic') {
-          const clone = resp.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
+    // Solo intentar si hay un sw.js real disponible
+    fetch('/sw.js', { method: 'HEAD' })
+      .then(r => {
+        if (r.ok) {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(() => console.log('✅ SW offline activo'))
+            .catch(() => {});
         }
-        return resp;
-      }).catch(() => cached || new Response('Sin conexión. Recargá cuando tengas internet.', {status: 503}));
-    })
-  );
-});
-`;
-    try {
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
-      // FIX: Usar scope explicit y manejar errores mejor
-      navigator.serviceWorker.register(swUrl, { scope: '/' })
-        .then(reg => { 
-          console.log('✅ SW registrado — modo offline activo'); 
-          // Auto-cleanup del Blob URL después de registro (opcional pero recomendado)
-          setTimeout(() => { try { URL.revokeObjectURL(swUrl); } catch(e) {} }, 1000);
-        })
-        .catch(err => { 
-          console.warn('⚠️  SW no registrado:', err.message); 
-          // No bloquea la app, solo pierde funcionalidad offline
-        });
-    } catch(e) {
-      console.warn('⚠️  SW blob no soportado:', e.message);
-      // No bloquea la app, funciona en modo online
-    }
+      })
+      .catch(() => {});
+  });
+}
+</script>
+
+<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
+<script>
+// Modal de confirmación reutilizable
+async function uiConfirm(message) {
+  return new Promise((resolve) => {
+    const id = 'uiConfirmModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
   });
 }
 
+// Modal de entrada de texto reutilizable
+async function uiPrompt(message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const id = 'uiPromptModal_' + Date.now();
+    const modal = document.createElement('div');
+    modal.id = id;
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: flex; align-items: center;
+      justify-content: center; z-index: 10000;
+    `;
+    modal.innerHTML = `
+      <div style="background: white; padding: 20px; border-radius: 8px;
+                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
+        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
+               style="width: 100%; padding: 8px; border: 1px solid #ccc;
+                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
+                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+            Cancelar
+          </button>
+          <button id="${id}_ok" style="padding: 8px 16px; border: none;
+                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+            Aceptar
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const input = document.getElementById(`${id}_input`);
+    input.focus();
+    input.select();
+    
+    const cleanup = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    
+    document.getElementById(`${id}_ok`).addEventListener('click', () => {
+      cleanup(input.value);
+    });
+    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
+      cleanup(null);
+    });
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') cleanup(input.value);
+      if (e.key === 'Escape') cleanup(null);
+    });
+  });
+}
 </script>
+<!-- FIN CORRECCIONES -->
+
 </body>
 </html>
