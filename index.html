@@ -6977,7 +6977,7 @@ const CAT_CLASS = {
 ══════════════════════════════════════════════════════ */
 function renderGrid() {
   const grid = document.getElementById('sym-grid');
-  grid.textContent = '';
+  grid.innerHTML = '';
 
   // Inject a category print button for printable pictogram categories
   const PRINTABLE_CATS = {
@@ -7007,7 +7007,7 @@ function renderGrid() {
       catPrintBar.style.display = 'block';
     } else {
       catPrintBar.style.display = 'none';
-      catPrintBar.textContent = '';
+      catPrintBar.innerHTML = '';
     }
   }
 
@@ -7026,7 +7026,7 @@ function renderGrid() {
     // visual
     let visual = '';
     if(sym.photo) {
-      visual = `<img class="sym-photo" src="${sym.photo}" alt="${_escHtml(sym.label)}">`;
+      visual = `<img class="sym-photo" src="${sym.photo}" alt="${sym.label}">`;
     } else if(sym._numVal !== undefined) {
       // Number pictogram: big digit + dots
       const n = sym._numVal;
@@ -7035,7 +7035,7 @@ function renderGrid() {
     } else {
       visual = `<span class="sym-em">${sym.emoji}</span>`;
     }
-    const lbl = `<span class="sym-lbl" ${showLabels?'':'style="display:none"'}>${_escHtml(sym.label)}</span>`;
+    const lbl = `<span class="sym-lbl" ${showLabels?'':'style="display:none"'}>${sym.label}</span>`;
     const badge = `<div class="edit-badge" onclick="openEdit(event,${sym.id})">✏️</div>`;
 
     card.innerHTML = visual + lbl + badge;
@@ -7118,7 +7118,7 @@ function addSymbol(sym) {
 function renderOutput() {
   const chips = document.getElementById('output-chips');
   const ph    = document.getElementById('output-placeholder');
-  chips.textContent = '';
+  chips.innerHTML = '';
   if(!outputQueue.length) {
     chips.appendChild(ph);
   } else {
@@ -7408,14 +7408,14 @@ function kbdConvertToPictos(text) {
   }
 
   const strip = document.getElementById('kbd-picto-strip');
-  strip.textContent = '';
+  strip.innerHTML = '';
   matched.forEach(sym => {
     const chip = document.createElement('div');
     chip.className = 'kbd-pic-chip';
     const vis = sym.photo
       ? `<img class="kpc-em" src="${sym.photo}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;">`
       : `<span class="kpc-em">${sym.emoji}</span>`;
-    chip.innerHTML = vis + `<span class="kpc-lbl">${_escHtml(sym.label)}</span>`;
+    chip.innerHTML = vis + `<span class="kpc-lbl">${sym.label}</span>`;
     strip.appendChild(chip);
   });
 
@@ -7624,7 +7624,7 @@ function enviarSolicitudWACAP() {
 ══════════════════════════════════════════════════════ */
 function buildEmojiPicker(selected) {
   const row = document.getElementById('emoji-picker-row');
-  row.textContent = '';
+  row.innerHTML = '';
   EMOJI_POOL.forEach(em => {
     const span = document.createElement('span');
     span.className = 'epick' + (em === selected ? ' sel' : '');
@@ -8154,7 +8154,7 @@ function renderSeqEx() {
 
   // Sequence row
   const row = document.getElementById('seq-row');
-  row.textContent = '';
+  row.innerHTML = '';
   ex.seq.forEach((em,i) => {
     if(i>0){ const ar=document.createElement('span'); ar.className='seq-arrow'; ar.textContent='→'; row.appendChild(ar); }
     const cell = document.createElement('div');
@@ -8166,7 +8166,7 @@ function renderSeqEx() {
   // Shuffle options
   const opts = [...ex.opts].sort(()=>Math.random()-.5);
   const grid = document.getElementById('seq-ans');
-  grid.textContent = '';
+  grid.innerHTML = '';
   opts.forEach(opt => {
     const btn = document.createElement('button');
     btn.className='ans-btn'; btn.textContent=opt;
@@ -8365,7 +8365,7 @@ function renderCogEx() {
   document.getElementById('cog-next').className = 'ex-next-btn';
   document.getElementById('cog-num').textContent = cogIdx+1;
 
-  body.textContent = '';
+  body.innerHTML = '';
 
   if(cogType==='memory') {
     q.textContent = '👀 MEMORIZA ESTOS EMOJIS:';
@@ -8411,7 +8411,7 @@ function renderCogEx() {
         b.onclick = () => checkCogAns(opt, localEx.answer, b);
         grid.appendChild(b);
       });
-      qArea.textContent = '';
+      qArea.innerHTML = '';
       qArea.appendChild(grid);
       qArea.style.display = 'flex';
     };
@@ -8499,7 +8499,7 @@ function renderIqEx() {
   document.getElementById('iq-num').textContent=iqIdx+1;
 
   q.textContent=ex.q;
-  body.textContent = '';
+  body.innerHTML='';
 
   if(ex.items) {
     const row=document.createElement('div');
@@ -8592,7 +8592,7 @@ function buildFoodGrid() {
   FOOD_ITEMS.forEach(([em, label]) => {
     const card=document.createElement('div');
     card.className='food-card';
-    card.innerHTML = `<div class="f-em">${em}</div><div class="f-lbl">${_escHtml(label)}</div>`;
+    card.innerHTML=`<div class="f-em">${em}</div><div class="f-lbl">${label}</div>`;
     card.onclick=()=>{ speak(label); toast('🔊 '+label); };
     grid.appendChild(card);
   });
@@ -9048,16 +9048,7 @@ function clearEmotionPage(idx) {
 ══════════════════════════════════════════════════════ */
 let builderQueue = [];   // [{label, emoji, photo}]
 let builderCat = 'todo';
-try {
-  savedPhrases = JSON.parse(localStorage.getItem('comunicap_phrases') || '[]');
-  // Validar tipo
-  if (!Array.isArray(savedPhrases) && typeof savedPhrases === 'object' && savedPhrases === null) {
-    savedPhrases = [];
-  }
-} catch(e) {
-  console.warn('⚠️ localStorage corrupto: comunicap_phrases');
-  savedPhrases = [];
-}
+let savedPhrases = JSON.parse(localStorage.getItem('comunicap_phrases') || '[]');
 
 function builderConvertText() {
   const input = document.getElementById('builder-text-input');
@@ -9147,7 +9138,7 @@ function builderBuildCatTabs() {
 
 function builderRenderGrid() {
   const grid = document.getElementById('builder-sym-grid');
-  grid.textContent = '';
+  grid.innerHTML = '';
   const list = builderCat === 'todo' ? symbols : symbols.filter(s => s.cat === builderCat);
   list.forEach(sym => {
     const card = document.createElement('div');
@@ -9155,13 +9146,13 @@ function builderRenderGrid() {
     card.className = `bld-sym-card ${cc}`;
     let vis;
     if(sym.photo) {
-      vis = `<img class="bs-img" src="${sym.photo}" alt="${_escHtml(sym.label)}">`;
+      vis = `<img class="bs-img" src="${sym.photo}" alt="${sym.label}">`;
     } else if(sym._numVal !== undefined) {
       vis = `<div class="num-digit" style="font-size:18px">${sym._numVal}</div><div class="num-dots" style="width:36px;height:36px">${buildDots(sym._numVal)}</div>`;
     } else {
       vis = `<span class="bs-em">${sym.emoji}</span>`;
     }
-    card.innerHTML = vis + `<span class="bs-lbl">${_escHtml(sym.label)}</span>`;
+    card.innerHTML = vis + `<span class="bs-lbl">${sym.label}</span>`;
     card.onclick = () => {
       builderQueue.push({label: sym.label, emoji: sym.emoji, photo: sym.photo||null});
       builderRenderStrip();
@@ -9174,7 +9165,7 @@ function builderRenderGrid() {
 function builderRenderStrip() {
   const strip = document.getElementById('builder-strip');
   const lbl2  = document.getElementById('builder-strip-label2');
-  strip.textContent = '';
+  strip.innerHTML = '';
   if(!builderQueue.length) {
     lbl2.style.display = 'none';
     const p = document.createElement('span');
@@ -9190,7 +9181,7 @@ function builderRenderStrip() {
     const vis = sym.photo
       ? `<img class="bc-img" src="${sym.photo}">`
       : `<span class="bc-em">${sym.emoji}</span>`;
-    chip.innerHTML = vis + `<span class="bc-lbl">${_escHtml(sym.label)}</span><span class="bc-del" onclick="builderRemove(${i})">✕</span>`;
+    chip.innerHTML = vis + `<span class="bc-lbl">${sym.label}</span><span class="bc-del" onclick="builderRemove(${i})">✕</span>`;
     strip.appendChild(chip);
   });
 }
@@ -9402,7 +9393,7 @@ function ppmSetLayout(lay, btn) {
 function ppmRenderPictos() {
   const wrap = document.getElementById('ppm-pictos-wrap');
   if (!wrap) return;
-  wrap.textContent = '';
+  wrap.innerHTML = '';
   if (!_ppSyms.length) {
     wrap.innerHTML = '<span style="font-size:12px;color:#aab;font-weight:700;">Sin pictogramas</span>';
     return;
@@ -9585,9 +9576,9 @@ function _initCEOUI() {
 }
 
 function ceoAgregarPictograma() {
-  const emoji = await uiPrompt('Emoji del pictograma:');
+  const emoji = prompt('Emoji del pictograma:');
   if (!emoji) return;
-  const etiqueta = await uiPrompt('Nombre/etiqueta (ej: AUTO, CASA):');
+  const etiqueta = prompt('Nombre/etiqueta (ej: AUTO, CASA):');
   if (!etiqueta) return;
   const cats = ['action','thing','place','social','time','describe','question','pronoun','health','hygiene','food2','clothes','animales','frutas','verduras'];
   const cat = prompt('Categoría:
@@ -9675,16 +9666,7 @@ const EMOJI_NAMES = {
 };
 
 let _emojiCurrentCat = 'caras';
-try {
-  _emojiRecientes = JSON.parse(localStorage.getItem('cap_emoji_recientes') || '[]');
-  // Validar tipo
-  if (!Array.isArray(_emojiRecientes) && typeof _emojiRecientes === 'object' && _emojiRecientes === null) {
-    _emojiRecientes = [];
-  }
-} catch(e) {
-  console.warn('⚠️ localStorage corrupto: cap_emoji_recientes');
-  _emojiRecientes = [];
-}
+let _emojiRecientes = JSON.parse(localStorage.getItem('cap_emoji_recientes') || '[]');
 
 function emojiPickerInit() {
   // Render category tabs
@@ -9766,105 +9748,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (orig) window.openEditModal = function(...a) { orig(...a); setTimeout(emojiPickerInit, 50); };
 });
 <\/script>
-
-
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
 
 </body></html>`;
 
@@ -9976,7 +9859,7 @@ function phrasesInit() {
 
 function phrasesRenderCatBar() {
   const bar = document.getElementById('phrases-cat-bar');
-  bar.textContent = '';
+  bar.innerHTML = '';
 
   // "Mis frases" tab — PRIMERO y destacado
   const myBtn = document.createElement('button');
@@ -10015,7 +9898,7 @@ function phrasesRenderCatBar() {
 
 function phrasesRenderList() {
   const list = document.getElementById('phrases-list');
-  list.textContent = '';
+  list.innerHTML = '';
 
   if(currentPhraseCat === '_saved') {
     if(!savedPhrases.length) {
@@ -10074,7 +9957,7 @@ function phraseBuildCard(text, syms, isSaved, id) {
     if(s.photo) {
       pic.innerHTML = `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
     } else {
-      pic.innerHTML = `<span>${s.emoji}</span><span class="pp-lbl">${_escHtml(s.label)}</span>`;
+      pic.innerHTML = `<span>${s.emoji}</span><span class="pp-lbl">${s.label}</span>`;
     }
     picWrap.appendChild(pic);
   });
@@ -10135,15 +10018,13 @@ function phraseBuildCard(text, syms, isSaved, id) {
     delBtn.style.minWidth = '50px';
     delBtn.onclick = (e) => {
       e.stopPropagation();
-      uiConfirm('¿Eliminar la frase "' + text + '"?').then(ok => {
-        if(ok) {
-          savedPhrases = savedPhrases.filter(p => p.id !== id);
-          try { localStorage.setItem('comunicap_phrases', JSON.stringify(savedPhrases)); } catch(e){}
-          phrasesRenderCatBar(); // actualiza contador
-          phrasesRenderList();
-          toast('🗑️ Frase eliminada');
-        }
-      });
+      if(confirm('¿Eliminar la frase "' + text + '"?')) {
+        savedPhrases = savedPhrases.filter(p => p.id !== id);
+        try { localStorage.setItem('comunicap_phrases', JSON.stringify(savedPhrases)); } catch(e){}
+        phrasesRenderCatBar(); // actualiza contador
+        phrasesRenderList();
+        toast('🗑️ Frase eliminada');
+      }
     };
     actions.appendChild(delBtn);
   } else {
@@ -10348,106 +10229,7 @@ function executePrintAllPhrases() {
       <button onclick="window.print()" style="padding:12px 28px;background:#06d6a0;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">🖨️ Imprimir</button>
       <button onclick="_cerrarApp()" style="padding:12px 28px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
     </div>
-  
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
-
-</body></html>`;
+  </body></html>`;
 
   document.getElementById('print-all-modal').style.display = 'none';
 
@@ -10581,18 +10363,16 @@ let pbEditPhoto= null;
 let pbInited   = false;
 
 function pbReset() {
-  uiConfirm('¿Restaurar el tablero a los pictogramas originales? Los cambios se perderán.').then(ok => {
-    if(!ok) return;
-    pbCells = PB_DEFAULT.map((c,i) => ({...c, id:i, photo:null}));
-    pbInited = true;
-    pbCols = 11; pbTheme = 'comunipro';
-    pbTitle = 'MI TABLERO DE COMUNICACIÓN';
-    document.getElementById('pb-cols-select').value = '11';
-    document.getElementById('pb-color-select').value = 'comunipro';
-    pbSaveState();
-    pbRender();
-    toast('🔄 Tablero restaurado al original');
-  });
+  if(!confirm('¿Restaurar el tablero a los pictogramas originales? Los cambios se perderán.')) return;
+  pbCells = PB_DEFAULT.map((c,i) => ({...c, id:i, photo:null}));
+  pbInited = true;
+  pbCols = 11; pbTheme = 'comunipro';
+  pbTitle = 'MI TABLERO DE COMUNICACIÓN';
+  document.getElementById('pb-cols-select').value = '11';
+  document.getElementById('pb-color-select').value = 'comunipro';
+  pbSaveState();
+  pbRender();
+  toast('🔄 Tablero restaurado al original');
 }
 
 function pbInit() {
@@ -10613,7 +10393,7 @@ function pbRender() {
   const grid = document.getElementById('pb-grid');
   grid.style.gridTemplateColumns = `repeat(${pbCols}, 1fr)`;
   grid.className = `pb-theme-${pbTheme}`;
-  grid.textContent = '';
+  grid.innerHTML = '';
 
   pbCells.forEach((cell, i) => {
     const div = document.createElement('div');
@@ -10670,7 +10450,7 @@ function pbOpenModal(idx) {
 
 function pbBuildEmojiPicker(selected) {
   const row = document.getElementById('pb-emoji-row');
-  row.textContent = '';
+  row.innerHTML = '';
   EMOJI_POOL.forEach(em => {
     const span = document.createElement('span');
     span.className = 'pb-epick' + (em === selected ? ' sel' : '');
@@ -10846,12 +10626,12 @@ function renderEqEx() {
   const opts = [...wrongs, ex].sort(()=>Math.random()-.5);
 
   const grid = document.getElementById('eq-ans');
-  grid.textContent = '';
+  grid.innerHTML='';
   const exSnapshot = {name: ex.name, em: ex.em, color: ex.color, bg: ex.bg, desc: ex.desc};
   opts.forEach((opt, oi) => {
     const b = document.createElement('button');
     b.className='ans-btn';
-    b.innerHTML = `<span style="font-size:26px;line-height:1.2;display:block;">${opt.em}</span><span style="font-size:11px;font-weight:800;">${_escHtml(opt.name)}</span>`;
+    b.innerHTML = `<span style="font-size:26px;line-height:1.2;display:block;">${opt.em}</span><span style="font-size:11px;font-weight:800;">${opt.name}</span>`;
     const optName = opt.name;
     if(optName === exSnapshot.name) b.dataset.correct = '1';
     b.onclick = () => checkEqAns(optName, exSnapshot.name, b, exSnapshot);
@@ -10984,7 +10764,7 @@ function initSortCat() {
 
   // Render boards
   const boards = document.getElementById('sc-boards');
-  boards.textContent = '';
+  boards.innerHTML='';
   scActiveCats.forEach(cat => {
     const d = document.createElement('div');
     d.className = 'sc-board';
@@ -10992,7 +10772,7 @@ function initSortCat() {
     d.dataset.catid = cat.id;
     d.dataset.catcolor = cat.color;
     d.style.borderColor = cat.color + '66';
-    d.innerHTML = `<div class="sc-board-title" style="color:${cat.color};border-bottom-color:${cat.color}33">${_escHtml(cat.name)}</div>
+    d.innerHTML = `<div class="sc-board-title" style="color:${cat.color};border-bottom-color:${cat.color}33">${cat.name}</div>
       <div class="sc-board-items" id="sc-placed-${cat.id}"></div>`;
     // Touch drop by tap
     d.addEventListener('click', () => scDropByTap(cat.id, cat.color));
@@ -11002,7 +10782,7 @@ function initSortCat() {
 
   // Render bank
   const bank = document.getElementById('sc-bank-row');
-  bank.textContent = '';
+  bank.innerHTML='';
   allItems.forEach((item, i) => {
     const parts = item.text.split(' ');
     const em = parts[0];
@@ -11242,7 +11022,7 @@ function initPictoCat() {
 
   // Boards
   const boards = document.getElementById('pc-boards');
-  boards.textContent = '';
+  boards.innerHTML='';
   pcActiveCats.forEach(cat => {
     const d = document.createElement('div');
     d.className = 'sc-board';
@@ -11250,7 +11030,7 @@ function initPictoCat() {
     d.dataset.catid = cat.id;
     d.dataset.catcolor = cat.color;
     d.style.borderColor = cat.color + '66';
-    d.innerHTML = `<div class="sc-board-title" style="color:${cat.color};border-bottom-color:${cat.color}33">${_escHtml(cat.name)}</div>
+    d.innerHTML = `<div class="sc-board-title" style="color:${cat.color};border-bottom-color:${cat.color}33">${cat.name}</div>
       <div class="sc-board-items" id="pc-placed-${cat.id}"></div>`;
     d.addEventListener('click', () => pcDropByTap(cat.id, cat.color));
     boards.appendChild(d);
@@ -11258,7 +11038,7 @@ function initPictoCat() {
 
   // Bank
   const bank = document.getElementById('pc-bank-row');
-  bank.textContent = '';
+  bank.innerHTML='';
   allItems.forEach((item, i) => {
     const d = document.createElement('div');
     d.className = 'sc-item';
@@ -11483,35 +11263,17 @@ function emRequestGPS() {
 function openEmergencyPanel() {
   // Load saved contacts
   try {
-    try {
-  c1 = JSON.parse(localStorage.getItem('em_contact1') || 'null');
-  // Validar tipo
-  if (!Array.isArray(c1) && typeof c1 === 'object' && c1 === null) {
-    c1 = null;
-  }
-} catch(e) {
-  console.warn('⚠️ localStorage corrupto: em_contact1');
-  c1 = null;
-}
-    try {
-  c2 = JSON.parse(localStorage.getItem('em_contact2') || 'null');
-  // Validar tipo
-  if (!Array.isArray(c2) && typeof c2 === 'object' && c2 === null) {
-    c2 = null;
-  }
-} catch(e) {
-  console.warn('⚠️ localStorage corrupto: em_contact2');
-  c2 = null;
-}
+    const c1 = JSON.parse(localStorage.getItem('em_contact1')||'null');
+    const c2 = JSON.parse(localStorage.getItem('em_contact2')||'null');
     const div1 = document.getElementById('em-contact1-btn');
     const div2 = document.getElementById('em-contact2-btn');
     if(c1 && c1.name && c1.phone) {
       div1.style.display = 'block';
-      div1.innerHTML = `<a class="em-call-btn" href="tel:${c1.phone}" onclick="try{window.location.href='tel:${c1.phone}'}catch(e){}">📞 LLAMAR A ${_escHtml(c1.name.toUpperCase())}</a>`;
+      div1.innerHTML = `<a class="em-call-btn" href="tel:${c1.phone}" onclick="try{window.location.href='tel:${c1.phone}'}catch(e){}">📞 LLAMAR A ${c1.name.toUpperCase()}</a>`;
     } else { div1.style.display = 'none'; }
     if(c2 && c2.name && c2.phone) {
       div2.style.display = 'block';
-      div2.innerHTML = `<a class="em-call-btn" href="tel:${c2.phone}" onclick="try{window.location.href='tel:${c2.phone}'}catch(e){}">📞 LLAMAR A ${_escHtml(c2.name.toUpperCase())}</a>`;
+      div2.innerHTML = `<a class="em-call-btn" href="tel:${c2.phone}" onclick="try{window.location.href='tel:${c2.phone}'}catch(e){}">📞 LLAMAR A ${c2.name.toUpperCase()}</a>`;
     } else { div2.style.display = 'none'; }
   } catch(e) {}
   document.getElementById('emergency-panel').classList.add('open');
@@ -11821,7 +11583,7 @@ function ltInit() {
 function ltRender() {
   const grid = document.getElementById('lt-grid');
   grid.style.gridTemplateColumns = `repeat(${ltCols}, 1fr)`;
-  grid.textContent = '';
+  grid.innerHTML = '';
 
   ltCells.forEach((cell, idx) => {
     const div = document.createElement('div');
@@ -11868,7 +11630,7 @@ function ltOpenModal(idx) {
 
 function ltBuildEmojiPicker(selected) {
   const row = document.getElementById('lt-emoji-row');
-  row.textContent = '';
+  row.innerHTML = '';
   LT_EMOJIS.forEach(em => {
     const sp = document.createElement('span');
     sp.className = 'lt-epick' + (em===selected?' sel':'');
@@ -11890,7 +11652,7 @@ function ltSaveCell() {
   const lbl = document.getElementById('lt-edit-label').value.trim().toUpperCase();
   const cat = document.getElementById('lt-edit-cat').value;
   const em  = document.getElementById('lt-prev-em').textContent || '❓';
-  if(!lbl) { _showToast('Ingresá una etiqueta', 'info'); return; }
+  if(!lbl) { _showToast('Ingresá una etiqueta', 'warning'); return; }
   if(ltIsNew) {
     ltCells.push({ e:em, l:lbl, cat, id: Date.now() });
   } else {
@@ -11927,14 +11689,12 @@ function ltEditTitle() {
 }
 
 function ltReset() {
-  uiConfirm('¿Restaurar el tablero a los valores originales? Se perderán los cambios.').then(ok => {
-    if(!ok) return;
-    ltCells = LT_DEFAULT_CELLS.map((c,i)=>({...c, id:i}));
-    ltTitle = 'TABLERO BAJA TECNOLOGÍA';
-    ltCols  = 5;
-    ltSave();
-    ltInit();
-  });
+  if(!confirm('¿Restaurar el tablero a los valores originales? Se perderán los cambios.')) return;
+  ltCells = LT_DEFAULT_CELLS.map((c,i)=>({...c, id:i}));
+  ltTitle = 'TABLERO BAJA TECNOLOGÍA';
+  ltCols  = 5;
+  ltSave();
+  ltInit();
 }
 
 function ltPrint() {
@@ -12013,7 +11773,7 @@ function initEmoMatch() {
 
 function renderEmoCards() {
   const grid = document.getElementById('emomatch-grid');
-  grid.textContent = '';
+  grid.innerHTML = '';
 
   emmData.forEach((em, i) => {
     const card = document.createElement('div');
@@ -12038,7 +11798,7 @@ function renderEmoCards() {
 
 function renderEmoPool() {
   const pool = document.getElementById('emomatch-pool');
-  pool.textContent = '';
+  pool.innerHTML = '';
   emmTokens.forEach((em, i) => {
     const tok = document.createElement('div');
     tok.className = 'emo-token';
@@ -12167,7 +11927,7 @@ function contactsSave() {
 function contactsRender() {
   const grid = document.getElementById('contacts-grid');
   if(!grid) return;
-  grid.textContent = '';
+  grid.innerHTML = '';
 
   contacts.forEach(c => {
     const card = document.createElement('div');
@@ -12400,7 +12160,7 @@ function showSosLocationModal(phone, baseMsg) {
   }
 
   const btns = modal.querySelector('#sos-loc-btns');
-  btns.textContent = '';
+  btns.innerHTML = '';
 
   // Button: try again after activating
   const retryBtn = document.createElement('button');
@@ -12455,7 +12215,7 @@ function openContactModal(id) {
 
   // Build avatar picker
   const row = document.getElementById('cm-avatar-row');
-  row.textContent = '';
+  row.innerHTML = '';
   CONTACT_AVATARS.forEach(av => {
     const sp = document.createElement('span');
     sp.className = 'cm-av';
@@ -12526,14 +12286,12 @@ function deleteContact() {
   if(cmEditingId === null) return;
   const c = contacts.find(x=>x.id===cmEditingId);
   if(!c) return;
-  uiConfirm('¿Eliminar el contacto ' + _escHtml(c.name) + '?').then(ok => {
-    if(!ok) return;
-    contacts = contacts.filter(x=>x.id!==cmEditingId);
-    contactsSave();
-    closeContactModal();
-    contactsRender();
-    toast('🗑️ Contacto eliminado');
-  });
+  if(!confirm('¿Eliminar el contacto ' + c.name + '?')) return;
+  contacts = contacts.filter(x=>x.id!==cmEditingId);
+  contactsSave();
+  closeContactModal();
+  contactsRender();
+  toast('🗑️ Contacto eliminado');
 }
 
 // Close contact modal on backdrop click
@@ -12609,7 +12367,7 @@ function symVisRender(cat) {
 
   // Category filter pills
   const allCats = ['todo', ...new Set(symbols.map(s => s.cat))];
-  catsDiv.textContent = '';
+  catsDiv.innerHTML = '';
   allCats.forEach(c => {
     const pill = document.createElement('button');
     pill.textContent = c === 'todo' ? '🔤 Todos' : (CAT_LABELS_ES[c] || c);
@@ -12622,7 +12380,7 @@ function symVisRender(cat) {
 
   // Symbol grid
   const list = cat === 'todo' ? symbols : symbols.filter(s => s.cat === cat);
-  gridDiv.textContent = '';
+  gridDiv.innerHTML = '';
   list.forEach(sym => {
     if(sym._numVal !== undefined) return; // skip number pictograms
     const isHidden = hiddenSymbols.has(sym.id);
@@ -12633,7 +12391,7 @@ function symVisRender(cat) {
       background:${isHidden?'#f5f5f5':'var(--brand-light)'};cursor:pointer;
       opacity:${isHidden?'0.4':'1'};transition:all .15s;min-width:54px;`;
     btn.innerHTML = `<span style="font-size:22px;line-height:1">${sym.emoji||'?'}</span>
-      <span style="font-size:9px;font-weight:800;color:${isHidden?'#aaa':'var(--brand-dark)'};max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escHtml(sym.label)}</span>`;
+      <span style="font-size:9px;font-weight:800;color:${isHidden?'#aaa':'var(--brand-dark)'};max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sym.label}</span>`;
     btn.onclick = () => {
       if(hiddenSymbols.has(sym.id)) hiddenSymbols.delete(sym.id);
       else hiddenSymbols.add(sym.id);
@@ -12806,7 +12564,7 @@ function pmRenderPictoGrid(catKey) {
   const grid = document.getElementById('pm-pictos-grid');
   const countEl = document.getElementById('pm-pictos-count');
   if(!grid) return;
-  grid.textContent = '';
+  grid.innerHTML = '';
   const catSymbols = symbols.filter(s => s.cat === catKey);
   if(!pmSelectedPictoIds) pmSelectedPictoIds = {};
   // Init selection for this cat if not yet
@@ -12820,7 +12578,7 @@ function pmRenderPictoGrid(catKey) {
     const vis = sym.photo
       ? `<img src="${sym.photo}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;">`
       : `<span style="font-size:26px;line-height:1">${sym.emoji}</span>`;
-    cell.innerHTML = `${vis}<span style="font-size:10px;font-weight:800;color:${isSelected ? '#1d4ed8' : '#555'};text-align:center;word-break:break-word;max-width:66px;">${_escHtml(sym.label)}</span>`;
+    cell.innerHTML = `${vis}<span style="font-size:10px;font-weight:800;color:${isSelected ? '#1d4ed8' : '#555'};text-align:center;word-break:break-word;max-width:66px;">${sym.label}</span>`;
     cell.onclick = () => {
       if(pmSelectedPictoIds[catKey].has(sym.id)) {
         pmSelectedPictoIds[catKey].delete(sym.id);
@@ -12903,7 +12661,7 @@ function pmUpdatePreview() {
         ${photoHtml}
         <div style="flex:1;text-align:left;">
           <div style="font-size:10px;font-weight:900;color:#ff1744;letter-spacing:1px;">🆘 TARJETA DE EMERGENCIA</div>
-          <div style="font-size:13px;font-weight:900;color:#1a1a2e;">${_escHtml(name)}</div>
+          <div style="font-size:13px;font-weight:900;color:#1a1a2e;">${name}</div>
           <div style="margin-top:3px;">${contacts}</div>
         </div>
       </div>`;
@@ -12927,7 +12685,7 @@ function openPrintModal(context, preSelectType) {
   // Build category chips
   const catsSub = document.getElementById('pm-cats-sub');
   if(catsSub) {
-    catsSub.textContent = '';
+    catsSub.innerHTML = '';
     // Add instruction hint
     const hint = document.createElement('div');
     hint.style.cssText = 'width:100%;font-size:10px;color:#aab;font-weight:700;margin-bottom:2px;';
@@ -13079,105 +12837,6 @@ ${PB_THEME_CSS}
 <div class="pb-grid ${gridClass}">${gridHTML}</div>
 ${WATERMARK_HTML}
 ${_buildNoticeBtns(autoPrint)}
-
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
-
 </body></html>`;
 }
 
@@ -13213,105 +12872,6 @@ h1 { font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:800; text-ali
 <div class="grid">${cardsHTML}</div>
 ${WATERMARK_HTML}
 ${_buildNoticeBtns(autoPrint)}
-
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
-
 </body></html>`;
 }
 
@@ -13360,105 +12920,6 @@ h1 { font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:800; text-ali
 ${sectionsHTML}
 ${WATERMARK_HTML}
 ${_buildNoticeBtns(autoPrint)}
-
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
-
 </body></html>`;
 }
 
@@ -13468,7 +12929,7 @@ function _openPrintWindow(html) {
   try {
     const win = window.open('','_blank');
     if(win) { win.document.write(html); win.document.close(); }
-    else { _showToast('El navegador bloqueó la ventana emergente. Habilitá las ventanas emergentes para imprimir.', 'info'); }
+    else { _showToast('El navegador bloqueó la ventana emergente', 'warning'); }
   } catch(e) { console.error('openPrintWindow:', e); }
 }
 
@@ -13511,8 +12972,8 @@ function executePrint() {
     const ph1  = document.getElementById('pm-em-ph1')?.value.trim() || '';
     const cn2  = document.getElementById('pm-em-cn2')?.value.trim() || '';
     const ph2  = document.getElementById('pm-em-ph2')?.value.trim() || '';
-    if(!name) { _showToast('Por favor ingresá el nombre del usuario antes de imprimir.', 'info'); return; }
-    if(!cn1 || !ph1) { _showToast('Por favor ingresá al menos un contacto de emergencia.', 'info'); return; }
+    if(!name) { _showToast('Por favor ingresá el nombre del usuario', 'warning'); return; }
+    if(!cn1 || !ph1) { _showToast('Por favor ingresá al menos un contacto', 'warning'); return; }
     try {
       localStorage.setItem('cp_em_name',       name);
       localStorage.setItem('cp_em_apellidos',   apellidos);
@@ -13778,106 +13239,7 @@ button, [role="button"], input[type="button"], input[type="submit"] {
       <button class="close" onclick="_cerrarApp()">✕ Cerrar</button>
     </div>
 
-  
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
-
-</body></html>`;
+  </body></html>`;
 
   closePrintModal();
 
@@ -14198,7 +13560,7 @@ function _mostrarAvisoVencimiento(dias, fecha) {
     <div style="display:flex;align-items:center;gap:10px;">
       <div style="font-size:26px;flex-shrink:0;">${icono}</div>
       <div style="flex:1;">
-        <div style="font-size:12px;font-weight:900;color:white;margin-bottom:2px;">${_escHtml(texto)}</div>
+        <div style="font-size:12px;font-weight:900;color:white;margin-bottom:2px;">${texto}</div>
         <div style="font-size:10px;color:rgba(255,255,255,.7);">Renovar antes de que se bloquee el acceso</div>
       </div>
       <button onclick="document.getElementById('_cap_aviso_venc').remove()"
@@ -14231,7 +13593,7 @@ function _mostrarPantallaBloqueo(motivo, fecha) {
   div.innerHTML = `
     <div style="font-size:56px;margin-bottom:16px;">${motivo === 'vencida' ? '⏰' : '🔒'}</div>
     <div style="font-size:20px;font-weight:900;color:white;margin-bottom:12px;">ACCESO BLOQUEADO</div>
-    <div style="font-size:14px;color:#cbd5e1;margin-bottom:28px;max-width:320px;line-height:1.6;">${_escHtml(texto)}</div>
+    <div style="font-size:14px;color:#cbd5e1;margin-bottom:28px;max-width:320px;line-height:1.6;">${texto}</div>
     <a href="https://wa.me/59899926775?text=Hola%2C+necesito+renovar+mi+suscripci%C3%B3n+de+ComuniCAP"
       target="_blank" rel="noopener noreferrer"
       style="background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;border-radius:14px;padding:14px 28px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;margin-bottom:12px;">
@@ -14306,7 +13668,7 @@ async function _tomarControlDispositivo(code) {
 
 /* ── Confirmar cierre de sesión ── */
 function subCerrarSesionConfirm() {
-  if(await uiConfirm('🔒 ¿Cerrar sesión?\nTendrás que ingresar tu código la próxima vez.')) {
+  if(confirm('🔒 ¿Cerrar sesión?\nTendrás que ingresar tu código la próxima vez.')) {
     subCerrarSesion();
   }
 }
@@ -14657,15 +14019,15 @@ function saveDatosPersonalesData() {
 
 function saveDatosPersonales() {
   const d = saveDatosPersonalesData();
-  if(!d.nombre) { _showToast('Por favor ingresá el nombre.', 'info'); return; }
+  if(!d.nombre) { _showToast('Por favor ingresá el nombre', 'warning'); return; }
   closeDatosPersonalesModal();
   toast('✅ Datos personales guardados');
 }
 
 function saveDatosPersonalesAndPrint() {
   const d = saveDatosPersonalesData();
-  if(!d.nombre) { _showToast('Por favor ingresá el nombre.', 'info'); return; }
-  if(!d.cn1 || !d.ph1) { _showToast('Por favor ingresá al menos un contacto de emergencia.', 'info'); return; }
+  if(!d.nombre) { _showToast('Por favor ingresá el nombre', 'warning'); return; }
+  if(!d.cn1 || !d.ph1) { _showToast('Por favor ingresá al menos un contacto', 'warning'); return; }
   closeDatosPersonalesModal();
   printEmergencyCard();
 }
@@ -14843,7 +14205,7 @@ function _populateVoiceSelect() {
   const otherVoices = voices.filter(v => !v.lang.startsWith('es'));
   const sorted = [...esVoices, ...otherVoices];
 
-  sel.textContent = '';
+  sel.innerHTML = '';
   sorted.forEach(v => {
     const opt = document.createElement('option');
     opt.value = v.voiceURI;
@@ -15011,7 +14373,7 @@ function _renderPhrasesSearch() {
 
   const list = document.getElementById('phrases-list');
   if (!list) return;
-  list.textContent = '';
+  list.innerHTML = '';
 
   const found = allPhrases.filter(ph => {
     const t = (ph.text || ph.label || '').toLowerCase();
@@ -15280,106 +14642,7 @@ function printActSheet(activity) {
     <button onclick="window.print()" style="padding:10px 24px;background:#3a86ff;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">🖨️ Imprimir</button>
     <button onclick="_cerrarApp()" style="padding:10px 24px;background:#888;color:white;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin:0 6px;">✕ Cerrar</button>
 
-  </div>
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
-
-</body></html>`;
+  </div></body></html>`;
 
   if (activity === 'sequence') {
     const diff = seqDiff || 'easy';
@@ -15657,7 +14920,7 @@ async function uiPrompt(message, defaultValue = '') {
       ${footer}`;
   }
 
-  if (!html) { _showToast('No hay datos para imprimir', 'info'); return; }
+  if (!html) { _showToast('No hay datos para imprimir', 'warning'); return; }
   const win = window.open('', '_blank');
   if (win) {
     win.document.write(html);
@@ -15786,7 +15049,7 @@ function _ttsLoadVoices() {
   const card = document.getElementById('tts-voice-card');
   if (!sel || !card) return;
   card.style.display = 'flex';
-  sel.textContent = '';
+  sel.innerHTML = '';
   // Filtrar voces en español primero
   const esVoices = voices.filter(v => v.lang.startsWith('es'));
   const allVoices = esVoices.length ? esVoices : voices;
@@ -16168,7 +15431,7 @@ function _updateCompanionDisplay() {
 
   if (!chips.length) {
     textEl.textContent = '—';
-    emojisEl.textContent = '';
+    emojisEl.innerHTML = '';
     return;
   }
 
@@ -16255,7 +15518,7 @@ function openRecentPhrases() {
   const list    = document.getElementById('recent-phrases-list');
   if (!overlay || !list) return;
 
-  list.textContent = '';
+  list.innerHTML = '';
   if (!_recentHistory.length) {
     list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text2);font-weight:700;">Aún no hay historial.<br>Seleccioná símbolos para guardarlos aquí.</div>';
   } else {
@@ -16768,16 +16031,7 @@ const _ANT_EMOJIS = {
   'ir':['🚶','➡️','🏃'],'venir':['⬅️','🚶','🏠'],'esperar':['⏳','⌚','😊'],
 };
 
-try {
-  _antPerfiles = JSON.parse(localStorage.getItem('ant_perfiles') || '[]');
-  // Validar tipo
-  if (!Array.isArray(_antPerfiles) && typeof _antPerfiles === 'object' && _antPerfiles === null) {
-    _antPerfiles = [];
-  }
-} catch(e) {
-  console.warn('⚠️ localStorage corrupto: ant_perfiles');
-  _antPerfiles = [];
-}
+let _antPerfiles = JSON.parse(localStorage.getItem('ant_perfiles') || '[]');
 let _antPerfilActivo = localStorage.getItem('ant_perfil_activo') || null;
 let _antDiaActivo = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][new Date().getDay()-1] || 'Lunes';
 
@@ -16816,7 +16070,7 @@ function _antSave() {
 }
 
 function _antNuevoPerfil() {
-  const nombre = await uiPrompt('Nombre del alumno:');
+  const nombre = prompt('Nombre del alumno:');
   if (!nombre || !nombre.trim()) return;
   const perfil = { id: Date.now().toString(), nombre: nombre.trim(), dias: {} };
   _antPerfiles.push(perfil);
@@ -17044,106 +16298,7 @@ function _antImprimir() {
       `).join('')}
     </div>
     <div class="footer">© ${new Date().getFullYear()} Hadrion · Adriana Soba · Uruguay · ComuniCAP – Anticipador de Actividades<br>Todos los derechos reservados. Prohibida su reproducción sin autorización.</div>
-    
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
-
-</body></html>
+    </body></html>
   `);
   win.document.close();
   setTimeout(() => win.print(), 500);
@@ -17625,9 +16780,9 @@ async function betaInit(appName) {
     window.history.replaceState({}, '', window.location.pathname);
     const result = await betaActivate(betaCode, appName);
     if (result.ok) {
-      _showToast('✅ ¡Código beta activado!\n\nBienvenido/a ' + result.name + '\n' + result.days + ' días de acceso completo a ' + appName, 'info');
+      alert('✅ ¡Código beta activado!\n\nBienvenido/a ' + result.name + '\n' + result.days + ' días de acceso completo a ' + appName);
     } else {
-      _showToast(result.msg, 'warning');
+      alert(result.msg);
     }
   }
   
@@ -17725,16 +16880,7 @@ function _calcularDias(fechaStr) {
 
 function _capDeletePhrase(id) {
   try {
-    try {
-  phrases = JSON.parse(localStorage.getItem('comunicap_phrases_v2') || '[]');
-  // Validar tipo
-  if (!Array.isArray(phrases) && typeof phrases === 'object' && phrases === null) {
-    phrases = [];
-  }
-} catch(e) {
-  console.warn('⚠️ localStorage corrupto: comunicap_phrases_v2');
-  phrases = [];
-}
+    let phrases = JSON.parse(localStorage.getItem('comunicap_phrases_v2') || '[]');
     phrases = phrases.filter(p => p.id !== id);
     localStorage.setItem('comunicap_phrases_v2', JSON.stringify(phrases));
     showMisFrases(); // refresh
@@ -17845,13 +16991,12 @@ function capBuscarPicto(query) {
     grid.innerHTML = '<div style="color:var(--text3);font-size:0.85rem;text-align:center;padding:32px;grid-column:1/-1;">No se encontraron pictogramas</div>';
     return;
   }
-  grid.textContent = '';
+  grid.innerHTML = '';
   results.slice(0, 30).forEach(function(el) { grid.appendChild(el); });
 }
 
 async function cargarPictogramasSupabase() {
   try {
-    // AbortController con timeout de 8 segundos
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
     
@@ -17862,15 +17007,10 @@ async function cargarPictogramasSupabase() {
     
     clearTimeout(timeout);
     
-    if (!res.ok) {
-      console.warn('⚠️ Supabase respondió con error:', res.status);
-      return;
-    }
-    
+    if (!res.ok) return;
     const data = await res.json();
-    if (!data || !Array.isArray(data) || !data.length) return; // Sin datos remotos, usar locales
+    if (!data || !Array.isArray(data) || !data.length) return;
 
-    // Agregar pictogramas que no existen localmente
     let added = 0;
     const maxId = symbols.reduce((m, s) => Math.max(m, s.id || 0), 0);
     let nextId = maxId + 1;
@@ -17879,7 +17019,6 @@ async function cargarPictogramasSupabase() {
       const cat = p.categoria || 'thing';
       const label = (p.etiqueta || '').toLowerCase();
       const emoji = p.emoji || '🔵';
-      // Evitar duplicados por label+cat
       if (!symbols.find(function(s) { return s.label === label && s.cat === cat; })) {
         symbols.push({ id: nextId++, label: label, emoji: emoji, cat: cat });
         added++;
@@ -17888,13 +17027,7 @@ async function cargarPictogramasSupabase() {
 
     if (added > 0) renderGrid();
   } catch(e) { 
-    clearTimeout(timeout);
-    if (e.name === 'AbortError') {
-      console.warn('⚠️ Timeout cargando pictogramas de Supabase (8s). Continuando con locales.');
-    } else {
-      console.warn('⚠️ Error cargando pictogramas de Supabase:', e.message);
-    }
-    /* Falla silenciosamente, usa símbolos locales */ 
+    console.warn('⚠️ Error cargando pictogramas de Supabase');
   }
 }
 
@@ -17946,7 +17079,7 @@ function handleVideoUpload(e) {
 }
 
 function showMsgHistory() {
-  if (!_msgHistory.length) { _showToast('Sin historial aún. Usá la app para construir mensajes.', 'info'); return; }
+  if (!_msgHistory.length) { _showToast('Sin historial aún', 'info'); return; }
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:20px;';
   const bx = document.createElement('div');
@@ -17958,7 +17091,7 @@ function showMsgHistory() {
   _msgHistory.forEach(function(h) {
     const row = document.createElement('div');
     row.style.cssText = 'padding:10px;border-bottom:1px solid #1f2937;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:8px;';
-    row.innerHTML = '<span style="font-size:1.3rem;">' + h.emoji + '</span><span style="font-size:0.88rem;color:#f1f5f9;flex:1;">' + _escHtml(h.text) + '</span>';
+    row.innerHTML = '<span style="font-size:1.3rem;">' + h.emoji + '</span><span style="font-size:0.88rem;color:#f1f5f9;flex:1;">' + h.text + '</span>';
     row.onclick = function() {
       if (typeof window.speechSynthesis !== 'undefined') {
         window.speechSynthesis.cancel();
@@ -18751,105 +17884,6 @@ function _catEditClose() {
   </div>
 </div>
 
-
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
-
 </body>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
@@ -19491,104 +18525,5 @@ if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.
   });
 }
 </script>
-
-<!-- CORRECCIONES DE AUDITORÍA — FUNCIONES HELPER -->
-<script>
-// Modal de confirmación reutilizable
-async function uiConfirm(message) {
-  return new Promise((resolve) => {
-    const id = 'uiConfirmModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 20px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Confirmar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      modal.remove();
-      resolve(true);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      modal.remove();
-      resolve(false);
-    });
-  });
-}
-
-// Modal de entrada de texto reutilizable
-async function uiPrompt(message, defaultValue = '') {
-  return new Promise((resolve) => {
-    const id = 'uiPromptModal_' + Date.now();
-    const modal = document.createElement('div');
-    modal.id = id;
-    modal.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); display: flex; align-items: center;
-      justify-content: center; z-index: 10000;
-    `;
-    modal.innerHTML = `
-      <div style="background: white; padding: 20px; border-radius: 8px;
-                  max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <p style="margin: 0 0 12px 0; font-size: 16px;">${_escHtml(message)}</p>
-        <input id="${id}_input" type="text" value="${_escHtml(defaultValue)}"
-               style="width: 100%; padding: 8px; border: 1px solid #ccc;
-                      border-radius: 4px; box-sizing: border-box; margin-bottom: 15px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button id="${id}_cancel" style="padding: 8px 16px; border: 1px solid #ccc;
-                   background: #f5f5f5; border-radius: 4px; cursor: pointer;">
-            Cancelar
-          </button>
-          <button id="${id}_ok" style="padding: 8px 16px; border: none;
-                   background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-            Aceptar
-          </button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const input = document.getElementById(`${id}_input`);
-    input.focus();
-    input.select();
-    
-    const cleanup = (value) => {
-      modal.remove();
-      resolve(value);
-    };
-    
-    document.getElementById(`${id}_ok`).addEventListener('click', () => {
-      cleanup(input.value);
-    });
-    document.getElementById(`${id}_cancel`).addEventListener('click', () => {
-      cleanup(null);
-    });
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') cleanup(input.value);
-      if (e.key === 'Escape') cleanup(null);
-    });
-  });
-}
-</script>
-<!-- FIN CORRECCIONES -->
-
 </body>
 </html>
