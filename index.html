@@ -10133,15 +10133,17 @@ function phraseBuildCard(text, syms, isSaved, id) {
     delBtn.title = 'Eliminar frase';
     delBtn.style.flex = '0';
     delBtn.style.minWidth = '50px';
-    delBtn.onclick = async (e) => {
+    delBtn.onclick = (e) => {
       e.stopPropagation();
-      if(await uiConfirm('¿Eliminar la frase "' + text + '"?')) {
-        savedPhrases = savedPhrases.filter(p => p.id !== id);
-        try { localStorage.setItem('comunicap_phrases', JSON.stringify(savedPhrases)); } catch(e){}
-        phrasesRenderCatBar(); // actualiza contador
-        phrasesRenderList();
-        toast('🗑️ Frase eliminada');
-      }
+      uiConfirm('¿Eliminar la frase "' + text + '"?').then(ok => {
+        if(ok) {
+          savedPhrases = savedPhrases.filter(p => p.id !== id);
+          try { localStorage.setItem('comunicap_phrases', JSON.stringify(savedPhrases)); } catch(e){}
+          phrasesRenderCatBar(); // actualiza contador
+          phrasesRenderList();
+          toast('🗑️ Frase eliminada');
+        }
+      });
     };
     actions.appendChild(delBtn);
   } else {
@@ -10578,17 +10580,19 @@ let pbEditIdx  = null;
 let pbEditPhoto= null;
 let pbInited   = false;
 
-async function pbReset() {
-  if(!(await uiConfirm('¿Restaurar el tablero a los pictogramas originales? Los cambios se perderán.'))) return;
-  pbCells = PB_DEFAULT.map((c,i) => ({...c, id:i, photo:null}));
-  pbInited = true;
-  pbCols = 11; pbTheme = 'comunipro';
-  pbTitle = 'MI TABLERO DE COMUNICACIÓN';
-  document.getElementById('pb-cols-select').value = '11';
-  document.getElementById('pb-color-select').value = 'comunipro';
-  pbSaveState();
-  pbRender();
-  toast('🔄 Tablero restaurado al original');
+function pbReset() {
+  uiConfirm('¿Restaurar el tablero a los pictogramas originales? Los cambios se perderán.').then(ok => {
+    if(!ok) return;
+    pbCells = PB_DEFAULT.map((c,i) => ({...c, id:i, photo:null}));
+    pbInited = true;
+    pbCols = 11; pbTheme = 'comunipro';
+    pbTitle = 'MI TABLERO DE COMUNICACIÓN';
+    document.getElementById('pb-cols-select').value = '11';
+    document.getElementById('pb-color-select').value = 'comunipro';
+    pbSaveState();
+    pbRender();
+    toast('🔄 Tablero restaurado al original');
+  });
 }
 
 function pbInit() {
@@ -11922,13 +11926,15 @@ function ltEditTitle() {
   }
 }
 
-async function ltReset() {
-  if(!(await uiConfirm('¿Restaurar el tablero a los valores originales? Se perderán los cambios.'))) return;
-  ltCells = LT_DEFAULT_CELLS.map((c,i)=>({...c, id:i}));
-  ltTitle = 'TABLERO BAJA TECNOLOGÍA';
-  ltCols  = 5;
-  ltSave();
-  ltInit();
+function ltReset() {
+  uiConfirm('¿Restaurar el tablero a los valores originales? Se perderán los cambios.').then(ok => {
+    if(!ok) return;
+    ltCells = LT_DEFAULT_CELLS.map((c,i)=>({...c, id:i}));
+    ltTitle = 'TABLERO BAJA TECNOLOGÍA';
+    ltCols  = 5;
+    ltSave();
+    ltInit();
+  });
 }
 
 function ltPrint() {
@@ -12516,16 +12522,18 @@ function saveContact() {
   contactsRender();
 }
 
-async function deleteContact() {
+function deleteContact() {
   if(cmEditingId === null) return;
   const c = contacts.find(x=>x.id===cmEditingId);
   if(!c) return;
-  if(!(await uiConfirm('¿Eliminar el contacto ' + c.name + '?'))) return;
-  contacts = contacts.filter(x=>x.id!==cmEditingId);
-  contactsSave();
-  closeContactModal();
-  contactsRender();
-  toast('🗑️ Contacto eliminado');
+  uiConfirm('¿Eliminar el contacto ' + _escHtml(c.name) + '?').then(ok => {
+    if(!ok) return;
+    contacts = contacts.filter(x=>x.id!==cmEditingId);
+    contactsSave();
+    closeContactModal();
+    contactsRender();
+    toast('🗑️ Contacto eliminado');
+  });
 }
 
 // Close contact modal on backdrop click
