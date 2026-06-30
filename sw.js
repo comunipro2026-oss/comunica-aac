@@ -3,7 +3,7 @@
 // Subir este archivo a la raíz del repo (mismo nivel que index.html)
 // ══════════════════════════════════════════════════════
 
-const CACHE_NAME = 'comunicap-v1';
+const CACHE_NAME = 'comunicap-v2';
 
 // Recursos que se cachean al instalar (shell de la app)
 const PRECACHE = [
