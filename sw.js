@@ -1,92 +1,92 @@
-// ══════════════════════════════════════════════════════
-// ComuniCAP — Service Worker v1.0
-// Subir este archivo a la raíz del repo (mismo nivel que index.html)
-// ══════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════
+   ComuniCAP — Service Worker (App Shell offline)
+   ──────────────────────────────────────────────────────────────────
+   BLOQUEANTE 6 — CAUSA RAÍZ REAL:
+   app.html nunca tenía un sw.js real desplegado (el propio código lo
+   admitía en un comentario: "Para activar SW offline completo, crear
+   archivo sw.js separado en el repo" — nunca se hizo), y además tenía
+   meta tags Cache-Control/Pragma/Expires en "no-cache, no-store" que
+   le prohibían al navegador guardar cualquier copia de la página.
+   Resultado: sin internet, la app ni siquiera podía CARGAR — no es que
+   perdiera datos, es que no arrancaba. Para un dispositivo de
+   comunicación de una persona no verbal, eso es el peor escenario
+   posible.
 
-const CACHE_NAME = 'comunicap-v2';
+   IMPORTANTE — ESTO REQUIERE UN PASO DE DESPLIEGUE:
+   Este archivo debe subirse a la MISMA carpeta/origen donde vive
+   app.html (ComuniCAP ya lo busca automáticamente en esa ruta — ver
+   el bloque "Service Worker: modo offline para CAA" al final de
+   app.html). Un archivo HTML solo no puede registrarse a sí mismo
+   como Service Worker; necesita este archivo separado, servido por
+   HTTPS, en el mismo path. Si se sube tal cual con el nombre "sw.js"
+   junto a app.html, el registro ya existente en app.html lo detecta
+   solo (hace un HEAD request a sw.js antes de registrar).
+   ══════════════════════════════════════════════════════════════════ */
 
-// Recursos que se cachean al instalar (shell de la app)
-const PRECACHE = [
+// Subir este número cada vez que se publique una nueva versión de
+// app.html — fuerza a los dispositivos ya instalados a bajar la nueva
+// versión en vez de quedarse pegados en una copia vieja en caché.
+const CACHE_VERSION = 'comunicap-v1';
+const APP_SHELL = [
   './',
-  './index.html',
-  'https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap',
+  './app.html',
+  './index.html'
 ];
 
-// ── Instalación: cachear shell ──
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_VERSION).then((cache) => {
+      // No falla la instalación entera si alguna de las rutas no existe
+      // (por ejemplo si el archivo real no se llama index.html) —
+      // cachea las que sí resuelven.
+      return Promise.all(
+        APP_SHELL.map((url) =>
+          cache.add(url).catch(() => {})
+        )
+      );
+    }).then(() => self.skipWaiting())
   );
 });
 
-// ── Activación: limpiar caches viejos ──
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
+    caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter(k => k !== CACHE_NAME)
-          .map(k => caches.delete(k))
+        keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k))
       )
     ).then(() => self.clients.claim())
   );
 });
 
-// ── Fetch: estrategia por tipo de recurso ──
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
 
-  // Supabase y APIs externas → siempre red (nunca cachear)
-  if (
-    url.hostname.includes('supabase.co') ||
-    url.hostname.includes('anthropic.com') ||
-    url.hostname.includes('whatsapp.com')
-  ) {
-    return; // dejar pasar sin interceptar
-  }
+  // Solo cachear GET — nunca interceptar POST/PATCH (login, guardado en
+  // Supabase, etc.) para no interferir con la sincronización real.
+  if (req.method !== 'GET') return;
 
-  // Fuentes de Google → cache first
-  if (url.hostname.includes('fonts.gstatic.com') || url.hostname.includes('fonts.googleapis.com')) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        if (cached) return cached;
-        return fetch(event.request).then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return response;
-        });
-      })
-    );
-    return;
-  }
+  // Llamadas a Supabase / APIs externas: siempre red, nunca caché —
+  // los datos clínicos y de licencia deben ser lo más frescos posible
+  // cuando hay conexión, y si no hay conexión el código de la app ya
+  // maneja el error de red de forma segura (ver verificarSesionActiva).
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
 
-  // index.html → network first con fallback a cache (siempre la versión más nueva)
-  if (url.pathname.endsWith('/') || url.pathname.endsWith('index.html') || url.pathname.endsWith('.html')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // Resto → cache first con fallback a red
+  // App shell (HTML/CSS/JS/imágenes propias): cache-first con
+  // actualización en segundo plano (stale-while-revalidate). Así la
+  // app abre INSTANTÁNEAMENTE incluso sin red, y se actualiza sola en
+  // cuanto vuelve la conexión.
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      });
-    })
+    caches.open(CACHE_VERSION).then((cache) =>
+      cache.match(req).then((cached) => {
+        const networkFetch = fetch(req)
+          .then((res) => {
+            if (res && res.status === 200) cache.put(req, res.clone());
+            return res;
+          })
+          .catch(() => cached); // sin red y sin caché: no hay nada más que ofrecer
+        return cached || networkFetch;
+      })
+    )
   );
 });
