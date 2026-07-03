@@ -6481,7 +6481,16 @@ async function _secureProxyCall(path, payload) {
     body: JSON.stringify(payload)
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || ('Error del servidor (' + res.status + ')'));
+  if (!res.ok) {
+    // FIX (2 jul 2026): antes se perdía el status HTTP del error, así que
+    // no había forma de distinguir "409 = código en uso en otro
+    // dispositivo" de cualquier otro error genérico del servidor. Ahora
+    // se conserva en err.status para que subVerificarRemota pueda ofrecer
+    // la pantalla de "usar en este dispositivo" solo en ese caso puntual.
+    const err = new Error(data.error || ('Error del servidor (' + res.status + ')'));
+    err.status = res.status;
+    throw err;
+  }
   return data;
 }
 
@@ -14415,7 +14424,20 @@ function getDeviceId() {
 async function subVerificarRemota(code) {
   if (SECURE_PROXY_URL) {
     const deviceId = getDeviceId();
-    const data = await _secureProxyCall('/verify-device', { code, deviceId });
+    let data;
+    try {
+      data = await _secureProxyCall('/verify-device', { code, deviceId });
+    } catch(e) {
+      // NUEVO (2 jul 2026): antes esto tiraba el error genérico del Worker
+      // directo a pantalla ("Este código ya está siendo usado en otro
+      // dispositivo...") sin ninguna acción posible salvo ingresar otro
+      // código. Ahora, si el motivo puntual es 409 (dispositivo en uso),
+      // se relanza como __CONFLICT__ — el mismo formato que ya esperaba
+      // subActivar() más abajo — para ofrecer la opción de tomar control
+      // desde este dispositivo en vez de solo bloquear.
+      if (e.status === 409) throw new Error('__CONFLICT__:' + code);
+      throw e;
+    }
     if (data.nombre) {
       try {
         localStorage.setItem('cp_username', data.nombre);
@@ -14713,9 +14735,14 @@ function _mostrarPantallaConflicto(code, miToken, otroToken) {
       ✅ USAR EN ESTE DISPOSITIVO
     </button>
     <button onclick="subCerrarSesion();document.getElementById('_cap_conflict_screen').remove();"
-      style="background:transparent;color:#94a3b8;border:1px solid #334155;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+      style="background:transparent;color:#94a3b8;border:1px solid #334155;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:16px;">
       ← Volver al inicio
     </button>
+    <div style="font-size:12px;color:#64748b;margin-bottom:8px;">¿No fuiste vos? Avisale a soporte:</div>
+    <a href="mailto:soporte@hadrion.app?subject=Sesi%C3%B3n%20ComuniCAP%20en%20otro%20dispositivo&body=Hola%2C%20detect%C3%A9%20que%20mi%20sesi%C3%B3n%20se%20abri%C3%B3%20en%20otro%20dispositivo%20y%20no%20fui%20yo."
+      style="background:#1e293b;color:#60a5fa;border:1px solid #334155;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;">
+      ✉️ Mail a soporte
+    </a>
   `;
   document.body.appendChild(div);
 }
@@ -14754,6 +14781,83 @@ async function _tomarControlDispositivo(code) {
 /* ── Confirmar cierre de sesión ── */
 function subCerrarSesionConfirm() {
   uiConfirm('¿Cerrar sesión? Tendrás que ingresar tu código la próxima vez.', 'Cerrar sesión').then(function(ok){ if(ok) subCerrarSesion(); });
+}
+
+/* ── NUEVO (2 jul 2026) — Pantalla de conflicto EN EL LOGIN ──
+   Distinta de _mostrarPantallaConflicto(): esa es para cuando la sesión
+   YA estaba activa en este dispositivo y otro la tomó (se detecta por
+   sondeo periódico de sesion_token). Esta es para cuando el usuario
+   recién está intentando entrar por primera vez en un dispositivo nuevo
+   y el código ya tiene otro dispositivo registrado (respuesta 409 de
+   /verify-device). subActivar() ya esperaba esta función (código
+   __CONFLICT__ preexistente) pero nunca se había definido. */
+function _mostrarPantallaConflictoLogin(code) {
+  let ex = document.getElementById('_cap_conflict_login_screen');
+  if(ex) ex.remove();
+  const div = document.createElement('div');
+  div.id = '_cap_conflict_login_screen';
+  div.style.cssText = 'position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0a0f1e,#1a1f0a);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;font-family:inherit;';
+  div.innerHTML = `
+    <div style="font-size:56px;margin-bottom:16px;">📱</div>
+    <div style="font-size:20px;font-weight:900;color:white;margin-bottom:12px;">CÓDIGO EN USO EN OTRO DISPOSITIVO</div>
+    <div style="font-size:14px;color:#cbd5e1;margin-bottom:28px;max-width:320px;line-height:1.6;">
+      Este código ya está activo en otro dispositivo.<br>
+      Podés <strong style="color:#06d6a0;">usarlo acá</strong> — el otro dispositivo cerrará sesión automáticamente,<br>
+      o volver e ingresar con otro código.
+    </div>
+    <button id="_btn_switch_device_login" onclick="_usarEsteDispositivoLogin('${code}')"
+      style="background:linear-gradient(135deg,#06d6a0,#0891b2);color:white;border:none;border-radius:14px;padding:14px 28px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;width:100%;max-width:300px;margin-bottom:10px;">
+      ✅ USAR EN ESTE DISPOSITIVO
+    </button>
+    <button onclick="document.getElementById('_cap_conflict_login_screen').remove();"
+      style="background:transparent;color:#94a3b8;border:1px solid #334155;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:16px;">
+      ← Volver
+    </button>
+    <div style="font-size:12px;color:#64748b;margin-bottom:8px;">¿No sabías que tu código estaba en uso? Avisale a soporte:</div>
+    <a href="mailto:soporte@hadrion.app?subject=C%C3%B3digo%20ComuniCAP%20en%20uso%20en%20otro%20dispositivo&body=Hola%2C%20intent%C3%A9%20entrar%20a%20ComuniCAP%20y%20me%20dice%20que%20mi%20c%C3%B3digo%20ya%20est%C3%A1%20en%20uso%20en%20otro%20dispositivo."
+      style="background:#1e293b;color:#60a5fa;border:1px solid #334155;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;">
+      ✉️ Mail a soporte
+    </a>
+  `;
+  document.body.appendChild(div);
+}
+
+/* ── NUEVO (2 jul 2026) — Confirmar cambio de dispositivo desde el login ──
+   Llama a /switch-device (Worker): reemplaza la lista de dispositivos
+   por SOLO este dispositivo y genera un sesion_token nuevo, lo cual
+   fuerza el cierre de sesión del dispositivo anterior la próxima vez
+   que ese dispositivo chequee su sesión (verificarSesionActiva). Con
+   la respuesta ya completa un login normal, igual que si /verify-device
+   hubiera funcionado directo. */
+async function _usarEsteDispositivoLogin(code) {
+  const btn = document.getElementById('_btn_switch_device_login');
+  if(btn) { btn.disabled = true; btn.textContent = '⏳ Conectando...'; }
+  try {
+    if (!SECURE_PROXY_URL) {
+      throw new Error('Función no disponible: falta configurar el servidor seguro.');
+    }
+    const deviceId = getDeviceId();
+    const data = await _secureProxyCall('/switch-device', { code, deviceId });
+    if (data.nombre) {
+      try {
+        localStorage.setItem('cp_username', data.nombre);
+        const inp = document.getElementById('setting-username');
+        if (inp) inp.value = data.nombre;
+      } catch(e) {}
+    }
+    _capEditHabilitado = !!data.editHabilitado;
+    const lic = { code: data.code, plan: data.plan, expiry: data.expiry, nombre: data.nombre };
+    await subGuardarLocal(lic);
+    subAplicarAcceso(lic);
+    const el = document.getElementById('_cap_conflict_login_screen');
+    if (el) el.remove();
+    const screen = document.getElementById('sub-screen');
+    if (screen) screen.classList.add('hidden');
+    toast('✅ Sesión activa en este dispositivo');
+  } catch(e) {
+    toast('❌ ' + (e.message || 'Error de conexión'));
+    if(btn) { btn.disabled = false; btn.textContent = '✅ USAR EN ESTE DISPOSITIVO'; }
+  }
 }
 
 /* ── Info de licencia ── */
