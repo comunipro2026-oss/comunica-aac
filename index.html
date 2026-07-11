@@ -2086,39 +2086,45 @@ body.edit-mode #edit-banner { display: flex; }
 /* ═══════════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════════ */
+/* FIX (10 jul 2026): el wrap de abajo (#output-area a su propio renglón
+   completo, debajo del logo y los botones) antes SOLO se aplicaba en
+   @media (max-width:680px), es decir, únicamente en celulares. En tablet
+   y computadora #top-bar seguía en una sola fila sin wrap, y como
+   #logo-area y #bar-actions tienen flex-shrink:0 (con ~12 botones:
+   Buscar/Atrás/Instalar/B-N/Actividades/Borrar/Limpiar/Hablar/Guardar/
+   VOZ/Pantalla/Salir), esos dos bloques por sí solos ya ocupan más ancho
+   que la pantalla en la mayoría de tablets y varias notebooks. Con
+   flex:2 y flex-basis:0, #output-area ("TU FRASE") solo recibía el
+   espacio que sobraba — casi siempre 0px o unos pocos píxeles — así que
+   la frase armada por el usuario nunca se veía, aunque sí se agregaba
+   por dentro. Se saca este bloque de la media query para que el wrap se
+   aplique SIEMPRE, en cualquier tamaño de pantalla, y así la frase
+   siempre tenga su propio renglón completo y visible. */
+#top-bar { flex-wrap: wrap; overflow-x: visible; min-height: 0; }
+#logo-area { order: 1; }
+#bar-actions {
+  order: 2;
+  margin-left: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-shrink: 1;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#output-area {
+  order: 3;
+  flex: 1 1 100%;
+  width: 100%;
+  min-height: 56px;
+  overflow: visible;
+  border-top: 2px solid var(--border);
+  border-left: none;
+  border-right: none;
+}
+#output-chips { max-height: 112px; overflow-y: auto; }
+
 @media (max-width: 680px) {
-  /* FIX (3 jul 2026, parte 5): #output-area (la tira de pictogramas que se
-     van tocando) vivía apretada en la misma fila que #logo-area y
-     #bar-actions (BUSCAR/ATRÁS/INSTALAR). Como esos dos bloques tienen
-     flex-shrink:0 (nunca se achican) y #top-bar no hacía wrap, en pantallas
-     angostas #output-area quedaba comprimida a ~0px de ancho visible: los
-     símbolos SÍ se agregaban a la cola (outputQueue) por dentro, pero la
-     tira nunca se veía en pantalla. Se fuerza que #output-area baje a su
-     propio renglón completo debajo del logo y los botones, como en el
-     ejemplo de referencia. */
-  #top-bar { flex-wrap: wrap; overflow-x: visible; min-height: 0; }
-  #logo-area { order: 1; }
-  #bar-actions {
-    order: 2;
-    margin-left: auto;
-    flex: 1 1 auto;
-    min-width: 0;
-    flex-shrink: 1;
-    max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  #output-area {
-    order: 3;
-    flex: 1 1 100%;
-    width: 100%;
-    min-height: 56px;
-    overflow: visible;
-    border-top: 2px solid var(--border);
-    border-left: none;
-    border-right: none;
-  }
-  #output-chips { max-height: 112px; overflow-y: auto; }
   #sidebar { display: none; }
   #cat-scroll { display: flex; }
   #bottom-nav { display: block; }
@@ -4967,7 +4973,7 @@ body.kiosco-mode #kiosco-btn {
           <span id="bab-edit-icon">✏️</span>
           <span id="bab-edit-label">Editar símbolos</span>
         </button>
-        <button class="bab-btn bab-print" onclick="openPrintModal()">
+        <button class="bab-btn bab-print" onclick="openPrintModalForCurrentView()">
           🖨️ Imprimir
         </button>
         <button class="bab-btn bab-settings" onclick="showView('settings')">
@@ -5734,7 +5740,7 @@ body.kiosco-mode #kiosco-btn {
           </div>
           <button class="act-back-btn" onclick="showView('board')">← Tablero</button>
         </div>
-        <button class="food-print-btn" onclick="openPrintModal()">🖨️ IMPRIMIR TABLERO</button>
+        <button class="food-print-btn" onclick="openPrintModal('food2')">🖨️ IMPRIMIR TABLERO</button>
         <div class="food-grid" id="food-grid"></div>
       </div>
 
@@ -5753,7 +5759,7 @@ body.kiosco-mode #kiosco-btn {
           <button class="diff-tab" onclick="setAnimalDiff('medium',this)">🟡 MEDIO</button>
           <button class="diff-tab" onclick="setAnimalDiff('hard',this)">🔴 DIFÍCIL</button>
         </div>
-        <button class="animal-print-btn" onclick="openPrintModal()">🖨️ IMPRIMIR FICHA</button>
+        <button class="animal-print-btn" onclick="openPrintModal('animales')">🖨️ IMPRIMIR FICHA</button>
         <div class="animal-selector" id="animal-selector"></div>
         <div id="animal-sheet-wrap"></div>
       </div>
@@ -6127,7 +6133,7 @@ body.kiosco-mode #kiosco-btn {
       <button class="bnav-btn" id="bnav-keyboard" onclick="showView('keyboard')">
         <span class="bi">⌨️</span><span>TECLADO</span>
       </button>
-      <button class="bnav-btn" id="bnav-print" onclick="openPrintModal()" style="color:#166534;">
+      <button class="bnav-btn" id="bnav-print" onclick="openPrintModalForCurrentView()" style="color:#166534;">
         <span class="bi">🖨️</span><span>IMPRIMIR</span>
       </button>
       <button class="bnav-btn" id="bnav-settings" onclick="showView('settings')">
@@ -6154,11 +6160,16 @@ body.kiosco-mode #kiosco-btn {
     <span>Inicio</span>
   </button>
 
+  <!-- NUEVO (10 jul 2026): se saca la opción de 3×3 cm — es demasiado chica
+       para manipular con seguridad (sobre todo para personas con dificultades
+       motrices/autismo, donde un blanco más grande reduce los toques
+       fallidos). El mínimo ahora es 4×4 cm, con 5×5 cm marcado como
+       recomendado y activo por defecto. -->
   <div style="font-size:10px;font-weight:900;color:#888;letter-spacing:1.2px;margin-bottom:6px;">📏 TAMAÑO DE PICTOGRAMAS AL IMPRIMIR</div>
+  <div style="font-size:9.5px;font-weight:700;color:#aab;margin-bottom:6px;line-height:1.4;">👉 5×5 cm es más fácil de agarrar y recortar para manos con menor precisión motriz.</div>
   <div style="display:flex;gap:7px;margin-bottom:14px;" id="act-size-row">
-    <button class="act-size-btn" data-sz="3" onclick="actSetPicSize(3,this)">3×3 cm</button>
-    <button class="act-size-btn active" data-sz="4" onclick="actSetPicSize(4,this)">4×4 cm</button>
-    <button class="act-size-btn" data-sz="5" onclick="actSetPicSize(5,this)">5×5 cm</button>
+    <button class="act-size-btn" data-sz="4" onclick="actSetPicSize(4,this)">4×4 cm</button>
+    <button class="act-size-btn active" data-sz="5" onclick="actSetPicSize(5,this)">5×5 cm ⭐</button>
   </div>
 
   <div style="font-size:10px;font-weight:900;color:#aab;letter-spacing:1.2px;margin-bottom:8px;">COGNITIVAS</div>
@@ -6687,6 +6698,23 @@ body.kiosco-mode #kiosco-btn {
             <div class="pm-big-opt-check" id="pm-chk-phrases"></div>
           </div>
 
+        </div>
+      </div>
+
+      <!-- NUEVO (10 jul 2026): antes este modal (Tablero por categoría /
+           Tablero completo) no tenía NINGÚN control de tamaño de
+           pictograma — el emoji/foto salía siempre al mismo tamaño fijo
+           (34px), sin relación con el selector "3×3/4×4/5×5cm" que solo
+           existía en el menú de Actividades. Se agrega acá también,
+           reusando actPicSizeCm/actSetPicSize para que sea un único
+           ajuste compartido por toda la app. Mínimo 4×4cm — 5×5cm
+           recomendado y activo por defecto para mejor manipulación. -->
+      <div class="pm-section" id="pm-picsize-section">
+        <div class="pm-section-title">📏 Tamaño de los pictogramas</div>
+        <div style="font-size:11px;color:#8890b5;font-weight:700;margin-bottom:8px;">5×5 cm es más fácil de agarrar y ver para manos con menor precisión motriz.</div>
+        <div style="display:flex;gap:7px;" id="pm-size-row">
+          <button class="act-size-btn" data-sz="4" onclick="actSetPicSize(4,this);pmUpdatePreview();">4×4 cm</button>
+          <button class="act-size-btn active" data-sz="5" onclick="actSetPicSize(5,this);pmUpdatePreview();">5×5 cm ⭐</button>
         </div>
       </div>
 
@@ -12769,8 +12797,12 @@ function pbEditTitle() {
 }
 
 function pbPrint() {
-  // Make sure only printboard is visible before printing
-  openPrintModal();
+  // NUEVO (10 jul 2026): antes llamaba a openPrintModal() sin contexto, así
+  // que aunque el usuario estuviera parado en "Tablero imprimible" armando
+  // SU tablero a medida, el modal arrancaba en la opción "Tablero por
+  // categoría" de siempre. Ahora abre directo con "Tablero imprimible"
+  // preseleccionado.
+  openPrintModal('printboard', 'printboard');
 }
 
 document.addEventListener('click', e => {
@@ -14913,7 +14945,46 @@ const PM_CONTENT_DEFS = {
 
 let pmCurrentContext = 'current'; // what triggered the print
 let pmSelectedType = 'cat';      // 'cat' | 'board' | 'printboard' | 'emergency'
-let pmSelectedCats = new Set(['social','pronoun','action','describe','question','thing','place','time','health','hygiene','food2','clothes','muebles','verb','animales','conj']); // default: todas excepto emergencia
+// Set "de fábrica" con todas las categorías tildadas (default cuando se abre
+// el selector genérico de impresión, sin contexto de pantalla específico).
+const PM_ALL_CATS_DEFAULT = ['social','pronoun','action','describe','question','thing','place','time','health','hygiene','food2','clothes','muebles','verb','animales','conj'];
+let pmSelectedCats = new Set(PM_ALL_CATS_DEFAULT); // default: todas excepto emergencia
+
+// BUG REAL corregido (10 jul 2026): el botón "🖨️ Imprimir" del tablero y de
+// la barra inferior siempre llamaba a openPrintModal() SIN argumentos, sin
+// importar en qué categoría o pantalla estuviera parado el usuario (Verbos,
+// Frases guardadas, etc.). openPrintModal() sí tenía un parámetro "context"
+// pensado para esto, pero nunca se usaba realmente adentro — solo se
+// guardaba en pmCurrentContext y no volvía a leerse en ningún lado. Por
+// eso, sin importar dónde estuviera el usuario, SIEMPRE aparecía el mismo
+// selector genérico con las 20 categorías para elegir a mano ("imagen 2").
+// Esta función mira la pantalla/categoría activa (currentCat, _currentView)
+// y devuelve el contexto real, para que "Imprimir" imprima por defecto lo
+// que se está viendo (ej: parado en Verbos → imprime solo Verbos; en Mis
+// Frases → imprime las frases guardadas), sin dejar de poder elegir otra
+// cosa manualmente adentro del modal.
+function _resolvePrintContext() {
+  if (typeof _currentView !== 'undefined' && _currentView === 'phrases') {
+    return { context: 'phrases', preSelectType: 'phrases' };
+  }
+  if (typeof _currentView !== 'undefined' && _currentView === 'printboard') {
+    return { context: 'printboard', preSelectType: 'printboard' };
+  }
+  if (typeof _currentView === 'undefined' || _currentView === 'board') {
+    if (typeof currentCat !== 'undefined' && currentCat && currentCat !== 'todo' && currentCat !== 'emergency') {
+      return { context: currentCat, preSelectType: null }; // categoría puntual del tablero (ej. 'verb')
+    }
+  }
+  return { context: 'current', preSelectType: null }; // sin categoría puntual: selector genérico con todo
+}
+
+// Punto de entrada de los botones "🖨️ Imprimir" genéricos (barra de acciones
+// del tablero y navegación inferior): resuelve el contexto actual y abre el
+// modal ya preseleccionado en lugar de siempre mostrar el selector genérico.
+function openPrintModalForCurrentView() {
+  const r = _resolvePrintContext();
+  openPrintModal(r.context, r.preSelectType);
+}
 
 function pmSelectType(type) {
   pmSelectedType = type;
@@ -14939,6 +15010,9 @@ function pmSelectType(type) {
   // Show/hide paper/orientation section
   const paperSec = document.getElementById('pm-paper-section');
   if(paperSec) paperSec.style.display = (type === 'emergency' || type === 'phrases') ? 'none' : 'block';
+  // El tamaño de pictograma no aplica a la tarjeta de datos de emergencia
+  const picSizeSec = document.getElementById('pm-picsize-section');
+  if(picSizeSec) picSizeSec.style.display = (type === 'emergency') ? 'none' : 'block';
   pmUpdatePreview();
 }
 
@@ -15132,8 +15206,36 @@ function openPrintModal(context, preSelectType) {
   pmSelectedPictoIds = null;
   pmPictoActiveCat = null;
 
+  // BUG REAL corregido (10 jul 2026): "context" se guardaba en
+  // pmCurrentContext pero nunca se usaba para nada — por eso "Imprimir"
+  // siempre mostraba el selector genérico con las 20 categorías sueltas,
+  // sin importar si el usuario venía de la vista de Verbos, de Animales,
+  // etc. Ahora, si context es una categoría real del tablero (ej. 'verb'
+  // al venir desde la vista de Verbos), se preselecciona SOLO esa
+  // categoría — se sigue pudiendo tildar más desde el modal, pero ya no
+  // arranca siempre en "todo tildado" / "nada relacionado con la pantalla
+  // de origen". Si no hay una categoría puntual (context === 'current',
+  // por ejemplo al tocar Imprimir desde "Todo"), se vuelve a las 20
+  // categorías completas de siempre.
+  const isRealCatContext = BOARD_CATS.some(c => c.key === context);
+  if (isRealCatContext) {
+    pmSelectedType = 'cat';
+    pmSelectedCats = new Set([context]);
+  } else if (context === 'phrases') {
+    pmSelectedType = 'phrases';
+  } else if (context === 'printboard') {
+    pmSelectedType = 'printboard';
+  } else {
+    pmSelectedCats = new Set(PM_ALL_CATS_DEFAULT);
+  }
+
   // If a type is pre-selected (e.g. 'emergency'), apply it now
   if(preSelectType) pmSelectedType = preSelectType;
+
+  // Sincronizar el selector de tamaño de pictogramas con el valor guardado
+  document.querySelectorAll('#pm-size-row .act-size-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.sz) === actPicSizeCm);
+  });
 
   // Build category chips
   const catsSub = document.getElementById('pm-cats-sub');
@@ -15328,6 +15430,15 @@ function _buildBoardHTML(dims, orient, autoPrint) {
   renderGrid();
   currentCat = savedCat;
 
+  // NUEVO (10 jul 2026): antes el tamaño de la tarjeta/emoji estaba fijo
+  // en 34px / 48px de foto / 86px de alto de tarjeta, SIN relación con el
+  // selector de tamaño (actPicSizeCm). Ahora la tarjeta se imprime al
+  // tamaño físico real elegido (mínimo 4×4cm) y el emoji o la foto crecen
+  // JUNTOS y en la misma proporción que la tarjeta — antes la foto tenía
+  // un tamaño fijo aparte que no seguía al resto.
+  const sz     = actPicSizeCm || 5;
+  const emPx   = Math.round(sz * 8);
+  const lblPx  = Math.max(9, Math.round(sz * 2.3));
   let cardsHTML = '';
   document.querySelectorAll('#sym-grid .sym-card').forEach(card => {
     const id  = parseInt(card.dataset.id||'0');
@@ -15335,9 +15446,9 @@ function _buildBoardHTML(dims, orient, autoPrint) {
     if(!sym) return;
     const cc  = CAT_COLORS[sym.cat] || {bg:'#f8f8f8', border:'#bbb'};
     const vis = sym.photo
-      ? `<img src="${sym.photo}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;margin-bottom:4px;">`
-      : `<span style="font-size:34px;line-height:1;margin-bottom:4px;">${sym.emoji||''}</span>`;
-    cardsHTML += `<div style="background:${cc.bg};border:2.5px solid ${cc.border};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 4px 6px;min-height:86px;page-break-inside:avoid;">${vis}<span style="font-size:10px;font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:.3px;line-height:1.2;word-break:break-word;max-width:90px;">${sym.label||''}</span></div>`;
+      ? `<img src="${sym.photo}" style="width:${sz*0.6}cm;height:${sz*0.6}cm;object-fit:cover;border-radius:6px;margin-bottom:4px;">`
+      : `<span style="font-size:${emPx}px;line-height:1;margin-bottom:4px;">${sym.emoji||''}</span>`;
+    cardsHTML += `<div style="background:${cc.bg};border:2.5px solid ${cc.border};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 4px 6px;width:${sz}cm;height:${sz}cm;box-sizing:border-box;page-break-inside:avoid;">${vis}<span style="font-size:${lblPx}px;font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:.3px;line-height:1.2;word-break:break-word;max-width:100%;">${sym.label||''}</span></div>`;
   });
   renderGrid(); // restore
 
@@ -15347,7 +15458,7 @@ function _buildBoardHTML(dims, orient, autoPrint) {
 <style>
 ${_baseStyle(dims, orient)}
 h1 { font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:800; text-align:center; margin-bottom:12px; text-transform:uppercase; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:5px; }
+.grid { display:flex; flex-wrap:wrap; gap:5px; }
 </style></head><body>
 <h1>MI TABLERO DE COMUNICACIÓN</h1>
 <div class="grid">${cardsHTML}</div>
@@ -15371,6 +15482,13 @@ function _buildCatBoardHTML(dims, orient, autoPrint) {
   // se imprimía una hoja incompleta sin avisar. Ahora incluye las 20.
   const CATS_ORDER = ['social','pronoun','action','describe','question','thing','place','time','number',
     'health','hygiene','food2','frutas','verduras','clothes','muebles','verb','animales','conj','emergency'];
+  // NUEVO (10 jul 2026): mismo fix que en _buildBoardHTML — el tamaño de
+  // tarjeta/emoji/foto acá también estaba fijo en 34px/48px/86px sin
+  // relación con el selector de tamaño. Ahora respeta actPicSizeCm
+  // (mínimo 4×4cm) y el emoji/foto escalan junto con la tarjeta.
+  const sz    = actPicSizeCm || 5;
+  const emPx  = Math.round(sz * 8);
+  const lblPx = Math.max(9, Math.round(sz * 2.3));
   let sectionsHTML = '';
   CATS_ORDER.forEach(catKey => {
     if(!pmSelectedCats.has(catKey)) return;
@@ -15385,13 +15503,13 @@ function _buildCatBoardHTML(dims, orient, autoPrint) {
     let cardsHTML = '';
     catSyms.forEach(sym => {
       const vis = sym.photo
-        ? `<img src="${sym.photo}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;margin-bottom:4px;">`
-        : `<span style="font-size:34px;line-height:1;margin-bottom:4px;">${sym.emoji||''}</span>`;
-      cardsHTML += `<div style="background:${cc.bg};border:2.5px solid ${cc.border};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 4px 6px;min-height:86px;page-break-inside:avoid;">${vis}<span style="font-size:10px;font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:.3px;line-height:1.2;word-break:break-word;max-width:90px;">${sym.label||''}</span></div>`;
+        ? `<img src="${sym.photo}" style="width:${sz*0.6}cm;height:${sz*0.6}cm;object-fit:cover;border-radius:6px;margin-bottom:4px;">`
+        : `<span style="font-size:${emPx}px;line-height:1;margin-bottom:4px;">${sym.emoji||''}</span>`;
+      cardsHTML += `<div style="background:${cc.bg};border:2.5px solid ${cc.border};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 4px 6px;width:${sz}cm;height:${sz}cm;box-sizing:border-box;page-break-inside:avoid;">${vis}<span style="font-size:${lblPx}px;font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:.3px;line-height:1.2;word-break:break-word;max-width:100%;">${sym.label||''}</span></div>`;
     });
     sectionsHTML += `<div style="margin-bottom:14px;page-break-inside:avoid;">
       <div style="font-family:'Baloo 2',sans-serif;font-size:13px;font-weight:800;color:${cc.border};margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid ${cc.border};padding-bottom:3px;">${catDef?catDef.label:catKey}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:5px;">${cardsHTML}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">${cardsHTML}</div>
     </div>`;
   });
 
@@ -17528,13 +17646,22 @@ document.addEventListener('DOMContentLoaded', function() {
 /* ══════════════════════════════════════════════════════
    🖨️ IMPRIMIR ACTIVIDADES — genera ficha para papel
 ══════════════════════════════════════════════════════ */
-let actPicSizeCm = parseInt(localStorage.getItem('cp_act_pic_size') || '4') || 4;
+// NUEVO (10 jul 2026): default subido de 4cm a 5cm — más fácil de agarrar y
+// recortar para personas con dificultades motrices (recomendación pedida
+// explícitamente). Se fuerza además un piso de 4cm ante cualquier valor
+// viejo guardado en localStorage (ej. la opción de 3cm que existía antes).
+let actPicSizeCm = Math.max(4, parseInt(localStorage.getItem('cp_act_pic_size') || '5') || 5);
 
 function actSetPicSize(n, btn) {
-  actPicSizeCm = n;
-  try { localStorage.setItem('cp_act_pic_size', String(n)); } catch(e) {}
-  document.querySelectorAll('#act-size-row .act-size-btn').forEach(b => b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
+  actPicSizeCm = Math.max(4, n); // piso de 4cm: nunca imprimir pictogramas más chicos
+  try { localStorage.setItem('cp_act_pic_size', String(actPicSizeCm)); } catch(e) {}
+  // NUEVO (10 jul 2026): este ajuste ahora es compartido por el menú de
+  // Actividades (#act-size-row) Y por el modal de Impresión (#pm-size-row)
+  // — se sincronizan las DOS filas de botones a la vez, sin importar cuál
+  // se tocó, para que nunca queden mostrando valores distintos entre sí.
+  document.querySelectorAll('#act-size-row .act-size-btn, #pm-size-row .act-size-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.sz) === actPicSizeCm);
+  });
 }
 
 // Builds one "recortable" pictogram cell sized to actPicSizeCm (cm), used across
@@ -18700,17 +18827,25 @@ document.getElementById('dolor-overlay').addEventListener('click', function(e) {
 
 /* ══ VOZ ══ */
 let _voiceRecognizer = null;
-let _voiceActive = false;
+let _voiceActive = false;      // true mientras el motor de reconocimiento está realmente escuchando
+let _voiceWantActive = false;  // true mientras el USUARIO quiere seguir escuchando (toggle), aunque el motor esté reiniciando entre frases
 let _voiceHadResult = false; // true si se reconoció algo nuevo durante esta sesión de micrófono
 let _voiceToggleBusy = false;
-// BUG REAL corregido: en Android/Chrome el reconocimiento en modo continuo
-// (continuous:true) suele volver a marcar como "final" el MISMO segmento de
-// audio varias veces en distintos eventos onresult (reinicia e.resultIndex
-// internamente en vez de seguir sumando). Antes eso hacía que _voiceToPhrase
-// agregara la misma palabra/frase reconocida varias veces seguidas (ej:
-// decir "hola" una vez y que aparezca "HOLA" repetido 3 o 4 veces). Ahora se
-// recuerda qué texto final ya se procesó en esta sesión de mic y se ignoran
-// repeticiones exactas del mismo resultado.
+// BUG REAL corregido (10 jul 2026): el problema de fondo NO era la falta de
+// un Set para descartar repetidos (eso ya estaba) sino el uso de
+// continuous:true. En Android/Chrome, el reconocimiento continuo tiene un
+// bug conocido: cada tanto reinicia e.resultIndex y vuelve a mandar como
+// "final" texto que YA se había recibido, pero con pequeñísimas variaciones
+// (mayúsculas, un signo de puntuación, un espacio de más) que hacían que la
+// comparación por texto normalizado fallara y el resultado "viejo" se
+// tratara como nuevo — así aparecían pictogramas duplicados aunque el
+// usuario dijera la palabra una sola vez. La solución de raíz es NO usar
+// continuous:true: cada sesión de reconocimiento ahora escucha una sola
+// tanda (continuous:false, resultados siempre empiezan en e.results[0], sin
+// arrastre de resultados viejos) y, si el usuario no tocó "parar", se
+// reinicia sola automáticamente para que siga funcionando como si fuera
+// continuo — sin heredar el bug. El Set de textos ya vistos se mantiene
+// como red de seguridad extra.
 let _voiceSeenFinals = new Set();
 
 function _initVoice() {
@@ -18718,13 +18853,11 @@ function _initVoice() {
   if (!SR) return null;
   const rec = new SR();
   rec.lang = 'es-UY';
-  rec.continuous = true;
+  rec.continuous = false; // ver nota arriba: evita el bug de resultados repetidos de Chrome/Android
   rec.interimResults = true;
   rec.onstart = () => {
     if (_voiceRecognizer !== rec) return; // instancia vieja/reemplazada: ignorar
     _voiceActive = true;
-    _voiceHadResult = false;
-    _voiceSeenFinals = new Set();
     document.getElementById('voiceStatus').style.display = 'block';
     document.getElementById('voiceInterim').textContent = '';
     const btn = document.getElementById('voiceBtn');
@@ -18733,6 +18866,18 @@ function _initVoice() {
   rec.onend = () => {
     if (_voiceRecognizer !== rec) return; // instancia vieja/reemplazada: ignorar por completo
     _voiceActive = false;
+    // Si el usuario todavía quiere escuchar (no tocó el botón para parar),
+    // reiniciamos automáticamente una nueva tanda — esto simula el modo
+    // continuo pero sin el bug de resultados duplicados, porque cada tanda
+    // nueva empieza con e.results vacío.
+    if (_voiceWantActive) {
+      setTimeout(() => {
+        if (_voiceWantActive && _voiceRecognizer === rec) {
+          try { rec.start(); } catch(e) {}
+        }
+      }, 250);
+      return;
+    }
     document.getElementById('voiceStatus').style.display = 'none';
     document.getElementById('voiceInterim').textContent = '';
     const btn = document.getElementById('voiceBtn');
@@ -18751,6 +18896,7 @@ function _initVoice() {
       _voiceHadResult = false;
       toast('🎤 Agregado a tu frase — tocá 🔊 Hablar cuando quieras decirla');
     }
+    _voiceSeenFinals = new Set();
   };
   // BUG REAL corregido: antes onerror solo llamaba a rec.onend(), sin decir
   // nunca por qué falló (permiso denegado, sin micrófono, sin internet, etc.)
@@ -18760,19 +18906,26 @@ function _initVoice() {
     const motivos = {
       'not-allowed': '🚫 Permiso de micrófono denegado — habilitalo en el navegador',
       'service-not-allowed': '🚫 Permiso de micrófono denegado — habilitalo en el navegador',
-      'no-speech': '🤔 No se detectó voz — intentá de nuevo',
+      'no-speech': '', // transitorio: no interrumpe el reinicio automático, no hace falta avisar cada vez
       'audio-capture': '🎤 No se encontró micrófono en este dispositivo',
       'network': '📡 El micrófono necesita internet (el reconocimiento de voz no funciona offline)',
       'aborted': ''
     };
+    // Errores persistentes (permiso, sin micrófono, sin red): dejar de
+    // querer reiniciar, o quedaría reintentando en loop contra el mismo
+    // error para siempre.
+    if (['not-allowed','service-not-allowed','audio-capture','network'].includes(e && e.error)) {
+      _voiceWantActive = false;
+    }
     const msg = motivos[e && e.error] !== undefined ? motivos[e.error] : '⚠️ Error de micrófono (' + (e && e.error || 'desconocido') + ')';
     if(msg) toast(msg);
-    rec.onend();
   };
   rec.onresult = (e) => {
     if (_voiceRecognizer !== rec) return;
+    // continuous:false → e.results siempre arranca en 0, nunca arrastra
+    // resultados de una tanda anterior (a diferencia del modo continuo).
     let interim='', final='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
+    for(let i=0;i<e.results.length;i++){
       const t=e.results[i][0].transcript;
       if(e.results[i].isFinal) final+=t; else interim+=t;
     }
@@ -18807,9 +18960,16 @@ function toggleVoiceInput() {
   }
   if(!_voiceRecognizer) _voiceRecognizer = _initVoice();
   if(!_voiceRecognizer){ toast('❌ Usá Chrome para voz'); return; }
-  if(_voiceActive){
+  if(_voiceWantActive){
+    // El usuario toca de nuevo para PARAR: cortamos la intención de seguir
+    // y detenemos el motor (si estaba entre tandas, el setTimeout de
+    // reinicio de onend verá _voiceWantActive=false y no reiniciará).
+    _voiceWantActive = false;
+    _voiceHadResult = false;
     try { _voiceRecognizer.stop(); } catch(e) {}
   } else {
+    _voiceWantActive = true;
+    _voiceSeenFinals = new Set();
     try {
       _voiceRecognizer.start();
     } catch(e) {
@@ -18823,15 +18983,16 @@ function toggleVoiceInput() {
   }
 }
 
-function _norm(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+function _norm(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim(); }
 
 function _voiceToPhrase(text) {
   if(!text) return;
   const key = _norm(text);
+  if(!key) return;
   if(_voiceSeenFinals.has(key)) return; // ya se agregó este mismo resultado en esta sesión de mic
   _voiceSeenFinals.add(key);
   toast('🎤 "'+text+'"');
-  const words = _norm(text).split(/\s+/).filter(w=>w.length>1);
+  const words = key.split(/\s+/).filter(w=>w.length>1);
   let found = 0;
   words.forEach(w => {
     const match = symbols.find(s=>_norm(s.label)===w) || symbols.find(s=>_norm(s.label).includes(w)||w.includes(_norm(s.label)));
