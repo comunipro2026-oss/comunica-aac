@@ -31,7 +31,8 @@ const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.png'
+  './icon-192.png',
+  './tablero-comunicap-adriana.jpg'
 ];
 
 self.addEventListener('install', (event) => {
