@@ -26,7 +26,7 @@
 // Subir este número cada vez que se publique una nueva versión de
 // index.html — fuerza a los dispositivos ya instalados a bajar la nueva
 // versión en vez de quedarse pegados en una copia vieja en caché.
-const CACHE_VERSION = 'comunicap-premium-v15';
+const CACHE_VERSION = 'comunicap-premium-v16';
 const APP_SHELL = [
   './',
   './index.html',
