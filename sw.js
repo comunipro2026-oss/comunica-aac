@@ -26,12 +26,22 @@
 // Subir este número cada vez que se publique una nueva versión de
 // index.html — fuerza a los dispositivos ya instalados a bajar la nueva
 // versión en vez de quedarse pegados en una copia vieja en caché.
-const CACHE_VERSION = 'comunicap-premium-v15';
+const CACHE_VERSION = 'comunicap-premium-v17';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.png'
+  './icon-192.png',
+  './tablero-comunicap-adriana.jpg',
+  './pictograms/alto.png',
+  './pictograms/ayuda.png',
+  './pictograms/descanso.png',
+  './pictograms/espera.png',
+  './pictograms/informacion.png',
+  './pictograms/no-quiero.png',
+  './pictograms/quiero.png',
+  './pictograms/seguridad.png',
+  './pictograms/terminar.png'
 ];
 
 self.addEventListener('install', (event) => {

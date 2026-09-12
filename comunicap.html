@@ -4139,6 +4139,19 @@ body.kiosco-mode #kiosco-btn {
 }
 .ant-picto-mini-em { font-size: 18px; line-height: 1; }
 .ant-picto-mini-lbl { font-size: 7px; font-weight: 900; color: #93c5fd; text-align: center; }
+/* Tablero visual completo diseñado por Adriana Soba */
+#visualboard-view{display:none;flex-direction:column;height:100%;background:#eef6f8;overflow:hidden}
+.vb-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.vb-title{font-size:15px;font-weight:900;color:var(--text)}
+.vb-actions{display:flex;gap:7px;flex-wrap:wrap}
+.vb-btn{border:0;border-radius:10px;padding:9px 12px;font:800 12px 'Nunito',sans-serif;cursor:pointer;background:#e2e8f0;color:#1e293b}
+.vb-btn.primary{background:#3a86ff;color:#fff}.vb-btn.success{background:#16a34a;color:#fff}
+.vb-scroll{flex:1;overflow:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.vb-sheet{width:min(1500px,100%);margin:auto;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(15,23,42,.14);overflow:hidden}
+.vb-sheet img{display:block;width:100%;height:auto;transition:transform .2s;transform-origin:top left}
+.vb-help{font-size:11px;color:var(--text3);font-weight:700;padding:7px 14px;background:#e0f2fe}
+@media(max-width:700px){.vb-scroll{padding:8px}.vb-title{font-size:13px}.vb-btn{padding:8px 10px}}
+@media print{body.print-visual-board #app>*:not(#content-area){display:none!important}body.print-visual-board #content-area>*:not(#visualboard-view){display:none!important}body.print-visual-board #visualboard-view{display:block!important;overflow:visible!important}body.print-visual-board .vb-toolbar,body.print-visual-board .vb-help{display:none!important}body.print-visual-board .vb-scroll{padding:0;overflow:visible}body.print-visual-board .vb-sheet{box-shadow:none;border-radius:0;width:100%}}
 </style></head>
 <body>
 <div id="app">
@@ -4390,6 +4403,7 @@ body.kiosco-mode #kiosco-btn {
       <button class="sid-btn" onclick="showView('phrases')"><span class="si">💬</span> Frases</button>
       <button class="sid-btn" onclick="toggleEditMode()"><span class="si">✏️</span> Editar Símbolos</button>
       <button class="sid-btn" onclick="showView('printboard')"><span class="si">🖨️</span> Imprimir Tablero</button>
+      <button class="sid-btn" onclick="showView('visualboard');closeSidebar();" style="background:#e0f2fe;color:#075985;border:2px solid #38bdf8;font-weight:900;"><span class="si">🖼️</span> Tablero completo</button>
       <button class="sid-btn" onclick="showView('lotech')"><span class="si">📋</span> Baja Tecnología</button>
       <button class="sid-btn" onclick="showView('anticipador');closeSidebar();" style="background:#1e3a5f;color:#60a5fa;border:1px solid #3a86ff;font-weight:900;"><span class="si">📅</span> Anticipador</button>
       <button class="sid-btn" onclick="showView('settings')"><span class="si">⚙️</span> Ajustes</button>
@@ -4474,6 +4488,9 @@ body.kiosco-mode #kiosco-btn {
         </button>
         <button class="bab-btn bab-print" onclick="openPrintModal()">
           🖨️ Imprimir
+        </button>
+        <button class="bab-btn" onclick="showView('visualboard')" style="background:#0ea5e9;color:white;">
+          🖼️ Tablero completo
         </button>
         <button class="bab-btn bab-settings" onclick="showView('settings')">
           ⚙️ Ajustes
@@ -5430,6 +5447,23 @@ body.kiosco-mode #kiosco-btn {
         </div>
       </div>
 
+      <!-- ══ TABLERO VISUAL COMPLETO — DISEÑO ADRIANA SOBA ══ -->
+      <div id="visualboard-view">
+        <div class="vb-toolbar">
+          <div class="vb-title">🖼️ Tablero completo ComuniCAP</div>
+          <div class="vb-actions">
+            <button class="vb-btn" onclick="vbZoom(-.15)" aria-label="Alejar tablero">➖ Alejar</button>
+            <button class="vb-btn" onclick="vbZoom(.15)" aria-label="Ampliar tablero">➕ Ampliar</button>
+            <button class="vb-btn success" onclick="vbPrint()">🖨️ Imprimir</button>
+            <button class="vb-btn primary" onclick="showView('board')">← Tablero interactivo</button>
+          </div>
+        </div>
+        <div class="vb-help">Deslizá para recorrerlo · ampliá si necesitás pictogramas más grandes · disponible sin conexión</div>
+        <div class="vb-scroll" id="vb-scroll">
+          <div class="vb-sheet"><img id="vb-image" src="tablero-comunicap-adriana.jpg" alt="Tablero de comunicación aumentativa y alternativa ComuniCAP diseñado por Adriana Soba" draggable="false"></div>
+        </div>
+      </div>
+
       <!-- ══ TABLERO BAJA TECNOLOGÍA ══ -->
       <div id="lotech-view" style="display: none;">
         <div id="lt-toolbar">
@@ -6205,13 +6239,13 @@ let symbols = [
   // ── SOCIAL ──
   {id:51,label:'sí',       emoji:'✅', cat:'social'},
   {id:52,label:'no',       emoji:'❌', cat:'social'},
-  {id:57,label:'ayuda',    emoji:'🆘', cat:'social'},
+  {id:57,label:'ayuda',    emoji:'🆘', photo:'pictograms/ayuda.png', cat:'social'},
   {id:142,label:'más',     emoji:'➕', cat:'social'},
-  {id:143,label:'basta',   emoji:'✋', cat:'social'},
+  {id:143,label:'alto',    emoji:'✋', photo:'pictograms/alto.png', cat:'social'},
   {id:140,label:'me gusta',emoji:'👍', cat:'social'},
   {id:141,label:'no gusta',emoji:'👎', cat:'social'},
-  {id:138,label:'quiero',  emoji:'❤️', cat:'social'},
-  {id:139,label:'no quiero',emoji:'💔', cat:'social'},
+  {id:138,label:'quiero',  emoji:'❤️', photo:'pictograms/quiero.png', cat:'social'},
+  {id:139,label:'no quiero',emoji:'💔', photo:'pictograms/no-quiero.png', cat:'social'},
   {id:49,label:'hola',     emoji:'👋', cat:'social'},
   {id:50,label:'gracias',  emoji:'🙏', cat:'social'},
   {id:53,label:'por favor',emoji:'🌸', cat:'social'},
@@ -6219,7 +6253,8 @@ let symbols = [
   {id:144,label:'turno',   emoji:'🔄', cat:'social'},
   {id:145,label:'juntos',  emoji:'🤝', cat:'social'},
   {id:146,label:'solo',    emoji:'🧍', cat:'social'},
-  {id:56,label:'espera',   emoji:'⏳', cat:'social'},
+  {id:56,label:'espera',   emoji:'⏳', photo:'pictograms/espera.png', cat:'social'},
+  {id:1168,label:'terminar',emoji:'🏁', photo:'pictograms/terminar.png', cat:'social'},
   {id:55,label:'adiós',    emoji:'🤚', cat:'social'},
   {id:54,label:'perdón',   emoji:'😅', cat:'social'},
   // ── PRONOUN ──
@@ -6284,6 +6319,13 @@ let symbols = [
   {id:119,label:'emocionado',emoji:'🤩', cat:'describe'},
   {id:118,label:'aburrido',emoji:'😐', cat:'describe'},
   {id:117,label:'sorprendido',emoji:'😮', cat:'describe'},
+  {id:1150,label:'orgulloso', emoji:'😌', cat:'describe'},
+  {id:1151,label:'nervioso',  emoji:'😰', cat:'describe'},
+  {id:1152,label:'tranquilo', emoji:'😌', cat:'describe'},
+  {id:1153,label:'confundido',emoji:'😕', cat:'describe'},
+  {id:1154,label:'enfermo',   emoji:'🤒', cat:'describe'},
+  {id:1155,label:'hambriento',emoji:'🤤', cat:'describe'},
+  {id:1156,label:'sediento',  emoji:'🥵', cat:'describe'},
   {id:27,label:'caliente', emoji:'🌡️', cat:'describe'},
   {id:28,label:'frío',     emoji:'🧊', cat:'describe'},
   {id:25,label:'grande',   emoji:'🐘', cat:'describe'},
@@ -6346,6 +6388,14 @@ let symbols = [
   {id:173,label:'foto',    emoji:'📷', cat:'thing'},
   {id:172,label:'regalo',  emoji:'🎁', cat:'thing'},
   {id:171,label:'globo',   emoji:'🎈', cat:'thing'},
+  {id:1160,label:'descanso',    emoji:'🛋️', photo:'pictograms/descanso.png', cat:'thing'},
+  {id:1161,label:'aire',        emoji:'🌬️', cat:'thing'},
+  {id:1162,label:'transporte',  emoji:'🚐', cat:'thing'},
+  {id:1163,label:'tiempo',      emoji:'🕐', cat:'thing'},
+  {id:1164,label:'espacio',     emoji:'↔️', cat:'thing'},
+  {id:1165,label:'información', emoji:'ℹ️', photo:'pictograms/informacion.png', cat:'thing'},
+  {id:1166,label:'seguridad',   emoji:'🛡️', photo:'pictograms/seguridad.png', cat:'thing'},
+  {id:1167,label:'pasta dental',emoji:'🦷', cat:'thing'},
   // ── PLACE ──
   {id:44,label:'baño',          emoji:'🚻', cat:'place'},
   {id:42,label:'casa',          emoji:'🏠', cat:'place'},
@@ -7147,6 +7197,7 @@ function showView(view) {
   document.getElementById('builder-view').style.display  = view==='builder'  ? 'flex'  : 'none';
   document.getElementById('phrases-view').style.display  = view==='phrases'  ? 'flex'  : 'none';
   document.getElementById('printboard-view').style.display = view==='printboard' ? 'flex' : 'none';
+  document.getElementById('visualboard-view').style.display = view==='visualboard' ? 'flex' : 'none';
   document.getElementById('lotech-view').style.display     = view==='lotech'     ? 'flex' : 'none';
   document.getElementById('anticipador-view') && (document.getElementById('anticipador-view').style.display = view==='anticipador' ? 'flex' : 'none');
   const _sv = document.getElementById('view-search'); if (_sv) _sv.style.display = view==='search' ? 'flex' : 'none';
@@ -7169,13 +7220,28 @@ function showView(view) {
     } catch(e) {}
   }
 
-  ['board','keyboard','settings','contacts','printboard','phrases'].forEach(v => {
+  ['board','keyboard','settings','contacts','printboard','phrases','visualboard'].forEach(v => {
     const b = document.getElementById('bnav-'+v);
     if(b) b.classList.toggle('active', v===view);
   });
   // Mark board nav active by default on load
   const bnavBoard = document.getElementById('bnav-board');
   if(bnavBoard && view === 'board') bnavBoard.classList.add('active');
+}
+
+let vbScale = 1;
+function vbZoom(delta) {
+  vbScale = Math.max(.7, Math.min(2.2, vbScale + delta));
+  const image = document.getElementById('vb-image');
+  if(image) {
+    image.style.width = (vbScale * 100) + '%';
+    image.style.maxWidth = 'none';
+  }
+}
+function vbPrint() {
+  document.body.classList.add('print-visual-board');
+  window.print();
+  setTimeout(()=>document.body.classList.remove('print-visual-board'),300);
 }
 
 function showMisFrases() {
