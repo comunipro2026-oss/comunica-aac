@@ -24,13 +24,14 @@
    ══════════════════════════════════════════════════════════════════ */
 
 // Subir este número cada vez que se publique una nueva versión de
-// app.html — fuerza a los dispositivos ya instalados a bajar la nueva
+// index.html — fuerza a los dispositivos ya instalados a bajar la nueva
 // versión en vez de quedarse pegados en una copia vieja en caché.
-const CACHE_VERSION = 'comunicap-v1';
+const CACHE_VERSION = 'comunicap-premium-v15';
 const APP_SHELL = [
   './',
-  './app.html',
-  './index.html'
+  './index.html',
+  './manifest.json',
+  './icon-192.png'
 ];
 
 self.addEventListener('install', (event) => {

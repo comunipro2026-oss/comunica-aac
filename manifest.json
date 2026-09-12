@@ -1,14 +1,15 @@
 {
-  "name": "ComuniCAP®",
+  "name": "ComuniCAP Premium | Hadrion",
   "short_name": "ComuniCAP",
-  "description": "Comunicación aumentativa y alternativa",
+  "description": "Comunicación aumentativa y alternativa de Hadrion",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0a0f1e",
   "theme_color": "#3a86ff",
-  "orientation": "portrait",
+  "orientation": "any",
+  "lang": "es-UY",
+  "categories": ["medical", "education", "accessibility"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }
   ]
 }

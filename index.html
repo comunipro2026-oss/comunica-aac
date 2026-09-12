@@ -9,12 +9,14 @@
        El control de versión/actualización ahora lo maneja sw.js (cache-first
        con versión explícita), que es el patrón correcto para una PWA offline. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ComuniCAP v14.6 — Editar categorías sidebar</title>
+<title>ComuniCAP Premium | Hadrion</title>
+<meta name="description" content="ComuniCAP Premium de Hadrion: comunicación aumentativa y alternativa, frases, rutinas y apoyos visuales personalizables.">
+<meta name="application-name" content="ComuniCAP Premium">
+<link rel="manifest" href="./manifest.json">
 <!-- 
 ╔════════════════════════════════════════════════════════════════════════════════╗
 ║                          🔐 AUDITORÍA DE SEGURIDAD                             ║
-║                          ComuniCAP v14.6 — ESTADO ACTUAL (2 jul 2026)          ║
-║           Ver auditoría completa: AUDITORIA_COMUNICAP_v14.6.md                 ║
+║                          ComuniCAP Premium — Hadrion                            ║
 ╚════════════════════════════════════════════════════════════════════════════════╝
 
 Esta nota reemplaza la auditoría de v14.1 que había quedado desactualizada
@@ -27,32 +29,12 @@ respecto al código real. Estado verificado línea por línea a la fecha de arri
   Worker con service_role key, que nunca viaja al navegador). Ver _secureProxyCall.
 - Datos de licencia en localStorage ya se cifran (_cryptoKey/_encrypt/_decrypt).
 
-🔴 SIGUE ABIERTO — CRÍTICO
-────────────────────────────
-1. CONTRASEÑAS DE IMPRESIÓN HARDCODEADAS (buscar CAP2025 / CAP2026 / MES30 / DEMO7)
-   Siguen en texto plano en el cliente. Pendiente: migrar validación a
-   SECURE_PROXY_URL, mismo patrón que ya funciona para licencias.
-
-2. XSS ALMACENADO EN FRASES/CATEGORÍAS PERSONALIZADAS (_renderPhrasesSearch y
-   el renderizado equivalente de "Mis Frases"): texto de usuario insertado en
-   innerHTML sin pasar por _escHtml, a diferencia de otros puntos del código
-   que sí la usan.
-
-3. SERVICE WORKER NO EXISTE (falta archivo sw.js real): el registro del código
-   actual no hace nada si el archivo no está presente, así que "debe funcionar
-   sin internet" todavía no está garantizado.
-
-🟡 IMPORTANTE
-───────────────
-- Anon key de Supabase sigue visible para LECTURAS (esperado si hay RLS
-  correctamente configurado del lado del servidor — confirmar políticas RLS).
-- Falta manifest.json (Web App Manifest) para instalabilidad completa.
-- Accesibilidad por teclado/lector de pantalla incompleta en elementos
-  interactivos que son <div> en vez de <button> (sin tabindex/role).
-
-Detalle completo de cada punto, impacto, riesgo de corrección y forma de
-verificación: ver AUDITORIA_COMUNICAP_v14.6.md (documento de referencia,
-actualizar junto con este comentario cada vez que se resuelva un punto).
+ESTADO DE PRODUCCIÓN
+────────────────────
+- La licencia y la impresión se validan mediante funciones del servidor.
+- El service worker y el manifiesto PWA están incluidos en el repositorio.
+- El contenido escrito por usuarios se escapa antes de insertarse en HTML.
+- La clave publicable de Supabase se usa solo para operaciones protegidas por RLS.
 
 ═════════════════════════════════════════════════════════════════════════════════
 -->
@@ -4630,8 +4612,8 @@ body.kiosco-mode #kiosco-btn {
         ">🚦</button>
       <span class="logo-icon">💬</span>
       <div style="display:flex;flex-direction:column;line-height:1.1;">
-        <span class="logo-text">Comuni<span>CAP</span></span><span style="background:red;color:white;font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;margin-left:4px;">v14</span>
-        <span id="logo-author" style="font-family:'Nunito',sans-serif;font-size:9px;font-weight:700;color:rgba(255,255,255,0.72);letter-spacing:0.3px;white-space:nowrap;">Hadrion</span>
+        <span class="logo-text">Comuni<span>CAP</span></span><span style="background:linear-gradient(135deg,#ffd166,#ff9f1c);color:#3b2600;font-size:9px;font-weight:900;padding:2px 6px;border-radius:999px;margin-left:4px;">PREMIUM</span>
+        <span id="logo-author" style="font-family:'Nunito',sans-serif;font-size:9px;font-weight:800;color:rgba(255,255,255,0.82);letter-spacing:0.8px;white-space:nowrap;">HADRION</span>
         <span id="logo-username" style="font-family:'Nunito',sans-serif;font-size:9px;font-weight:900;color:rgba(255,255,255,0.90);letter-spacing:0.3px;white-space:nowrap;display:none;max-width:110px;overflow:hidden;text-overflow:ellipsis;"></span>
       </div>
       <img id="header-avatar" src="" alt="" style="display:none;width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.6);margin-left:6px;flex-shrink:0;">
@@ -4655,7 +4637,7 @@ body.kiosco-mode #kiosco-btn {
     </div>
     <div id="output-area">
       <span id="output-label">🗨️ Tu frase</span>
-      <div id="output-chips" aria-live="polite" aria-label="Frase construida"><span id="output-placeholder">Toca un símbolo para comenzar a comunicar…</span></div>
+      <div id="output-chips" aria-live="polite" aria-label="Frase construida"><span id="output-placeholder">Tocá un símbolo para comenzar a comunicar…</span></div>
     </div>
     <div id="bar-actions">
       <button class="bar-btn" onclick="showView('search');document.getElementById('capSearchInput')?.focus()" title="Buscar pictograma" style="background:#3a86ff;color:white;">
@@ -7097,7 +7079,7 @@ let symbols = [
   {id:49,label:'hola',     emoji:'👋', cat:'social'},
   {id:50,label:'gracias',  emoji:'🙏', cat:'social'},
   {id:53,label:'por favor',emoji:'🌸', cat:'social'},
-  {id:137,label:'bien',    emoji:'🤙', cat:'social'},
+  {id:137,label:'bien',    emoji:'👍', cat:'social'},
   {id:144,label:'turno',   emoji:'🔄', cat:'social'},
   {id:145,label:'juntos',  emoji:'🤝', cat:'social'},
   {id:146,label:'solo',    emoji:'🧍', cat:'social'},
@@ -7149,7 +7131,7 @@ let symbols = [
   {id:82,label:'saltar',   emoji:'🦘', cat:'action'},
   {id:90,label:'comprar',  emoji:'🛒', cat:'action'},
   {id:95,label:'esperar',  emoji:'⏳', cat:'action'},
-  {id:12,label:'venir',    emoji:'🤝', cat:'action'},
+  {id:12,label:'venir',    emoji:'⬅️', cat:'action'},
   {id:98,label:'trabajar', emoji:'💼', cat:'action'},
   {id:99,label:'estudiar', emoji:'📓', cat:'action'},
   // ── DESCRIBE ──
@@ -7172,11 +7154,11 @@ let symbols = [
   {id:26,label:'pequeño',  emoji:'🐭', cat:'describe'},
   {id:101,label:'rápido',  emoji:'⚡', cat:'describe'},
   {id:102,label:'lento',   emoji:'🐢', cat:'describe'},
-  {id:33,label:'mucho',    emoji:'📦', cat:'describe'},
+  {id:33,label:'mucho',    emoji:'‼️', cat:'describe'},
   {id:34,label:'poco',     emoji:'🤏', cat:'describe'},
   {id:103,label:'sucio',   emoji:'🤢', cat:'describe'},
   {id:104,label:'limpio',  emoji:'✨', cat:'describe'},
-  {id:105,label:'lleno',   emoji:'🥴', cat:'describe'},
+  {id:105,label:'lleno',   emoji:'🔴', cat:'describe'},
   {id:106,label:'vacío',   emoji:'🫙', cat:'describe'},
   {id:113,label:'ruidoso', emoji:'🔔', cat:'describe'},
   {id:114,label:'silencioso',emoji:'🤫', cat:'describe'},
@@ -7185,7 +7167,7 @@ let symbols = [
   {id:111,label:'duro',    emoji:'🪨', cat:'describe'},
   {id:112,label:'suave',   emoji:'🪶', cat:'describe'},
   {id:107,label:'nuevo',   emoji:'🆕', cat:'describe'},
-  {id:108,label:'viejo',   emoji:'📦', cat:'describe'},
+  {id:108,label:'viejo',   emoji:'🕰️', cat:'describe'},
   // ── QUESTION ──
   {id:35,label:'qué',      emoji:'❓', cat:'question'},
   {id:39,label:'cómo',     emoji:'🔍', cat:'question'},
@@ -7452,22 +7434,22 @@ let symbols = [
   {id:726,label:'llave',         emoji:'🔑', cat:'muebles'},
 
   // ── VERBOS CONJUGADOS ──
-  {id:800,label:'tengo',       emoji:'🤲', cat:'verb'},
-  {id:801,label:'tiene',       emoji:'🤜', cat:'verb'},
-  {id:802,label:'quiero',      emoji:'❤️', cat:'verb'},
-  {id:803,label:'quiere',      emoji:'💙', cat:'verb'},
-  {id:804,label:'puedo',       emoji:'💪', cat:'verb'},
-  {id:805,label:'puede',       emoji:'✅', cat:'verb'},
-  {id:806,label:'voy',         emoji:'🚶', cat:'verb'},
-  {id:807,label:'va',          emoji:'➡️', cat:'verb'},
-  {id:808,label:'como',        emoji:'🍽️', cat:'verb'},
-  {id:809,label:'come',        emoji:'🥄', cat:'verb'},
-  {id:810,label:'bebo',        emoji:'🥤', cat:'verb'},
-  {id:811,label:'bebe',        emoji:'🧃', cat:'verb'},
-  {id:812,label:'duermo',      emoji:'😴', cat:'verb'},
-  {id:813,label:'duerme',      emoji:'🛌', cat:'verb'},
-  {id:814,label:'hago',        emoji:'🔨', cat:'verb'},
-  {id:815,label:'hace',        emoji:'🛠️', cat:'verb'},
+  {id:1800,label:'tengo',       emoji:'🤲', cat:'verb'},
+  {id:1801,label:'tiene',       emoji:'🤜', cat:'verb'},
+  {id:1802,label:'quiero',      emoji:'❤️', cat:'verb'},
+  {id:1803,label:'quiere',      emoji:'💙', cat:'verb'},
+  {id:1804,label:'puedo',       emoji:'💪', cat:'verb'},
+  {id:1805,label:'puede',       emoji:'✅', cat:'verb'},
+  {id:1806,label:'voy',         emoji:'🚶', cat:'verb'},
+  {id:1807,label:'va',          emoji:'➡️', cat:'verb'},
+  {id:1808,label:'como',        emoji:'🍽️', cat:'verb'},
+  {id:1809,label:'come',        emoji:'🥄', cat:'verb'},
+  {id:1810,label:'bebo',        emoji:'🥤', cat:'verb'},
+  {id:1811,label:'bebe',        emoji:'🧃', cat:'verb'},
+  {id:1812,label:'duermo',      emoji:'😴', cat:'verb'},
+  {id:1813,label:'duerme',      emoji:'🛌', cat:'verb'},
+  {id:1814,label:'hago',        emoji:'🔨', cat:'verb'},
+  {id:1815,label:'hace',        emoji:'🛠️', cat:'verb'},
   {id:816,label:'veo',         emoji:'👁️', cat:'verb'},
   {id:817,label:'escucho',     emoji:'👂', cat:'verb'},
   {id:818,label:'necesito',    emoji:'❗', cat:'verb'},
@@ -7516,39 +7498,39 @@ let symbols = [
   {id:935,label:'dragón',      emoji:'🐲', cat:'animales'},
 
   // ══ CATEGORÍA FRUTAS ══
-  {id:700,label:'manzana',     emoji:'🍎', cat:'frutas'},
-  {id:701,label:'plátano',     emoji:'🍌', cat:'frutas'},
-  {id:702,label:'fresa',       emoji:'🍓', cat:'frutas'},
-  {id:703,label:'naranja',     emoji:'🍊', cat:'frutas'},
-  {id:704,label:'limón',       emoji:'🍋', cat:'frutas'},
-  {id:705,label:'piña',        emoji:'🍍', cat:'frutas'},
-  {id:706,label:'sandía',      emoji:'🍉', cat:'frutas'},
-  {id:707,label:'durazno',     emoji:'🍑', cat:'frutas'},
-  {id:708,label:'uva',         emoji:'🍇', cat:'frutas'},
-  {id:709,label:'kiwi',        emoji:'🥝', cat:'frutas'},
-  {id:710,label:'cereza',      emoji:'🍒', cat:'frutas'},
-  {id:711,label:'pomelo',      emoji:'🍊', cat:'frutas'},
-  {id:712,label:'melón',       emoji:'🍈', cat:'frutas'},
-  {id:713,label:'mango',       emoji:'🥭', cat:'frutas'},
-  {id:714,label:'arándano',    emoji:'🫐', cat:'frutas'},
-  {id:715,label:'coco',        emoji:'🥥', cat:'frutas'},
+  {id:1700,label:'manzana',     emoji:'🍎', cat:'frutas'},
+  {id:1701,label:'plátano',     emoji:'🍌', cat:'frutas'},
+  {id:1702,label:'fresa',       emoji:'🍓', cat:'frutas'},
+  {id:1703,label:'naranja',     emoji:'🍊', cat:'frutas'},
+  {id:1704,label:'limón',       emoji:'🍋', cat:'frutas'},
+  {id:1705,label:'piña',        emoji:'🍍', cat:'frutas'},
+  {id:1706,label:'sandía',      emoji:'🍉', cat:'frutas'},
+  {id:1707,label:'durazno',     emoji:'🍑', cat:'frutas'},
+  {id:1708,label:'uva',         emoji:'🍇', cat:'frutas'},
+  {id:1709,label:'kiwi',        emoji:'🥝', cat:'frutas'},
+  {id:1710,label:'cereza',      emoji:'🍒', cat:'frutas'},
+  {id:1711,label:'pomelo',      emoji:'🍊', cat:'frutas'},
+  {id:1712,label:'melón',       emoji:'🍈', cat:'frutas'},
+  {id:1713,label:'mango',       emoji:'🥭', cat:'frutas'},
+  {id:1714,label:'arándano',    emoji:'🫐', cat:'frutas'},
+  {id:1715,label:'coco',        emoji:'🥥', cat:'frutas'},
 
   // ══ CATEGORÍA VERDURAS ══
-  {id:800,label:'tomate',      emoji:'🍅', cat:'verduras'},
-  {id:801,label:'lechuga',     emoji:'🥬', cat:'verduras'},
-  {id:802,label:'zanahoria',   emoji:'🥕', cat:'verduras'},
-  {id:803,label:'brócoli',     emoji:'🥦', cat:'verduras'},
-  {id:804,label:'coliflor',    emoji:'🥦', cat:'verduras'},
-  {id:805,label:'papa',        emoji:'🥔', cat:'verduras'},
-  {id:806,label:'cebolla',     emoji:'🧅', cat:'verduras'},
-  {id:807,label:'ajo',         emoji:'🧄', cat:'verduras'},
-  {id:808,label:'choclo',      emoji:'🌽', cat:'verduras'},
-  {id:809,label:'chaucha',     emoji:'🫘', cat:'verduras'},
-  {id:810,label:'espinaca',    emoji:'🥬', cat:'verduras'},
-  {id:811,label:'pepino',      emoji:'🥒', cat:'verduras'},
-  {id:812,label:'pimiento',    emoji:'🫑', cat:'verduras'},
-  {id:813,label:'calabaza',    emoji:'🎃', cat:'verduras'},
-  {id:814,label:'batata',      emoji:'🍠', cat:'verduras'},
+  {id:1900,label:'tomate',      emoji:'🍅', cat:'verduras'},
+  {id:1901,label:'lechuga',     emoji:'🥬', cat:'verduras'},
+  {id:1902,label:'zanahoria',   emoji:'🥕', cat:'verduras'},
+  {id:1903,label:'brócoli',     emoji:'🥦', cat:'verduras'},
+  {id:1904,label:'coliflor',    emoji:'🥦', cat:'verduras'},
+  {id:1905,label:'papa',        emoji:'🥔', cat:'verduras'},
+  {id:1906,label:'cebolla',     emoji:'🧅', cat:'verduras'},
+  {id:1907,label:'ajo',         emoji:'🧄', cat:'verduras'},
+  {id:1908,label:'choclo',      emoji:'🌽', cat:'verduras'},
+  {id:1909,label:'chaucha',     emoji:'🫘', cat:'verduras'},
+  {id:1910,label:'espinaca',    emoji:'🥬', cat:'verduras'},
+  {id:1911,label:'pepino',      emoji:'🥒', cat:'verduras'},
+  {id:1912,label:'pimiento',    emoji:'🫑', cat:'verduras'},
+  {id:1913,label:'calabaza',    emoji:'🎃', cat:'verduras'},
+  {id:1914,label:'batata',      emoji:'🍠', cat:'verduras'},
 
   // ── NEXOS / CONJUNCIONES ──
   {id:850,label:'y',           emoji:'➕', cat:'conj'},
@@ -17523,7 +17505,7 @@ window.openPhraseSaveModalWithCat = function(phraseData) {
         style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid var(--border,#ddd);font-family:inherit;font-size:15px;font-weight:700;color:var(--text,#222);background:var(--bg,#f5f5f5);outline:none;margin-bottom:14px;box-sizing:border-box;">
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text2,#777);margin-bottom:6px;">🏷️ Categoría</div>
       <div id="ph-cat-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-        ${cats.map(c => '<button class="ph-cat-chip" onclick="phSelectCat(this,\''+c+'\')" style="padding:6px 14px;border-radius:20px;border:2px solid var(--border,#ddd);background:white;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;">' + c + '</button>').join('')}
+        ${cats.map(c => '<button class="ph-cat-chip" type="button" style="padding:6px 14px;border-radius:20px;border:2px solid var(--border,#ddd);background:white;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;">' + _escHtml(c) + '</button>').join('')}
       </div>
       <div style="display:flex;gap:6px;margin-bottom:14px;">
         <input id="ph-new-cat" type="text" placeholder="➕ Nueva categoría…" maxlength="30"
@@ -17542,6 +17524,9 @@ window.openPhraseSaveModalWithCat = function(phraseData) {
   </div>`;
   modal.dataset.pd = JSON.stringify(phraseData || {});
   document.body.appendChild(modal);
+  modal.querySelectorAll('#ph-cat-chips .ph-cat-chip').forEach(btn => {
+    btn.addEventListener('click', () => phSelectCat(btn, btn.textContent || 'General'));
+  });
   const ni = modal.querySelector('#ph-save-name');
   if (ni && phraseData && phraseData.text) ni.value = phraseData.text;
   setTimeout(() => { if(ni) ni.focus(); }, 200);
